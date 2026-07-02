@@ -11,4 +11,4 @@ data class Event(
     val status: String,
     val approvalDeadline: String?,
     val designerImageUrl: String? = null
-)//im gay
+)
