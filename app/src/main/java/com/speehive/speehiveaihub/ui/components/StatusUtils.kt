@@ -11,12 +11,3 @@ fun statusColor(status: String): Color = when (status.lowercase()) {
     "scheduled" -> PulsePurple
     else -> TextMuted
 }
-
-fun statusBackgroundColor(status: String): Color = when (status.lowercase()) {
-    "approved", "active", "started" -> PulseGreenLight
-    "pending", "pending approval", "draft" -> PulseAmberLight
-    "rejected", "cancelled", "inactive" -> PulseRedLight
-    "generated", "posted" -> PulseBlueLight
-    "scheduled" -> PulsePurpleLight
-    else -> TextMuted
-}

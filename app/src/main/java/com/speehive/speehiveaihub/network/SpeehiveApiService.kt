@@ -8,7 +8,6 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.PUT
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import com.speehive.speehiveaihub.network.UserResponse
 import com.speehive.speehiveaihub.network.CreateUserRequest
 interface SpeehiveApiService {

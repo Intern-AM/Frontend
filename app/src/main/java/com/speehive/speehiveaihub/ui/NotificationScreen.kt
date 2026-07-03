@@ -105,7 +105,7 @@ fun NotificationCard(notification: Notification) {
         ),
         border = BorderStroke(
             1.dp,
-            accentColor.copy(alpha = 0.4f)
+            CardBorder
         )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {

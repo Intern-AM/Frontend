@@ -14,16 +14,10 @@ class AuthManager(private val sessionManager: SessionManager) {
         _authState.value = AuthState.Unauthenticated(error)
     }
 
-    fun clearAuthError() {
-        _authState.value = AuthState.Authenticated
-    }
-
     fun logout() {
         sessionManager.clearSession()
         _authState.value = AuthState.Unauthenticated(AuthError.NoToken)
     }
-
-    fun isLoggedIn(): Boolean = sessionManager.isLoggedIn()
 }
 
 sealed class AuthState {

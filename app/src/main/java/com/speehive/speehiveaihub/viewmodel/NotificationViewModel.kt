@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
 import com.speehive.speehiveaihub.models.Notification
-import com.speehive.speehiveaihub.models.NotificationStatus
 import com.speehive.speehiveaihub.models.NotificationType
 
 import com.speehive.speehiveaihub.repository.CampaignRepository
@@ -25,26 +24,11 @@ class NotificationViewModel(
     var notifications by mutableStateOf<List<Notification>>(emptyList())
 
     var isLoading by mutableStateOf(false)
-    val unreadCount: Int
-        get() = notifications.count {
-            it.status == NotificationStatus.UNREAD
-        }
+
     init {
         loadNotifications()
     }
-    fun markAsRead(id: String) {
 
-        notifications = notifications.map {
-
-            if (it.id == id) {
-                it.copy(
-                    status = NotificationStatus.READ
-                )
-            } else {
-                it
-            }
-        }
-    }
     fun loadNotifications() {
 
         viewModelScope.launch {

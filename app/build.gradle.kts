@@ -59,8 +59,7 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons.extended)
 
-    implementation(libs.google.generativeai)
-    implementation(libs.androidx.datastore.preferences)
+
 
     testImplementation(libs.junit)
 

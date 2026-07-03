@@ -86,12 +86,4 @@ class DashboardViewModel(
             )
         }
     }
-
-    fun getEventTitle(eventId: String): String {
-
-        return events
-            .find { it.id == eventId }
-            ?.title
-            ?: "Unknown Event"
-    }
 }

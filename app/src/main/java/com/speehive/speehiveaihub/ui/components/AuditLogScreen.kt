@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
-import com.speehive.speehiveaihub.models.AuditLog
 import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.viewmodel.AdminViewModel
 

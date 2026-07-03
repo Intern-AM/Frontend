@@ -92,15 +92,6 @@ class AdminViewModel(
         }
     }
 
-    fun deleteUser(id: String) {
-        viewModelScope.launch {
-            repository.deleteUser(id).fold(
-                onSuccess = { loadUsers() },
-                onFailure = { /* AuthManager handles 401/403 */ }
-            )
-        }
-    }
-
     val totalUsers: Int
         get() = users.count { !it.role.equals("Admin", ignoreCase = true) }
 

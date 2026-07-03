@@ -39,12 +39,6 @@ class DesignerViewModel(
             it.status.trim().equals("Generated", ignoreCase = true)
         }
 
-    val eventsWithDesign: Int
-        get() = filteredEvents.count { !it.designerImageUrl.isNullOrBlank() }
-
-    val campaignsWithImage: Int
-        get() = filteredCampaigns.count { !it.imageUrl.isNullOrBlank() }
-
     init {
         loadData()
     }
@@ -111,13 +105,5 @@ class DesignerViewModel(
             )
             uploadingId = null
         }
-    }
-
-    fun clearUploadResult() {
-        uploadSuccess = null
-    }
-
-    fun clearError() {
-        error = null
     }
 }

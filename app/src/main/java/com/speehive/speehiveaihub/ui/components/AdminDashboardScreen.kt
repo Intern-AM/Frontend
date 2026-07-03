@@ -131,9 +131,11 @@ fun AdminDashboardScreen(
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = PulseGreenLight
-                            )
+                            ),
+                            border = BorderStroke(1.dp, CardBorder)
                         ) {
                             Text(
                                 text = viewModel.successMessage ?: "",
@@ -162,7 +164,7 @@ fun AdminDashboardScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
 
                             Box(modifier = Modifier.weight(1f)) {
@@ -181,12 +183,12 @@ fun AdminDashboardScreen(
                         }
 
                         Spacer(
-                            modifier = Modifier.height(12.dp)
+                            modifier = Modifier.height(16.dp)
                         )
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
 
                             Box(modifier = Modifier.weight(1f)) {
@@ -205,7 +207,7 @@ fun AdminDashboardScreen(
                         }
 
                         Spacer(
-                            modifier = Modifier.height(12.dp)
+                            modifier = Modifier.height(16.dp)
                         )
 
                         Row(

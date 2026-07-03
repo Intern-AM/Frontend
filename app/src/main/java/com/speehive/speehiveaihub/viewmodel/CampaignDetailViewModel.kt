@@ -65,8 +65,4 @@ class CampaignDetailViewModel(
             }
         }
     }
-
-    fun updateStatus(newStatus: String) {
-        campaign = campaign?.copy(status = newStatus)
-    }
 }

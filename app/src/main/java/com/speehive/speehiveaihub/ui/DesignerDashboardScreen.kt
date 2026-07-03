@@ -8,7 +8,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Campaign
@@ -95,9 +94,11 @@ fun DesignerDashboardScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = PulseRedLight
-                        )
+                        ),
+                        border = BorderStroke(1.dp, CardBorder)
                     ) {
                         Text(
                             text = viewModel.error ?: "",
@@ -112,9 +113,11 @@ fun DesignerDashboardScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = PulseGreenLight
-                        )
+                        ),
+                        border = BorderStroke(1.dp, CardBorder)
                     ) {
                         Text(
                             text = viewModel.uploadSuccess ?: "",
@@ -324,7 +327,7 @@ fun DesignerCampaignCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardSurface
         ),
@@ -530,7 +533,7 @@ fun DesignerEventCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardSurface
         ),

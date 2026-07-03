@@ -8,7 +8,6 @@ data class EventResponse(
     val endTime: String,
     val location: String,
     val eventType: String,
-    val googleEventId: String?,
     val status: String,
     val approvalDeadline: String?,
     val designerImageUrl: String? = null
