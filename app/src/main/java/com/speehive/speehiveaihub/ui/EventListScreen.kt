@@ -69,9 +69,11 @@ fun EventListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = PulseRedLight
-                    )
+                    ),
+                    border = BorderStroke(1.dp, CardBorder)
                 ) {
 
                     Text(
