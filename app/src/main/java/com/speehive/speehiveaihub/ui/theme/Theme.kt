@@ -1,11 +1,11 @@
 package com.speehive.speehiveaihub.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 
-private val PulseAIColorScheme = darkColorScheme(
+private val PulseAIColorScheme = lightColorScheme(
     primary = PulseGreen,
     secondary = PulseAmber,
     tertiary = PulseBlue,

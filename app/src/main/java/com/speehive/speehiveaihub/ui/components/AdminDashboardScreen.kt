@@ -62,7 +62,7 @@ fun AdminDashboardScreen(
 
     LaunchedEffect(viewModel.successMessage) {
         if (viewModel.successMessage != null) {
-            kotlinx.coroutines.delay(3000)
+            kotlinx.coroutines.delay(3000L)
             viewModel.clearSuccessMessage()
         }
     }
@@ -100,7 +100,7 @@ fun AdminDashboardScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Create User"
+                    contentDescription = "Create Reviewer"
                 )
             }
         }
