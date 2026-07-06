@@ -67,7 +67,7 @@ fun NotificationScreen(
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxSize(),
-                contentPadding = PaddingValues(20.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(viewModel.notifications) { notification ->

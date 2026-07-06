@@ -22,6 +22,8 @@ class DashboardViewModel(
 
     var isLoading by mutableStateOf(false)
 
+    var errorMessage by mutableStateOf<String?>(null)
+
     val pendingCount: Int
         get() = campaigns.count {
             it.status.equals(
@@ -61,10 +63,11 @@ class DashboardViewModel(
         viewModelScope.launch {
 
             isLoading = true
+            errorMessage = null
 
             campaignRepository.getCampaigns().fold(
                 onSuccess = { campaigns = it },
-                onFailure = { /* AuthManager handles 401/403, UI redirects */ }
+                onFailure = { errorMessage = it.message ?: "Failed to load campaigns" }
             )
 
             isLoading = false
@@ -82,7 +85,7 @@ class DashboardViewModel(
                         }
                         .sortedBy { it.startTime }
                 },
-                onFailure = { /* AuthManager handles 401/403, UI redirects */ }
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load events" }
             )
         }
     }

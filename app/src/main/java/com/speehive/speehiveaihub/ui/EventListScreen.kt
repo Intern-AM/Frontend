@@ -103,7 +103,7 @@ fun EventListScreen(
                         start = 20.dp,
                         end = 20.dp,
                         top = 8.dp,
-                        bottom = 20.dp
+                        bottom = 80.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

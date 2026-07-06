@@ -56,6 +56,7 @@ class ApiEventRepository(
         eventId: String,
         imageUri: Uri
     ): Result<String> {
+        val tempFile = File(context.cacheDir, "upload_${System.currentTimeMillis()}.jpg")
         return try {
             val mimeType = context.contentResolver.getType(imageUri) ?: "image/jpeg"
             val allowedTypes = listOf("image/png", "image/jpeg")
@@ -66,15 +67,14 @@ class ApiEventRepository(
             val inputStream = context.contentResolver.openInputStream(imageUri)
                 ?: return Result.failure(Exception("Cannot open image"))
 
-            val tempFile = File(context.cacheDir, "upload_${System.currentTimeMillis()}.jpg")
-            tempFile.outputStream().use { output ->
-                inputStream.copyTo(output)
+            inputStream.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
             }
-            inputStream.close()
 
             val maxSize = 10L * 1024 * 1024
             if (tempFile.length() > maxSize) {
-                tempFile.delete()
                 return Result.failure(Exception("File size must be under 10 MB"))
             }
 
@@ -82,8 +82,6 @@ class ApiEventRepository(
             val part = MultipartBody.Part.createFormData("image", tempFile.name, requestBody)
 
             val response = api.uploadDesignerImage(eventId, part)
-
-            tempFile.delete()
 
             if (response.imageUrl.isNotBlank()) {
                 Result.success(response.imageUrl)
@@ -95,6 +93,8 @@ class ApiEventRepository(
             Result.failure(AuthError.fromCode(e.code(), errorBody))
         } catch (e: Exception) {
             Result.failure(e)
+        } finally {
+            tempFile.delete()
         }
     }
 }

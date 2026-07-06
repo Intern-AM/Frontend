@@ -20,22 +20,26 @@ class EventViewModel(private val repository: EventRepository) : ViewModel() {
 
     fun loadEvents() {
         viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
             repository.getEvents().fold(
                 onSuccess = {
                     events = it
                         .distinctBy { it.id }
                         .sortedBy { it.startTime }
                 },
-                onFailure = { /* AuthManager handles 401/403, UI redirects */ }
+                onFailure = { errorMessage = it.message ?: "Failed to load events" }
             )
+            isLoading = false
         }
     }
 
     fun cancelEvent(id: String) {
         viewModelScope.launch {
+            errorMessage = null
             repository.cancelEvent(id).fold(
                 onSuccess = { loadEvents() },
-                onFailure = { errorMessage = it.message }
+                onFailure = { errorMessage = it.message ?: "Failed to cancel event" }
             )
         }
     }
