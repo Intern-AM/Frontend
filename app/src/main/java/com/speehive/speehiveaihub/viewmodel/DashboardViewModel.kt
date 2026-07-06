@@ -55,11 +55,10 @@ class DashboardViewModel(
             )
         }
     init {
-        loadCampaigns()
-        loadEvents()
+        loadData()
     }
 
-    private fun loadCampaigns() {
+    private fun loadData() {
         viewModelScope.launch {
 
             isLoading = true
@@ -70,12 +69,6 @@ class DashboardViewModel(
                 onFailure = { errorMessage = it.message ?: "Failed to load campaigns" }
             )
 
-            isLoading = false
-        }
-    }
-
-    private fun loadEvents() {
-        viewModelScope.launch {
             eventRepository.getEvents().fold(
                 onSuccess = {
                     events = it
@@ -87,6 +80,8 @@ class DashboardViewModel(
                 },
                 onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load events" }
             )
+
+            isLoading = false
         }
     }
 }

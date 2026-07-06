@@ -109,7 +109,8 @@ fun EventListScreen(
                 ) {
 
                     items(
-                        viewModel.events.distinctBy { it.id }
+                        items = viewModel.events.distinctBy { it.id },
+                        key = { it.id }
                     ) { event ->
 
                         FullEventCard(
@@ -118,7 +119,8 @@ fun EventListScreen(
                                 viewModel.cancelEvent(
                                     event.id
                                 )
-                            }
+                            },
+                            isProcessing = viewModel.isProcessing
                         )
                     }
                 }
@@ -129,7 +131,8 @@ fun EventListScreen(
 @Composable
 fun FullEventCard(
     event: Event,
-    onReject: () -> Unit
+    onReject: () -> Unit,
+    isProcessing: Boolean = false
 ){
 
     val statusColor = statusColor(event.status)
@@ -232,9 +235,12 @@ fun FullEventCard(
                 Button(
                     onClick = onReject,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = PulseRed
+                        containerColor = PulseRed,
+                        disabledContainerColor = PulseRed.copy(alpha = 0.5f)
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isProcessing
                 ) {
                     Text(
                         text = "Reject Event",

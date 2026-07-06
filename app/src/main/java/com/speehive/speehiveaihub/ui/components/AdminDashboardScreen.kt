@@ -260,7 +260,10 @@ fun AdminDashboardScreen(
                         modifier = Modifier.height(16.dp)
                     )
                 }
-                items(viewModel.users.filter { !it.role.equals("Admin", ignoreCase = true) }) { user ->
+                items(
+                    items = viewModel.users.filter { !it.role.equals("Admin", ignoreCase = true) },
+                    key = { it.id }
+                ) { user ->
 
                     UserCard(
                         user = user,
@@ -271,7 +274,9 @@ fun AdminDashboardScreen(
 
                         onDeactivate = {
                             viewModel.deactivateUser(user.id)
-                        }
+                        },
+
+                        isProcessing = viewModel.isProcessing
                     )
                 }
             }
@@ -402,7 +407,8 @@ fun AuditLogCard(log: AuditLog) {
 private fun UserCard(
     user: AdminUser,
     onActivate: () -> Unit,
-    onDeactivate: () -> Unit
+    onDeactivate: () -> Unit,
+    isProcessing: Boolean = false
 ) {
 
     Card(
@@ -470,9 +476,11 @@ private fun UserCard(
                     Button(
                         onClick = onDeactivate,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = PulseRed
+                            containerColor = PulseRed,
+                            disabledContainerColor = PulseRed.copy(alpha = 0.5f)
                         ),
-                        shape = RoundedCornerShape(20.dp)
+                        shape = RoundedCornerShape(20.dp),
+                        enabled = !isProcessing
                     ) {
                         Text(
                             text = "Deactivate",
@@ -486,9 +494,11 @@ private fun UserCard(
                     Button(
                         onClick = onActivate,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = PulseGreen
+                            containerColor = PulseGreen,
+                            disabledContainerColor = PulseGreen.copy(alpha = 0.5f)
                         ),
-                        shape = RoundedCornerShape(20.dp)
+                        shape = RoundedCornerShape(20.dp),
+                        enabled = !isProcessing
                     ) {
                         Text(
                             text = "Activate",

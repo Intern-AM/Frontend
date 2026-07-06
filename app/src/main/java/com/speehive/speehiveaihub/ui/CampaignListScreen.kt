@@ -71,7 +71,10 @@ fun CampaignListScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                items(viewModel.reviewQueue) { campaign ->
+                items(
+                    items = viewModel.reviewQueue,
+                    key = { it.campaignId }
+                ) { campaign ->
 
                     val eventTitle = viewModel.events
                         .find { it.id == campaign.eventId }

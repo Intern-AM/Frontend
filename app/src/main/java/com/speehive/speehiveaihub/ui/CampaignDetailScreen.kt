@@ -89,7 +89,7 @@ fun CampaignDetailScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
+                            contentDescription = "Go back"
                         )
                     }
                 },

@@ -31,6 +31,9 @@ class AdminViewModel(
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    var isProcessing by mutableStateOf(false)
+        private set
+
     init {
         loadUsers()
         loadAuditLogs()
@@ -55,6 +58,7 @@ class AdminViewModel(
         role: String
     ) {
         viewModelScope.launch {
+            isProcessing = true
             errorMessage = null
             repository.createUser(name = name, email = email, password = password, role = role).fold(
                 onSuccess = {
@@ -63,6 +67,7 @@ class AdminViewModel(
                 },
                 onFailure = { errorMessage = it.message ?: "Failed to create user" }
             )
+            isProcessing = false
         }
     }
 
@@ -76,11 +81,13 @@ class AdminViewModel(
 
     fun activateUser(id: String) {
         viewModelScope.launch {
+            isProcessing = true
             errorMessage = null
             repository.activateUser(id).fold(
                 onSuccess = { loadUsers() },
                 onFailure = { errorMessage = it.message ?: "Failed to activate user" }
             )
+            isProcessing = false
         }
     }
 
@@ -95,11 +102,13 @@ class AdminViewModel(
 
     fun deactivateUser(id: String) {
         viewModelScope.launch {
+            isProcessing = true
             errorMessage = null
             repository.deactivateUser(id).fold(
                 onSuccess = { loadUsers() },
                 onFailure = { errorMessage = it.message ?: "Failed to deactivate user" }
             )
+            isProcessing = false
         }
     }
 

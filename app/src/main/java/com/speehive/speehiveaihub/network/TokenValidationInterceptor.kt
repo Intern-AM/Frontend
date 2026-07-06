@@ -9,12 +9,13 @@ class TokenValidationInterceptor(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val response = chain.proceed(chain.request())
+        val request = chain.request()
+        val response = chain.proceed(request)
 
-        when (response.code) {
-            401 -> {
-                authManager.onAuthError(AuthError.TokenExpired)
-            }
+        val isLoginRequest = request.url.encodedPath.contains("api/Auth/login")
+
+        if (!isLoginRequest && response.code == 401) {
+            authManager.onAuthError(AuthError.TokenExpired)
         }
 
         return response

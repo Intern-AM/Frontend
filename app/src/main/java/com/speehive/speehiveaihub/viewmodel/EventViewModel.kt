@@ -11,8 +11,13 @@ import kotlinx.coroutines.launch
 
 class EventViewModel(private val repository: EventRepository) : ViewModel() {
     var events by mutableStateOf<List<Event>>(emptyList())
+        private set
     var isLoading by mutableStateOf(false)
+        private set
+    var isProcessing by mutableStateOf(false)
+        private set
     var errorMessage by mutableStateOf<String?>(null)
+        private set
 
     init {
         loadEvents()
@@ -36,11 +41,13 @@ class EventViewModel(private val repository: EventRepository) : ViewModel() {
 
     fun cancelEvent(id: String) {
         viewModelScope.launch {
+            isProcessing = true
             errorMessage = null
             repository.cancelEvent(id).fold(
                 onSuccess = { loadEvents() },
                 onFailure = { errorMessage = it.message ?: "Failed to cancel event" }
             )
+            isProcessing = false
         }
     }
 }
