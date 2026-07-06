@@ -38,7 +38,7 @@ fun AuditLogScreen(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
+                            contentDescription = "Go back"
                         )
                     }
                 },
@@ -59,7 +59,10 @@ fun AuditLogScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            items(viewModel.auditLogs) { log ->
+            items(
+                items = viewModel.auditLogs,
+                key = { it.id }
+            ) { log ->
 
                 AuditLogCard(log)
             }

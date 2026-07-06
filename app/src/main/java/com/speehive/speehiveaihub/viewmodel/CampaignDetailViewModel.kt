@@ -16,10 +16,15 @@ class CampaignDetailViewModel(
     private val eventRepository: EventRepository
 ) : ViewModel() {
     var campaign by mutableStateOf<Campaign?>(null)
+        private set
     var isLoading by mutableStateOf(true)
+        private set
     var eventTitle by mutableStateOf("Loading...")
+        private set
     var errorMessage by mutableStateOf<String?>(null)
+        private set
     var isProcessing by mutableStateOf(false)
+        private set
 
     fun loadCampaign(id: String) {
         viewModelScope.launch {
@@ -37,7 +42,10 @@ class CampaignDetailViewModel(
                         )
                     }
                 },
-                onFailure = { campaign = null }
+                onFailure = {
+                    campaign = null
+                    errorMessage = "Campaign not found"
+                }
             )
 
             isLoading = false
@@ -59,6 +67,8 @@ class CampaignDetailViewModel(
                         }
                     }
                 )
+            } ?: run {
+                errorMessage = "Campaign not found"
             }
             isProcessing = false
         }
@@ -82,6 +92,8 @@ class CampaignDetailViewModel(
                         }
                     }
                 )
+            } ?: run {
+                errorMessage = "Campaign not found"
             }
             isProcessing = false
         }

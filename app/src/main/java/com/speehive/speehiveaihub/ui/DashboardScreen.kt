@@ -69,7 +69,7 @@ fun DashboardScreen(
                 start = 20.dp,
                 end = 20.dp,
                 top = 20.dp,
-                bottom = 100.dp
+                bottom = 80.dp
             ),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
@@ -238,14 +238,15 @@ fun DashboardScreen(
             }
 
             items(
-                viewModel.campaigns
+                items = viewModel.campaigns
                     .filter {
                         it.status.equals(
                             "Generated",
                             ignoreCase = true
                         )
                     }
-                    .take(4)
+                    .take(4),
+                key = { it.campaignId }
             ) { campaign ->
 
                 val eventTitle = viewModel.events
@@ -267,7 +268,10 @@ fun DashboardScreen(
             
             // Note: In a real app we'd have an event list in the VM,
             // for now showing placeholders that match Figma
-            items(viewModel.events.filter { isEventUpcoming(it.endTime) }.take(4)) { event ->
+            items(
+                items = viewModel.events.filter { isEventUpcoming(it.endTime) }.take(4),
+                key = { it.id }
+            ) { event ->
 
                 EventDashboardCard(
                     name = event.title,

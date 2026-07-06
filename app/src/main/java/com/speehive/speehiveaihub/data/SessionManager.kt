@@ -55,7 +55,9 @@ class SessionManager(context: Context) {
 
     fun clearSession() {
         sharedPreferences.edit()
-            .clear()
+            .remove("jwt_token")
+            .remove("user_name")
+            .remove("role")
             .apply()
     }
 

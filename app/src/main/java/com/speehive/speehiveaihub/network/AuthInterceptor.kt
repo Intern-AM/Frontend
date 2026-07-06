@@ -12,12 +12,15 @@ class AuthInterceptor(
         chain: Interceptor.Chain
     ): Response {
 
+        val request = chain.request()
+        val isLoginRequest = request.url.encodedPath.contains("api/Auth/login")
+
         val token = sessionManager.getToken()
 
-        val request = chain.request()
+        val finalRequest = request
             .newBuilder()
             .apply {
-                if (!token.isNullOrEmpty()) {
+                if (!isLoginRequest && !token.isNullOrEmpty()) {
                     addHeader(
                         "Authorization",
                         "Bearer $token"
@@ -26,6 +29,6 @@ class AuthInterceptor(
             }
             .build()
 
-        return chain.proceed(request)
+        return chain.proceed(finalRequest)
     }
 }

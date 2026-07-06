@@ -18,11 +18,17 @@ class DesignerViewModel(
 ) : ViewModel() {
 
     var events by mutableStateOf<List<Event>>(emptyList())
+        private set
     var campaigns by mutableStateOf<List<Campaign>>(emptyList())
+        private set
     var isLoading by mutableStateOf(false)
+        private set
     var error by mutableStateOf<String?>(null)
+        private set
     var uploadSuccess by mutableStateOf<String?>(null)
+        private set
     var uploadingId by mutableStateOf<String?>(null)
+        private set
 
     val filteredEvents: List<Event>
         get() {

@@ -22,10 +22,13 @@ class NotificationViewModel(
 ) : ViewModel() {
 
     var notifications by mutableStateOf<List<Notification>>(emptyList())
+        private set
 
     var isLoading by mutableStateOf(false)
+        private set
 
     var errorMessage by mutableStateOf<String?>(null)
+        private set
 
     init {
         loadNotifications()
@@ -36,6 +39,7 @@ class NotificationViewModel(
         viewModelScope.launch {
 
             isLoading = true
+            errorMessage = null
 
             val campaignNotifications = mutableListOf<Notification>()
             val eventNotifications = mutableListOf<Notification>()
