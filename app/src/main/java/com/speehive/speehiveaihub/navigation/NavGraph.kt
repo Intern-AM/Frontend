@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -40,7 +41,7 @@ fun NavGraph(navController: NavHostController) {
                 if (state.error != null && sessionManager.isLoggedIn()) {
                     sessionManager.clearSession()
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
                     }
                 }
             }
@@ -169,7 +170,7 @@ fun NavGraph(navController: NavHostController) {
                 onLogout = {
                     authManager.logout()
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
                     }
                 },
 
@@ -212,7 +213,7 @@ fun NavGraph(navController: NavHostController) {
                 onLogout = {
                     authManager.logout()
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
                     }
                 },
                 onViewAuditLogs = {
@@ -264,6 +265,7 @@ fun NavGraph(navController: NavHostController) {
                 onNavigateHome = {
                     navController.navigate(Screen.Dashboard.route) {
                         launchSingleTop = true
+                        popUpTo(Screen.Dashboard.route)
                     }
                 },
 
@@ -343,18 +345,21 @@ fun NavGraph(navController: NavHostController) {
                 onNavigateHome = {
                     navController.navigate(Screen.Dashboard.route) {
                         launchSingleTop = true
+                        popUpTo(Screen.Dashboard.route)
                     }
                 },
 
                 onNavigateEvents = {
                     navController.navigate(Screen.EventList.route) {
                         launchSingleTop = true
+                        popUpTo(Screen.EventList.route)
                     }
                 },
 
                 onNavigateCampaigns = {
                     navController.navigate(Screen.CampaignList.route) {
                         launchSingleTop = true
+                        popUpTo(Screen.CampaignList.route)
                     }
                 }
             )
@@ -371,7 +376,7 @@ fun NavGraph(navController: NavHostController) {
                 onLogout = {
                     authManager.logout()
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
                     }
                 }
             )

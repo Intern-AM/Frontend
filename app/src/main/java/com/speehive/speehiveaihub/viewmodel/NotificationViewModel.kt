@@ -25,6 +25,8 @@ class NotificationViewModel(
 
     var isLoading by mutableStateOf(false)
 
+    var errorMessage by mutableStateOf<String?>(null)
+
     init {
         loadNotifications()
     }
@@ -74,7 +76,7 @@ class NotificationViewModel(
                         }
                     }?.let { campaignNotifications.addAll(it) }
                 },
-                onFailure = { /* AuthManager handles 401/403 */ }
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load campaigns" }
             )
 
             eventRepository.getEvents().fold(
@@ -91,7 +93,7 @@ class NotificationViewModel(
                         )
                     }.let { eventNotifications.addAll(it) }
                 },
-                onFailure = { /* AuthManager handles 401/403 */ }
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load events" }
             )
 
             notifications = (campaignNotifications + eventNotifications)

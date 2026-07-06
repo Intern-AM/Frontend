@@ -28,6 +28,9 @@ class AdminViewModel(
     var successMessage by mutableStateOf<String?>(null)
         private set
 
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
+
     init {
         loadUsers()
         loadAuditLogs()
@@ -36,9 +39,10 @@ class AdminViewModel(
     fun loadUsers() {
         viewModelScope.launch {
             isLoading = true
+            errorMessage = null
             repository.getUsers().fold(
                 onSuccess = { users = it },
-                onFailure = { /* AuthManager handles 401/403, UI redirects */ }
+                onFailure = { errorMessage = it.message ?: "Failed to load users" }
             )
             isLoading = false
         }
@@ -51,12 +55,13 @@ class AdminViewModel(
         role: String
     ) {
         viewModelScope.launch {
+            errorMessage = null
             repository.createUser(name = name, email = email, password = password, role = role).fold(
                 onSuccess = {
                     successMessage = "New ${role.lowercase()} created successfully"
                     loadUsers()
                 },
-                onFailure = { /* AuthManager handles 401/403 */ }
+                onFailure = { errorMessage = it.message ?: "Failed to create user" }
             )
         }
     }
@@ -65,11 +70,16 @@ class AdminViewModel(
         successMessage = null
     }
 
+    fun clearError() {
+        errorMessage = null
+    }
+
     fun activateUser(id: String) {
         viewModelScope.launch {
+            errorMessage = null
             repository.activateUser(id).fold(
                 onSuccess = { loadUsers() },
-                onFailure = { /* AuthManager handles 401/403 */ }
+                onFailure = { errorMessage = it.message ?: "Failed to activate user" }
             )
         }
     }
@@ -78,16 +88,17 @@ class AdminViewModel(
         viewModelScope.launch {
             auditRepository.getAuditLogs().fold(
                 onSuccess = { auditLogs = it },
-                onFailure = { /* AuthManager handles 401/403 */ }
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load audit logs" }
             )
         }
     }
 
     fun deactivateUser(id: String) {
         viewModelScope.launch {
+            errorMessage = null
             repository.deactivateUser(id).fold(
                 onSuccess = { loadUsers() },
-                onFailure = { /* AuthManager handles 401/403 */ }
+                onFailure = { errorMessage = it.message ?: "Failed to deactivate user" }
             )
         }
     }
