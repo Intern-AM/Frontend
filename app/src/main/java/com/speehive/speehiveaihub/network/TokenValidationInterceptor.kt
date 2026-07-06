@@ -15,9 +15,6 @@ class TokenValidationInterceptor(
             401 -> {
                 authManager.onAuthError(AuthError.TokenExpired)
             }
-            403 -> {
-                authManager.onAuthError(AuthError.Unauthorized)
-            }
         }
 
         return response

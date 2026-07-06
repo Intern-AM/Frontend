@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.speehive.speehiveaihub.models.Campaign
+import com.speehive.speehiveaihub.network.AuthError
 import com.speehive.speehiveaihub.repository.CampaignRepository
 import com.speehive.speehiveaihub.repository.EventRepository
 import kotlinx.coroutines.launch
@@ -17,6 +18,8 @@ class CampaignDetailViewModel(
     var campaign by mutableStateOf<Campaign?>(null)
     var isLoading by mutableStateOf(true)
     var eventTitle by mutableStateOf("Loading...")
+    var errorMessage by mutableStateOf<String?>(null)
+    var isProcessing by mutableStateOf(false)
 
     fun loadCampaign(id: String) {
         viewModelScope.launch {
@@ -43,26 +46,48 @@ class CampaignDetailViewModel(
 
     fun approveCampaign(onSuccess: () -> Unit) {
         viewModelScope.launch {
+            isProcessing = true
+            errorMessage = null
             campaign?.let {
                 campaignRepository.approveCampaign(eventId = it.eventId).fold(
                     onSuccess = { onSuccess() },
-                    onFailure = { /* AuthManager handles 401/403 */ }
+                    onFailure = { error ->
+                        errorMessage = when (error) {
+                            is AuthError.Unauthorized -> "You don't have permission to approve campaigns"
+                            is AuthError.TokenExpired -> "Session expired. Please log in again"
+                            else -> error.message ?: "Failed to approve campaign"
+                        }
+                    }
                 )
             }
+            isProcessing = false
         }
     }
 
     fun rejectCampaign(comments: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
+            isProcessing = true
+            errorMessage = null
             campaign?.let {
                 campaignRepository.rejectCampaign(
                     eventId = it.eventId,
                     comments = comments
                 ).fold(
                     onSuccess = { onSuccess() },
-                    onFailure = { /* AuthManager handles 401/403 */ }
+                    onFailure = { error ->
+                        errorMessage = when (error) {
+                            is AuthError.Unauthorized -> "You don't have permission to reject campaigns"
+                            is AuthError.TokenExpired -> "Session expired. Please log in again"
+                            else -> error.message ?: "Failed to reject campaign"
+                        }
+                    }
                 )
             }
+            isProcessing = false
         }
+    }
+
+    fun clearError() {
+        errorMessage = null
     }
 }

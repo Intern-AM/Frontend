@@ -23,10 +23,10 @@ fun CreateUserDialog(
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var role by remember { mutableStateOf("User") }
+    var role by remember { mutableStateOf("Reviewer") }
     var expanded by remember { mutableStateOf(false) }
 
-    val roles = listOf("User", "Designer", "Admin")
+    val roles = listOf("Reviewer", "Designer", "Admin")
 
     AlertDialog(
         onDismissRequest = onDismiss,

@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,6 +34,44 @@ fun CampaignDetailScreen(
 
     val campaign = viewModel.campaign
     val isLoading = viewModel.isLoading
+    val isProcessing = viewModel.isProcessing
+    val errorMessage = viewModel.errorMessage
+
+    if (errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearError() },
+            containerColor = CardSurface,
+            shape = RoundedCornerShape(20.dp),
+            title = {
+                Text(
+                    text = "Error",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = TextPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.clearError() },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PulseBlue
+                    )
+                ) {
+                    Text(
+                        text = "Dismiss",
+                        color = PureBlack
+                    )
+                }
+            }
+        )
+    }
 
     Scaffold(
         containerColor = PureBlack,
@@ -92,11 +129,12 @@ fun CampaignDetailScreen(
                         modifier = Modifier
                             .weight(1f)
                             .height(56.dp),
-
+                        enabled = !isProcessing,
                         shape = RoundedCornerShape(20.dp),
 
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = PulseRed
+                            contentColor = PulseRed,
+                            disabledContentColor = PulseRed.copy(alpha = 0.5f)
                         )
                     ) {
 
@@ -126,12 +164,13 @@ fun CampaignDetailScreen(
                         modifier = Modifier
                             .weight(1f)
                             .height(56.dp),
-
+                        enabled = !isProcessing,
                         shape = RoundedCornerShape(20.dp),
 
                         colors = ButtonDefaults.buttonColors(
                             containerColor = PulseGreen,
-                            contentColor = PureBlack
+                            contentColor = PureBlack,
+                            disabledContainerColor = PulseGreen.copy(alpha = 0.5f)
                         )
                     ) {
 
