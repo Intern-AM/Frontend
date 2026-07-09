@@ -9,10 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,7 +18,7 @@ import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.viewmodel.NotificationViewModel
 import com.speehive.speehiveaihub.ui.components.BottomNavBar
 import com.speehive.speehiveaihub.ui.components.BottomNavItem
-import com.speehive.speehiveaihub.utils.formatAuditDate
+import com.speehive.speehiveaihub.utils.formatNotificationDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,8 +28,6 @@ fun NotificationScreen(
     onNavigateEvents: () -> Unit,
     onNavigateCampaigns: () -> Unit
 ) {
-    var isRefreshing by remember { mutableStateOf(false) }
-
     Scaffold(bottomBar = {
         BottomNavBar(
             selected = BottomNavItem.NOTIFICATIONS,
@@ -67,12 +61,8 @@ fun NotificationScreen(
         }
     ) { paddingValues ->
         PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = {
-                isRefreshing = true
-                viewModel.loadNotifications()
-                isRefreshing = false
-            },
+            isRefreshing = viewModel.isLoading,
+            onRefresh = { viewModel.loadNotifications() },
             state = rememberPullToRefreshState()
         ) {
         if (viewModel.isLoading && viewModel.notifications.isEmpty()) {
@@ -140,7 +130,7 @@ fun NotificationCard(notification: Notification) {
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = formatAuditDate(
+                    text = formatNotificationDate(
                         notification.timestamp
                     ),
                     style = MaterialTheme.typography.labelSmall

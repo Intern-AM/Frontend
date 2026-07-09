@@ -90,7 +90,7 @@ fun DesignerDashboardScreen(
                 }
             }
 
-            if (viewModel.error != null) {
+            if (viewModel.errorMessage != null) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -101,7 +101,7 @@ fun DesignerDashboardScreen(
                         border = BorderStroke(1.dp, CardBorder)
                     ) {
                         Text(
-                            text = viewModel.error ?: "",
+                            text = viewModel.errorMessage ?: "",
                             color = TextPrimary,
                             modifier = Modifier.padding(12.dp)
                         )
@@ -316,7 +316,7 @@ fun DesignerCampaignCard(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri -> uri?.let { onUpload(it) } }
 
-    val statusColor = statusColor(campaign.status)
+    val campaignStatusColor = statusColor(campaign.status)
     var isEditing by remember { mutableStateOf(false) }
     var editCampaignPost by remember { mutableStateOf(campaign.campaignPost) }
     var editHashtags by remember { mutableStateOf(campaign.hashtags) }
@@ -351,12 +351,12 @@ fun DesignerCampaignCard(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Surface(
-                    color = statusColor.copy(alpha = 0.15f),
+                    color = campaignStatusColor.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
                         text = campaign.status.uppercase(),
-                        color = statusColor,
+                        color = campaignStatusColor,
                         maxLines = 1,
                         modifier = Modifier.padding(
                             horizontal = 6.dp,
@@ -529,7 +529,7 @@ fun DesignerEventCard(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri -> uri?.let { onUpload(it) } }
 
-    val statusColor = statusColor(event.status)
+    val eventStatusColor = statusColor(event.status)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -556,12 +556,12 @@ fun DesignerEventCard(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Surface(
-                    color = statusColor.copy(alpha = 0.15f),
+                    color = eventStatusColor.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
                         text = event.status.uppercase(),
-                        color = statusColor,
+                        color = eventStatusColor,
                         maxLines = 1,
                         modifier = Modifier.padding(
                             horizontal = 6.dp,

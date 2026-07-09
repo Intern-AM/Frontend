@@ -1,7 +1,7 @@
 package com.speehive.speehiveaihub.data
 
 import android.content.Context
-import java.time.ZoneId
+import com.speehive.speehiveaihub.utils.istZone
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
@@ -12,8 +12,6 @@ class SessionManager(context: Context) {
             "speehive_session",
             Context.MODE_PRIVATE
         )
-
-    private val istZone = ZoneId.of("Asia/Kolkata")
 
     fun saveToken(token: String) {
         sharedPreferences.edit()
@@ -63,6 +61,19 @@ class SessionManager(context: Context) {
         sharedPreferences.edit()
             .putString("action_${eventId}_time", now)
             .apply()
+        evictOldTimestamps()
+    }
+
+    private fun evictOldTimestamps(limit: Int = 50) {
+        val actionKeys = sharedPreferences.all.keys
+            .filter { it.startsWith("action_") }
+            .sortedBy { sharedPreferences.getString(it, null) }
+        if (actionKeys.size > limit) {
+            val toRemove = actionKeys.take(actionKeys.size - limit)
+            val editor = sharedPreferences.edit()
+            toRemove.forEach { editor.remove(it) }
+            editor.apply()
+        }
     }
 
     fun getActionTimestamp(eventId: String): String? {

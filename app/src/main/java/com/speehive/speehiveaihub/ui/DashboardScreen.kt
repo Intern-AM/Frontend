@@ -48,8 +48,6 @@ fun DashboardScreen(
     mutableStateOf(false)
 }
 
-    var isRefreshing by remember { mutableStateOf(false) }
-
     Scaffold(
         containerColor = AppBackground,
         bottomBar = {
@@ -67,12 +65,8 @@ fun DashboardScreen(
         }
     ) { paddingValues ->
         PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = {
-                isRefreshing = true
-                viewModel.refresh()
-                isRefreshing = false
-            },
+            isRefreshing = viewModel.isLoading,
+            onRefresh = { viewModel.refresh() },
             state = rememberPullToRefreshState()
         ) {
         LazyColumn(

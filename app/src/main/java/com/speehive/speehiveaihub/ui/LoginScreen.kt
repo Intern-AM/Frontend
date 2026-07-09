@@ -31,17 +31,15 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import com.speehive.speehiveaihub.ui.theme.CardSurface
 import com.speehive.speehiveaihub.ui.theme.PulseBlue
 
-import android.util.Log
-
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit
 ) {
-    Log.d("LoginScreen", "LoginScreen Composed. isLoggedIn: ${viewModel.isLoggedIn}")
-
-    if (viewModel.isLoggedIn) {
-        onLoginSuccess()
+    LaunchedEffect(viewModel.isLoggedIn) {
+        if (viewModel.isLoggedIn) {
+            onLoginSuccess()
+        }
     }
     var passwordVisible by remember {
         mutableStateOf(false)
@@ -223,11 +221,13 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = viewModel.loginError!!,
-                    color = PulseRed,
-                    style = MaterialTheme.typography.bodySmall
-                )
+                viewModel.loginError?.let { error ->
+                    Text(
+                        text = error,
+                        color = PulseRed,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(32.dp))
 

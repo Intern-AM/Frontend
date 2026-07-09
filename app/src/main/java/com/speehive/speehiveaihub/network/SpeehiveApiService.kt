@@ -8,8 +8,7 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.PUT
 import okhttp3.MultipartBody
-import com.speehive.speehiveaihub.network.UserResponse
-import com.speehive.speehiveaihub.network.CreateUserRequest
+
 interface SpeehiveApiService {
 
     @POST("api/Auth/login")
@@ -21,11 +20,6 @@ interface SpeehiveApiService {
 
     @GET("api/Campaigns")
     suspend fun getCampaigns(): List<CampaignResponse>
-
-    @GET("api/campaigns/{id}")
-    suspend fun getCampaignById(
-        @Path("id") id: String
-    ): CampaignResponse
 
     // Events
 
@@ -53,11 +47,6 @@ interface SpeehiveApiService {
 
     @PUT("api/Admin/users/{id}/deactivate")
     suspend fun deactivateUser(
-        @Path("id") id: String
-    ): retrofit2.Response<Unit>
-
-    @retrofit2.http.DELETE("api/Admin/users/{id}")
-    suspend fun deleteUser(
         @Path("id") id: String
     ): retrofit2.Response<Unit>
 

@@ -20,8 +20,4 @@ interface AdminRepository {
     suspend fun deactivateUser(
         id: String
     ): Result<Unit>
-
-    suspend fun deleteUser(
-        id: String
-    ): Result<Unit>
 }

@@ -31,8 +31,6 @@ fun EventListScreen(
     onNavigateCampaigns: () -> Unit,
     onNavigateNotifications: () -> Unit
 ) {
-    var isRefreshing by remember { mutableStateOf(false) }
-
     Scaffold(
         bottomBar = {
             BottomNavBar(
@@ -61,12 +59,8 @@ fun EventListScreen(
         }
     ) { paddingValues ->
         PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = {
-                isRefreshing = true
-                viewModel.loadEvents()
-                isRefreshing = false
-            },
+            isRefreshing = viewModel.isLoading,
+            onRefresh = { viewModel.loadEvents() },
             state = rememberPullToRefreshState()
         ) {
         Column(
@@ -148,7 +142,7 @@ fun FullEventCard(
     isProcessing: Boolean = false
 ){
 
-    val statusColor = statusColor(event.status)
+    val eventStatusColor = statusColor(event.status)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -268,12 +262,12 @@ fun FullEventCard(
 
             Row {
                 Surface(
-                    color = statusColor.copy(alpha = 0.15f),
+                    color = eventStatusColor.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
                         text = event.status.uppercase(),
-                        color = statusColor,
+                        color = eventStatusColor,
                         maxLines = 1,
                         modifier = Modifier.padding(
                             horizontal = 6.dp,

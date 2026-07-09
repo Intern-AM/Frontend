@@ -49,10 +49,6 @@ class ApiCampaignRepository(
         ).toResult().map { }
     }
 
-    override suspend fun getCampaignById(id: String): Result<Campaign?> = safeApiCall {
-        api.getCampaigns().map { it.toCampaign() }.find { it.campaignId.toString() == id }
-    }
-
     override suspend fun uploadCampaignImage(
         eventId: String,
         imageUri: Uri

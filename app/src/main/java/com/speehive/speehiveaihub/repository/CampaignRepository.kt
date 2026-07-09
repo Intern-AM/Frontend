@@ -7,8 +7,6 @@ interface CampaignRepository {
 
     suspend fun getCampaigns(): Result<List<Campaign>>
 
-    suspend fun getCampaignById(id: String): Result<Campaign?>
-
     suspend fun approveCampaign(
         eventId: String,
         comments: String = ""

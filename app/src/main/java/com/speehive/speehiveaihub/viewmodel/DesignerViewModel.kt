@@ -23,7 +23,7 @@ class DesignerViewModel(
         private set
     var isLoading by mutableStateOf(false)
         private set
-    var error by mutableStateOf<String?>(null)
+    var errorMessage by mutableStateOf<String?>(null)
         private set
     var uploadSuccess by mutableStateOf<String?>(null)
         private set
@@ -52,14 +52,14 @@ class DesignerViewModel(
     fun loadData() {
         viewModelScope.launch {
             isLoading = true
-            error = null
+            errorMessage = null
             eventRepository.getEvents().fold(
                 onSuccess = { events = it },
-                onFailure = { error = it.message ?: "Failed to load events" }
+                onFailure = { errorMessage = it.message ?: "Failed to load events" }
             )
             campaignRepository.getCampaigns().fold(
                 onSuccess = { campaigns = it },
-                onFailure = { if (error == null) error = it.message ?: "Failed to load campaigns" }
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load campaigns" }
             )
             isLoading = false
         }
@@ -68,14 +68,14 @@ class DesignerViewModel(
     fun uploadEventImage(eventId: String, uri: Uri) {
         viewModelScope.launch {
             uploadingId = eventId
-            error = null
+            errorMessage = null
             uploadSuccess = null
             eventRepository.uploadDesignerImage(eventId, uri).fold(
                 onSuccess = {
                     uploadSuccess = "Event poster uploaded"
                     loadData()
                 },
-                onFailure = { error = it.message ?: "Upload failed" }
+                onFailure = { errorMessage = it.message ?: "Upload failed" }
             )
             uploadingId = null
         }
@@ -84,14 +84,14 @@ class DesignerViewModel(
     fun uploadCampaignImage(eventId: String, uri: Uri) {
         viewModelScope.launch {
             uploadingId = eventId
-            error = null
+            errorMessage = null
             uploadSuccess = null
             campaignRepository.uploadCampaignImage(eventId, uri).fold(
                 onSuccess = {
                     uploadSuccess = "Campaign poster uploaded"
                     loadData()
                 },
-                onFailure = { error = it.message ?: "Upload failed" }
+                onFailure = { errorMessage = it.message ?: "Upload failed" }
             )
             uploadingId = null
         }
@@ -100,14 +100,14 @@ class DesignerViewModel(
     fun editCampaign(eventId: String, campaignPost: String, hashtags: String) {
         viewModelScope.launch {
             uploadingId = eventId
-            error = null
+            errorMessage = null
             uploadSuccess = null
             campaignRepository.editCampaign(eventId, campaignPost, hashtags).fold(
                 onSuccess = {
                     uploadSuccess = "Campaign updated successfully"
                     loadData()
                 },
-                onFailure = { error = it.message ?: "Update failed" }
+                onFailure = { errorMessage = it.message ?: "Update failed" }
             )
             uploadingId = null
         }

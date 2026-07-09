@@ -17,12 +17,16 @@ class DashboardViewModel(
 ) : ViewModel() {
 
     var campaigns by mutableStateOf<List<Campaign>>(emptyList())
+        private set
 
     var events by mutableStateOf<List<Event>>(emptyList())
+        private set
 
     var isLoading by mutableStateOf(false)
+        private set
 
     var errorMessage by mutableStateOf<String?>(null)
+        private set
 
     val pendingCount: Int
         get() = campaigns.count {
