@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
+import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.viewmodel.AdminViewModel
 
@@ -27,8 +29,8 @@ fun AuditLogScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("ACTIVITY", style = MaterialTheme.typography.labelSmall)
-                        Text("History", style = MaterialTheme.typography.displayLarge)
+                        Text(stringResource(R.string.activity_header), style = MaterialTheme.typography.labelSmall)
+                        Text(stringResource(R.string.history_label), style = MaterialTheme.typography.displayLarge)
                     }
                 },
 

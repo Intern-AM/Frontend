@@ -1,6 +1,7 @@
 package com.speehive.speehiveaihub.data
 
 import android.content.Context
+import androidx.core.content.edit
 import com.speehive.speehiveaihub.utils.istZone
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -14,9 +15,9 @@ class SessionManager(context: Context) {
         )
 
     fun saveToken(token: String) {
-        sharedPreferences.edit()
-            .putString("jwt_token", token)
-            .apply()
+        sharedPreferences.edit {
+            putString("jwt_token", token)
+        }
     }
 
     fun getToken(): String? {
@@ -27,9 +28,9 @@ class SessionManager(context: Context) {
     }
 
     fun saveUserName(name: String) {
-        sharedPreferences.edit()
-            .putString("user_name", name)
-            .apply()
+        sharedPreferences.edit {
+            putString("user_name", name)
+        }
     }
 
     fun getUserName(): String {
@@ -40,9 +41,9 @@ class SessionManager(context: Context) {
     }
 
     fun saveRole(role: String) {
-        sharedPreferences.edit()
-            .putString("role", role)
-            .apply()
+        sharedPreferences.edit {
+            putString("role", role)
+        }
     }
 
     fun getRole(): String {
@@ -58,9 +59,9 @@ class SessionManager(context: Context) {
 
     fun saveActionTimestamp(eventId: String) {
         val now = OffsetDateTime.now(istZone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        sharedPreferences.edit()
-            .putString("action_${eventId}_time", now)
-            .apply()
+        sharedPreferences.edit {
+            putString("action_${eventId}_time", now)
+        }
         evictOldTimestamps()
     }
 
@@ -70,9 +71,9 @@ class SessionManager(context: Context) {
             .sortedBy { sharedPreferences.getString(it, null) }
         if (actionKeys.size > limit) {
             val toRemove = actionKeys.take(actionKeys.size - limit)
-            val editor = sharedPreferences.edit()
-            toRemove.forEach { editor.remove(it) }
-            editor.apply()
+            sharedPreferences.edit {
+                toRemove.forEach { remove(it) }
+            }
         }
     }
 
@@ -81,12 +82,12 @@ class SessionManager(context: Context) {
     }
 
     fun clearSession() {
-        sharedPreferences.edit()
-            .remove("jwt_token")
-            .remove("user_name")
-            .remove("role")
-            .remove("seen_notification_ids")
-            .apply()
+        sharedPreferences.edit {
+            remove("jwt_token")
+            remove("user_name")
+            remove("role")
+            remove("seen_notification_ids")
+        }
     }
 
     fun getSeenNotificationIds(): Set<String> {
@@ -94,10 +95,8 @@ class SessionManager(context: Context) {
     }
 
     fun saveSeenNotificationIds(ids: Set<String>) {
-        sharedPreferences.edit()
-            .putStringSet("seen_notification_ids", ids)
-            .apply()
+        sharedPreferences.edit {
+            putStringSet("seen_notification_ids", ids)
+        }
     }
-
-
 }
