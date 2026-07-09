@@ -1,4 +1,5 @@
 package com.speehive.speehiveaihub.navigation
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,6 +37,8 @@ fun NavGraph(navController: NavHostController) {
 
     val authState by authManager.authState.collectAsState()
 
+    val activity = context as? ComponentActivity
+
     LaunchedEffect(authState) {
         when (val state = authState) {
             is AuthState.Unauthenticated -> {
@@ -47,6 +50,16 @@ fun NavGraph(navController: NavHostController) {
                 }
             }
             is AuthState.Authenticated -> {}
+        }
+    }
+
+    LaunchedEffect(activity?.intent) {
+        val openNotifications = activity?.intent?.getBooleanExtra("open_notifications", false) ?: false
+        if (openNotifications && sessionManager.isLoggedIn()) {
+            navController.navigate(Screen.Notifications.route) {
+                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+            }
+            activity?.intent?.removeExtra("open_notifications")
         }
     }
 
