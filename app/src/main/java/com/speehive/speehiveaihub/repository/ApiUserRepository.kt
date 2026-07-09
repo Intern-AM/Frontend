@@ -6,7 +6,7 @@ import com.speehive.speehiveaihub.models.User
 import com.speehive.speehiveaihub.network.AuthError
 import com.speehive.speehiveaihub.network.LoginRequest
 import com.speehive.speehiveaihub.network.RetrofitClient
-import retrofit2.HttpException
+import com.speehive.speehiveaihub.network.safeApiCall
 
 class ApiUserRepository(
     private val sessionManager: SessionManager,
@@ -16,38 +16,31 @@ class ApiUserRepository(
     override suspend fun login(
         email: String,
         password: String
-    ): Result<User?> {
-        return try {
-            val api = RetrofitClient.create(sessionManager, authManager)
+    ): Result<User?> = safeApiCall {
+        val api = RetrofitClient.create(sessionManager, authManager)
 
-            val response = api.login(
-                LoginRequest(
-                    email = email,
-                    password = password
-                )
+        val response = api.login(
+            LoginRequest(
+                email = email,
+                password = password
             )
+        )
 
-            sessionManager.saveToken(response.token)
-            sessionManager.saveUserName(response.name)
-            sessionManager.saveRole(response.role)
+        sessionManager.saveToken(response.token)
+        sessionManager.saveUserName(response.name)
+        sessionManager.saveRole(response.role)
 
-            Result.success(
-                User(
-                    id = response.userId,
-                    name = response.name,
-                    email = email,
-                    role = response.role
-                )
-            )
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            when (e.code()) {
-                401 -> Result.failure(AuthError.InvalidCredentials)
-                403 -> Result.failure(AuthError.Unauthorized)
-                else -> Result.failure(AuthError.fromCode(e.code(), errorBody))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+        User(
+            id = response.userId,
+            name = response.name,
+            email = email,
+            role = response.role
+        )
+    }.recoverCatching { error ->
+        if (error is AuthError.TokenExpired) {
+            throw AuthError.InvalidCredentials
+        } else {
+            throw error
         }
     }
 }

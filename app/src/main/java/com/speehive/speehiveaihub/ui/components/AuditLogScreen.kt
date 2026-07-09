@@ -21,7 +21,7 @@ fun AuditLogScreen(
 ) {
 
     Scaffold(
-        containerColor = PureBlack,
+        containerColor = AppBackground,
 
         topBar = {
             TopAppBar(
@@ -44,7 +44,7 @@ fun AuditLogScreen(
                 },
 
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PureBlack
+                    containerColor = AppBackground
                 )
             )
         }

@@ -19,6 +19,7 @@ import com.speehive.speehiveaihub.ui.*
 import com.speehive.speehiveaihub.ui.components.*
 import com.speehive.speehiveaihub.viewmodel.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.speehive.speehiveaihub.data.SessionManager
 
 @Composable
@@ -68,6 +69,10 @@ fun NavGraph(navController: NavHostController) {
         ApiAuditRepository(sessionManager, authManager)
     }
 
+    val dashboardViewModel: DashboardViewModel = viewModel {
+        DashboardViewModel(campaignRepository, eventRepository)
+    }
+
 
     var currentUserName by remember {
         mutableStateOf(
@@ -111,7 +116,7 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.Login.route) {
 
-            val viewModel = remember {
+            val viewModel: LoginViewModel = viewModel {
                 LoginViewModel(userRepository)
             }
 
@@ -168,15 +173,8 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.Dashboard.route) {
 
-            val viewModel = remember {
-                DashboardViewModel(
-                    campaignRepository,
-                    eventRepository
-                )
-            }
-
             DashboardScreen(
-                viewModel = viewModel,
+                viewModel = dashboardViewModel,
                 userName = currentUserName,
 
                 onLogout = {
@@ -213,7 +211,7 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.AdminDashboard.route) {
 
-            val viewModel = remember {
+            val viewModel: AdminViewModel = viewModel {
                 AdminViewModel(
                     adminRepository,
                     auditRepository
@@ -237,7 +235,7 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.EventList.route) {
 
-            val viewModel = remember {
+            val viewModel: EventViewModel = viewModel {
                 EventViewModel(eventRepository)
             }
 
@@ -265,15 +263,8 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.CampaignList.route) {
 
-            val viewModel = remember {
-                DashboardViewModel(
-                    campaignRepository,
-                    eventRepository
-                )
-            }
-
             CampaignListScreen(
-                viewModel = viewModel,
+                viewModel = dashboardViewModel,
                 onNavigateHome = {
                     navController.navigate(Screen.Dashboard.route) {
                         launchSingleTop = true
@@ -312,10 +303,13 @@ fun NavGraph(navController: NavHostController) {
             val campaignId =
                 backStackEntry.arguments?.getString("campaignId") ?: ""
 
-            val viewModel = remember(campaignId) {
+            val viewModel: CampaignDetailViewModel = viewModel(
+                key = campaignId
+            ) {
                 CampaignDetailViewModel(
                     campaignRepository,
-                    eventRepository
+                    eventRepository,
+                    sessionManager
                 )
             }
 
@@ -323,13 +317,14 @@ fun NavGraph(navController: NavHostController) {
                 campaignId = campaignId,
                 viewModel = viewModel,
                 onBack = {
+                    dashboardViewModel.refresh()
                     navController.popBackStack()
                 }
             )
         }
         composable(Screen.AuditLogs.route) {
 
-            val viewModel = remember {
+            val viewModel: AdminViewModel = viewModel {
                 AdminViewModel(
                     adminRepository,
                     auditRepository
@@ -345,10 +340,11 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.Notifications.route) {
 
-            val viewModel = remember {
+            val viewModel: NotificationViewModel = viewModel {
                 NotificationViewModel(
                     campaignRepository,
-                    eventRepository
+                    eventRepository,
+                    sessionManager
                 )
             }
 
@@ -379,7 +375,7 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.DesignerDashboard.route) {
 
-            val viewModel = remember {
+            val viewModel: DesignerViewModel = viewModel {
                 DesignerViewModel(eventRepository, campaignRepository)
             }
 

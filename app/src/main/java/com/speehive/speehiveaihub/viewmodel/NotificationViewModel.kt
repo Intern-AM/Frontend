@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
+import com.speehive.speehiveaihub.data.SessionManager
 import com.speehive.speehiveaihub.models.Notification
 import com.speehive.speehiveaihub.models.NotificationType
 
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 
 class NotificationViewModel(
     private val campaignRepository: CampaignRepository,
-    private val eventRepository: EventRepository
+    private val eventRepository: EventRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     var notifications by mutableStateOf<List<Notification>>(emptyList())
@@ -59,14 +61,14 @@ class NotificationViewModel(
                                 id = campaign.campaignId.toString(),
                                 title = "Campaign Approved",
                                 message = "Campaign approved successfully",
-                                timestamp = campaign.createdAt,
+                                timestamp = sessionManager.getActionTimestamp(campaign.eventId) ?: campaign.createdAt,
                                 type = NotificationType.APPROVED
                             )
                             "rejected" -> Notification(
                                 id = campaign.campaignId.toString(),
                                 title = "Campaign Rejected",
                                 message = "Campaign rejected by reviewer",
-                                timestamp = campaign.createdAt,
+                                timestamp = sessionManager.getActionTimestamp(campaign.eventId) ?: campaign.createdAt,
                                 type = NotificationType.REJECTED
                             )
                             "posted" -> Notification(

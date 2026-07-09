@@ -66,7 +66,7 @@ fun CampaignDetailScreen(
                 ) {
                     Text(
                         text = "Dismiss",
-                        color = PureBlack
+                        color = AppBackground
                     )
                 }
             }
@@ -74,7 +74,7 @@ fun CampaignDetailScreen(
     }
 
     Scaffold(
-        containerColor = PureBlack,
+        containerColor = AppBackground,
 
         topBar = {
             TopAppBar(
@@ -95,7 +95,7 @@ fun CampaignDetailScreen(
                 },
 
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PureBlack
+                    containerColor = AppBackground
                 )
             )
         },
@@ -169,7 +169,7 @@ fun CampaignDetailScreen(
 
                         colors = ButtonDefaults.buttonColors(
                             containerColor = PulseGreen,
-                            contentColor = PureBlack,
+                            contentColor = AppBackground,
                             disabledContainerColor = PulseGreen.copy(alpha = 0.5f)
                         )
                     ) {

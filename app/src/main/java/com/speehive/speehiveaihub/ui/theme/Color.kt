@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 // Pulse AI Light Theme
 
-val PureBlack = Color(0xFFF8FAFC)      // Main background
+val AppBackground = Color(0xFFF8FAFC)      // Main background
 val CardSurface = Color(0xFFFFFFFF)    // Cards
 val ElevatedSurface = Color(0xFFF1F5F9)
 val CardBorder = Color(0xFFE2E8F0)

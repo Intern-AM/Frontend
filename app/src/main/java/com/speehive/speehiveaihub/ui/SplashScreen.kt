@@ -11,7 +11,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.speehive.speehiveaihub.R
-import com.speehive.speehiveaihub.ui.theme.PureBlack
+import com.speehive.speehiveaihub.ui.theme.AppBackground
 import android.util.Log
 import kotlinx.coroutines.delay
 
@@ -29,7 +29,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PureBlack),
+            .background(AppBackground),
         contentAlignment = Alignment.Center
     ) {
         Image(
