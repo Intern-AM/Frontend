@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -77,7 +78,7 @@ fun LoginScreen(
                 Column {
 
                     Text(
-                        text = "Hive AI",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.displayLarge,
                         color = TextPrimary
                     )
@@ -127,7 +128,7 @@ fun LoginScreen(
                 },
                 label = {
                     Text(
-                        text = "Email Address",
+                        text = stringResource(R.string.email_label),
                         color = TextSecondary
                     )
                 },
@@ -185,7 +186,7 @@ fun LoginScreen(
 
                 label = {
                     Text(
-                        text = "Password",
+                        text = stringResource(R.string.password_label),
                         color = TextSecondary
                     )
                 },
@@ -257,7 +258,7 @@ fun LoginScreen(
                 } else {
 
                     Text(
-                        text = "Sign In",
+                        text = stringResource(R.string.signin_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = AppBackground
                     )

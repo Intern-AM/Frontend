@@ -17,6 +17,8 @@ import com.speehive.speehiveaihub.models.Campaign
 import com.speehive.speehiveaihub.ui.components.BottomNavBar
 import com.speehive.speehiveaihub.ui.components.BottomNavItem
 import com.speehive.speehiveaihub.ui.components.FigmaStatusBadge
+import androidx.compose.ui.res.stringResource
+import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import com.speehive.speehiveaihub.viewmodel.DashboardViewModel
@@ -46,11 +48,11 @@ fun CampaignListScreen(
                 title = {
                     Column {
                         Text(
-                            "REVIEW QUEUE",
+                            stringResource(R.string.review_queue_header),
                             style = MaterialTheme.typography.labelSmall
                         )
                         Text(
-                            "Campaigns",
+                            stringResource(R.string.nav_campaigns),
                             style = MaterialTheme.typography.displayLarge
                         )
                     }

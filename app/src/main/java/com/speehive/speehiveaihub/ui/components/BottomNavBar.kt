@@ -8,6 +8,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.ui.theme.*
 
 enum class BottomNavItem {
@@ -47,7 +49,7 @@ fun BottomNavBar(
                     Icon(Icons.Default.Home, contentDescription = "Home")
                 },
                 label = {
-                    Text("Home")
+                    Text(stringResource(R.string.nav_home))
                 },
                 colors = itemColors
             )
@@ -61,7 +63,7 @@ fun BottomNavBar(
                     Icon(Icons.Default.Event, contentDescription = "Events")
                 },
                 label = {
-                    Text("Events")
+                    Text(stringResource(R.string.nav_events))
                 },
                 colors = itemColors
             )
@@ -75,7 +77,7 @@ fun BottomNavBar(
                     Icon(Icons.Default.Campaign, contentDescription = "Campaigns")
                 },
                 label = {
-                    Text("Campaigns")
+                    Text(stringResource(R.string.nav_campaigns))
                 },
                 colors = itemColors
             )
@@ -107,7 +109,7 @@ fun BottomNavBar(
                     }
                 },
                 label = {
-                    Text("Inbox")
+                    Text(stringResource(R.string.nav_inbox))
                 },
                 colors = itemColors
             )

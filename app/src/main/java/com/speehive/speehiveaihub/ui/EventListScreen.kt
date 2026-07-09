@@ -13,8 +13,10 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
+import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.models.Event
 import com.speehive.speehiveaihub.ui.components.statusColor
 import com.speehive.speehiveaihub.ui.theme.*
@@ -50,8 +52,8 @@ fun EventListScreen(
             TopAppBar(
                 title = { 
                     Column {
-                        Text("MONITORING", style = MaterialTheme.typography.labelSmall)
-                        Text("Events", style = MaterialTheme.typography.displayLarge)
+                        Text(stringResource(R.string.monitoring_header), style = MaterialTheme.typography.labelSmall)
+                        Text(stringResource(R.string.nav_events), style = MaterialTheme.typography.displayLarge)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground)

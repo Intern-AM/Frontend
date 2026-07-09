@@ -24,6 +24,8 @@ import com.speehive.speehiveaihub.ui.theme.PulseBlue
 import com.speehive.speehiveaihub.ui.theme.PulseRed
 import com.speehive.speehiveaihub.ui.theme.PulseGreen
 import com.speehive.speehiveaihub.ui.theme.PulseGreenLight
+import androidx.compose.ui.res.stringResource
+import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.utils.formatAuditDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,15 +76,15 @@ fun AdminDashboardScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("ADMIN", style = MaterialTheme.typography.labelSmall)
-                        Text("Dashboard", style = MaterialTheme.typography.displayLarge)
+                        Text(stringResource(R.string.admin_header), style = MaterialTheme.typography.labelSmall)
+                        Text(stringResource(R.string.dashboard_label), style = MaterialTheme.typography.displayLarge)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
                 actions = {
                     TextButton(onClick = onLogout) {
                         Text(
-                            "Logout",
+                            stringResource(R.string.logout_btn),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -236,7 +238,7 @@ fun AdminDashboardScreen(
                         )
                     ) {
                         Text(
-                            text = "View Activity History",
+                            text = stringResource(R.string.view_history_btn),
                             style = MaterialTheme.typography.titleSmall,
                             color = AppBackground
                         )
@@ -250,7 +252,7 @@ fun AdminDashboardScreen(
                     )
 
                     Text(
-                        text = "User Management",
+                        text = stringResource(R.string.user_mgmt_label),
                         style = MaterialTheme.typography.titleLarge
                     )
                 }
