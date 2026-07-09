@@ -32,8 +32,9 @@ class CampaignDetailViewModel(
         viewModelScope.launch {
             isLoading = true
 
-            campaignRepository.getCampaignById(id).fold(
-                onSuccess = { found ->
+            campaignRepository.getCampaigns().fold(
+                onSuccess = { campaigns ->
+                    val found = campaigns.find { it.campaignId.toString() == id }
                     campaign = found
                     found?.let { currentCampaign ->
                         eventRepository.getEvents().fold(

@@ -10,10 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,8 +30,6 @@ fun CampaignListScreen(
     onNavigateNotifications: () -> Unit,
     onCampaignClick: (String) -> Unit
 ) {
-    var isRefreshing by remember { mutableStateOf(false) }
-
     Scaffold(
         bottomBar = {
             BottomNavBar(
@@ -74,12 +68,8 @@ fun CampaignListScreen(
         ) {
 
             PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = {
-                    isRefreshing = true
-                    viewModel.refresh()
-                    isRefreshing = false
-                },
+                isRefreshing = viewModel.isLoading,
+                onRefresh = { viewModel.refresh() },
                 state = rememberPullToRefreshState()
             ) {
             LazyColumn(

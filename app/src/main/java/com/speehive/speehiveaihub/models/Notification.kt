@@ -5,8 +5,7 @@ data class Notification(
     val title: String,
     val message: String,
     val timestamp: String,
-    val type: NotificationType,
-    val status: NotificationStatus = NotificationStatus.UNREAD
+    val type: NotificationType
 )
 enum class NotificationType {
     REVIEW_REQUIRED,
@@ -14,8 +13,4 @@ enum class NotificationType {
     REJECTED,
     PUBLISHED,
     EVENT_CANCELLED
-}
-
-enum class NotificationStatus {
-    UNREAD, READ, ARCHIVED
 }

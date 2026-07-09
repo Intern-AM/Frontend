@@ -25,6 +25,9 @@ fun CreateUserDialog(
     var password by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("Reviewer") }
     var expanded by remember { mutableStateOf(false) }
+    var nameError by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
 
     val roles = listOf("Reviewer", "Designer", "Admin")
 
@@ -47,13 +50,14 @@ fun CreateUserDialog(
 
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = { name = it; nameError = false },
                     label = {
                         Text(
                             text = "Name",
                             color = TextSecondary
                         )
                     },
+                    isError = nameError,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     singleLine = true,
@@ -70,13 +74,14 @@ fun CreateUserDialog(
 
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = { email = it; emailError = false },
                     label = {
                         Text(
                             text = "Email",
                             color = TextSecondary
                         )
                     },
+                    isError = emailError,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     singleLine = true,
@@ -93,13 +98,14 @@ fun CreateUserDialog(
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = { password = it; passwordError = false },
                     label = {
                         Text(
                             text = "Password",
                             color = TextSecondary
                         )
                     },
+                    isError = passwordError,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     singleLine = true,
@@ -174,13 +180,12 @@ fun CreateUserDialog(
 
             Button(
                 onClick = {
-
-                    onCreateUser(
-                        name,
-                        email,
-                        password,
-                        role
-                    )
+                    nameError = name.isBlank()
+                    emailError = email.isBlank() || !email.contains("@")
+                    passwordError = password.length < 6
+                    if (!nameError && !emailError && !passwordError) {
+                        onCreateUser(name, email, password, role)
+                    }
                 },
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(

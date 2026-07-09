@@ -12,7 +12,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.ui.theme.AppBackground
-import android.util.Log
 import kotlinx.coroutines.delay
 
 @Composable
@@ -20,9 +19,7 @@ fun SplashScreen(
     onSplashComplete: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        Log.d("SplashScreen", "LaunchedEffect started, waiting 1000ms")
         delay(1000)
-        Log.d("SplashScreen", "LaunchedEffect delay complete, invoking onSplashComplete")
         onSplashComplete()
     }
 

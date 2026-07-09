@@ -52,8 +52,4 @@ class ApiAdminRepository(
     override suspend fun deactivateUser(id: String): Result<Unit> = safeApiCall {
         api.deactivateUser(id).toResult()
     }
-
-    override suspend fun deleteUser(id: String): Result<Unit> = safeApiCall {
-        api.deleteUser(id).toResult()
-    }
 }

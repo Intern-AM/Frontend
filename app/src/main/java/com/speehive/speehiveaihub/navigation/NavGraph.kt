@@ -73,6 +73,10 @@ fun NavGraph(navController: NavHostController) {
         DashboardViewModel(campaignRepository, eventRepository)
     }
 
+    val adminViewModel: AdminViewModel = viewModel {
+        AdminViewModel(adminRepository, auditRepository)
+    }
+
 
     var currentUserName by remember {
         mutableStateOf(
@@ -88,7 +92,6 @@ fun NavGraph(navController: NavHostController) {
         composable(Screen.Splash.route) {
             SplashScreen(
                 onSplashComplete = {
-                    android.util.Log.d("NavGraph", "onSplashComplete invoked. isLoggedIn: ${sessionManager.isLoggedIn()}, role: ${sessionManager.getRole()}")
                     if (sessionManager.isLoggedIn()) {
                         val role = sessionManager.getRole()
                         when {
@@ -142,6 +145,8 @@ fun NavGraph(navController: NavHostController) {
                                     inclusive = true
                                 }
                             }
+                            adminViewModel.loadUsers()
+                            adminViewModel.loadAuditLogs()
                         }
 
                         role.equals(
@@ -165,6 +170,7 @@ fun NavGraph(navController: NavHostController) {
                                     inclusive = true
                                 }
                             }
+                            dashboardViewModel.refresh()
                         }
                     }
                 }
@@ -211,15 +217,8 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.AdminDashboard.route) {
 
-            val viewModel: AdminViewModel = viewModel {
-                AdminViewModel(
-                    adminRepository,
-                    auditRepository
-                )
-            }
-
             AdminDashboardScreen(
-                viewModel = viewModel,
+                viewModel = adminViewModel,
                 onLogout = {
                     authManager.logout()
                     navController.navigate(Screen.Login.route) {
@@ -324,15 +323,8 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.AuditLogs.route) {
 
-            val viewModel: AdminViewModel = viewModel {
-                AdminViewModel(
-                    adminRepository,
-                    auditRepository
-                )
-            }
-
             AuditLogScreen(
-                viewModel = viewModel,
+                viewModel = adminViewModel,
                 onBack = {
                     navController.popBackStack()
                 }
