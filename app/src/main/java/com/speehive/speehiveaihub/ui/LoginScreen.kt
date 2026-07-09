@@ -31,11 +31,14 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import com.speehive.speehiveaihub.ui.theme.CardSurface
 import com.speehive.speehiveaihub.ui.theme.PulseBlue
 
+import android.util.Log
+
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit
 ) {
+    Log.d("LoginScreen", "LoginScreen Composed. isLoggedIn: ${viewModel.isLoggedIn}")
 
     if (viewModel.isLoggedIn) {
         onLoginSuccess()
