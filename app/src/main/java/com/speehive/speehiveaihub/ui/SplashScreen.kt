@@ -1,0 +1,42 @@
+package com.speehive.speehiveaihub.ui
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.speehive.speehiveaihub.R
+import com.speehive.speehiveaihub.ui.theme.PureBlack
+import android.util.Log
+import kotlinx.coroutines.delay
+
+@Composable
+fun SplashScreen(
+    onSplashComplete: () -> Unit
+) {
+    LaunchedEffect(Unit) {
+        Log.d("SplashScreen", "LaunchedEffect started, waiting 1000ms")
+        delay(1000)
+        Log.d("SplashScreen", "LaunchedEffect delay complete, invoking onSplashComplete")
+        onSplashComplete()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(PureBlack),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_logo),
+            contentDescription = "Hive AI Logo",
+            modifier = Modifier.size(192.dp),
+            contentScale = ContentScale.Fit
+        )
+    }
+}

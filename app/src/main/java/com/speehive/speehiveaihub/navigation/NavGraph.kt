@@ -77,25 +77,37 @@ fun NavGraph(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination =
-            if (sessionManager.isLoggedIn()) {
-
-                val role = sessionManager.getRole()
-
-                when {
-                    role.equals("Admin", ignoreCase = true) ->
-                        Screen.AdminDashboard.route
-                    role.equals("Designer", ignoreCase = true) ->
-                        Screen.DesignerDashboard.route
-                    else ->
-                        Screen.Dashboard.route
-                }
-
-            } else {
-
-                Screen.Login.route
-            }
+        startDestination = Screen.Splash.route
     ) {
+
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                onSplashComplete = {
+                    android.util.Log.d("NavGraph", "onSplashComplete invoked. isLoggedIn: ${sessionManager.isLoggedIn()}, role: ${sessionManager.getRole()}")
+                    if (sessionManager.isLoggedIn()) {
+                        val role = sessionManager.getRole()
+                        when {
+                            role.equals("Admin", ignoreCase = true) ->
+                                navController.navigate(Screen.AdminDashboard.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                            role.equals("Designer", ignoreCase = true) ->
+                                navController.navigate(Screen.DesignerDashboard.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                            else ->
+                                navController.navigate(Screen.Dashboard.route) {
+                                    popUpTo(Screen.Splash.route) { inclusive = true }
+                                }
+                        }
+                    } else {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
 
         composable(Screen.Login.route) {
 
