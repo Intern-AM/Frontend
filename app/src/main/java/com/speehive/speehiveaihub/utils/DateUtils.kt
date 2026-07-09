@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-private val istZone = ZoneId.of("Asia/Kolkata")
+internal val istZone = ZoneId.of("Asia/Kolkata")
 
 fun formatDate(dateString: String): String {
     return try {

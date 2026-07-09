@@ -10,6 +10,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +28,7 @@ import com.speehive.speehiveaihub.viewmodel.DashboardViewModel
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import com.speehive.speehiveaihub.utils.istZone
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import com.speehive.speehiveaihub.utils.formatEventDate
 import com.speehive.speehiveaihub.utils.isEventUpcoming
@@ -45,8 +48,10 @@ fun DashboardScreen(
     mutableStateOf(false)
 }
 
+    var isRefreshing by remember { mutableStateOf(false) }
+
     Scaffold(
-        containerColor = PureBlack,
+        containerColor = AppBackground,
         bottomBar = {
             BottomNavBar(
                 selected = BottomNavItem.HOME,
@@ -61,6 +66,15 @@ fun DashboardScreen(
             )
         }
     ) { paddingValues ->
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                viewModel.refresh()
+                isRefreshing = false
+            },
+            state = rememberPullToRefreshState()
+        ) {
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
@@ -76,14 +90,14 @@ fun DashboardScreen(
             // Dashboard Header (Chart Area Placeholder)
             item {
 
-                val currentDate = LocalDate.now()
+                val currentDate = LocalDate.now(istZone)
 
                 val formattedDate = currentDate.format(
                     DateTimeFormatter.ofPattern("EEE • MMM dd, yyyy")
                 )
                 val firstName = userName.substringBefore(" ")
 
-                val greeting = when (LocalTime.now().hour) {
+                val greeting = when (LocalTime.now(istZone).hour) {
                     in 0..11 -> "Good Morning"
                     in 12..16 -> "Good Afternoon"
                     else -> "Good Evening"
@@ -158,7 +172,7 @@ fun DashboardScreen(
                                         Text(
                                             text = initials,
                                             style = MaterialTheme.typography.titleMedium,
-                                            color = PureBlack
+                                            color = AppBackground
                                         )
                                     }
                                 }
@@ -280,6 +294,7 @@ fun DashboardScreen(
                     eventType = event.eventType
                 )
             }
+        }
         }
     }
 }

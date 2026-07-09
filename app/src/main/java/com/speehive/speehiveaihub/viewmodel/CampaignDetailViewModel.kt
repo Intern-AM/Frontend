@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.speehive.speehiveaihub.data.SessionManager
 import com.speehive.speehiveaihub.models.Campaign
 import com.speehive.speehiveaihub.network.AuthError
 import com.speehive.speehiveaihub.repository.CampaignRepository
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 
 class CampaignDetailViewModel(
     private val campaignRepository: CampaignRepository,
-    private val eventRepository: EventRepository
+    private val eventRepository: EventRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
     var campaign by mutableStateOf<Campaign?>(null)
         private set
@@ -56,9 +58,12 @@ class CampaignDetailViewModel(
         viewModelScope.launch {
             isProcessing = true
             errorMessage = null
-            campaign?.let {
-                campaignRepository.approveCampaign(eventId = it.eventId).fold(
-                    onSuccess = { onSuccess() },
+            campaign?.let { currentCampaign ->
+                campaignRepository.approveCampaign(eventId = currentCampaign.eventId).fold(
+                    onSuccess = {
+                        sessionManager.saveActionTimestamp(currentCampaign.eventId)
+                        onSuccess()
+                    },
                     onFailure = { error ->
                         errorMessage = when (error) {
                             is AuthError.Unauthorized -> "You don't have permission to approve campaigns"
@@ -78,12 +83,15 @@ class CampaignDetailViewModel(
         viewModelScope.launch {
             isProcessing = true
             errorMessage = null
-            campaign?.let {
+            campaign?.let { currentCampaign ->
                 campaignRepository.rejectCampaign(
-                    eventId = it.eventId,
+                    eventId = currentCampaign.eventId,
                     comments = comments
                 ).fold(
-                    onSuccess = { onSuccess() },
+                    onSuccess = {
+                        sessionManager.saveActionTimestamp(currentCampaign.eventId)
+                        onSuccess()
+                    },
                     onFailure = { error ->
                         errorMessage = when (error) {
                             is AuthError.Unauthorized -> "You don't have permission to reject campaigns"

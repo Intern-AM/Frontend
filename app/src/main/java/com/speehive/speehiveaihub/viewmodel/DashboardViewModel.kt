@@ -58,6 +58,10 @@ class DashboardViewModel(
         loadData()
     }
 
+    fun refresh() {
+        loadData()
+    }
+
     private fun loadData() {
         viewModelScope.launch {
 

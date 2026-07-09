@@ -94,7 +94,7 @@ fun BottomNavBar(
                                 ) {
                                     Text(
                                         text = notificationCount.toString(),
-                                        color = PureBlack
+                                        color = AppBackground
                                     )
                                 }
                             }

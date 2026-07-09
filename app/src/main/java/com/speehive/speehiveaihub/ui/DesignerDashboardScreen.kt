@@ -46,7 +46,7 @@ fun DesignerDashboardScreen(
     val filteredEvents = viewModel.filteredEvents
 
     Scaffold(
-        containerColor = PureBlack,
+        containerColor = AppBackground,
         topBar = {
             TopAppBar(
                 title = {
@@ -55,7 +55,7 @@ fun DesignerDashboardScreen(
                         Text("Dashboard", style = MaterialTheme.typography.displayLarge)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = PureBlack),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
                 actions = {
                     TextButton(onClick = onLogout) {
                         Text(
@@ -427,7 +427,7 @@ fun DesignerCampaignCard(
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = PulseBlue,
-                            contentColor = PureBlack
+                            contentColor = AppBackground
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -489,14 +489,14 @@ fun DesignerCampaignCard(
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isLocked) TextMuted else PulseBlue,
-                            contentColor = PureBlack
+                            contentColor = AppBackground
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         if (isUploading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(18.dp),
-                                color = PureBlack,
+                                color = AppBackground,
                                 strokeWidth = 2.dp
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -609,7 +609,7 @@ fun DesignerEventCard(
                 enabled = !isUploading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PulseBlue,
-                    contentColor = PureBlack
+                    contentColor = AppBackground
                 ),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -617,7 +617,7 @@ fun DesignerEventCard(
                 if (isUploading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
-                        color = PureBlack,
+                        color = AppBackground,
                         strokeWidth = 2.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))

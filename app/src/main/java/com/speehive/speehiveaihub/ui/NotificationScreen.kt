@@ -6,7 +6,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,6 +32,8 @@ fun NotificationScreen(
     onNavigateEvents: () -> Unit,
     onNavigateCampaigns: () -> Unit
 ) {
+    var isRefreshing by remember { mutableStateOf(false) }
+
     Scaffold(bottomBar = {
         BottomNavBar(
             selected = BottomNavItem.NOTIFICATIONS,
@@ -39,7 +47,7 @@ fun NotificationScreen(
             onNotificationsClick = {}
         )
     },
-        containerColor = PureBlack,
+        containerColor = AppBackground,
         topBar = {
             TopAppBar(
                 title = { Column {
@@ -54,11 +62,20 @@ fun NotificationScreen(
                         style = MaterialTheme.typography.displayLarge
                     )
                 } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = PureBlack)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground)
             )
         }
     ) { paddingValues ->
-        if (viewModel.isLoading) {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                viewModel.loadNotifications()
+                isRefreshing = false
+            },
+            state = rememberPullToRefreshState()
+        ) {
+        if (viewModel.isLoading && viewModel.notifications.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = TextPrimary, strokeWidth = 1.dp)
             }
@@ -76,6 +93,7 @@ fun NotificationScreen(
                 ) { notification ->
                     NotificationCard(notification)
                 }
+            }
             }
         }
     }

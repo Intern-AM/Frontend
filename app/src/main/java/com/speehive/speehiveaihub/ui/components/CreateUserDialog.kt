@@ -189,7 +189,7 @@ fun CreateUserDialog(
             ) {
                 Text(
                     text = "Create",
-                    color = PureBlack
+                    color = AppBackground
                 )
             }
         },

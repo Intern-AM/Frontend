@@ -6,15 +6,12 @@ import com.speehive.speehiveaihub.data.AuthManager
 import com.speehive.speehiveaihub.data.SessionManager
 import com.speehive.speehiveaihub.models.Campaign
 import com.speehive.speehiveaihub.network.ApprovalRequest
-import com.speehive.speehiveaihub.network.AuthError
 import com.speehive.speehiveaihub.network.EditCampaignRequest
 import com.speehive.speehiveaihub.network.RetrofitClient
+import com.speehive.speehiveaihub.network.safeApiCall
 import com.speehive.speehiveaihub.network.toCampaign
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import retrofit2.HttpException
-import java.io.File
+import com.speehive.speehiveaihub.network.toResult
+import com.speehive.speehiveaihub.utils.toMultipartBodyPart
 
 class ApiCampaignRepository(
     sessionManager: SessionManager,
@@ -24,123 +21,51 @@ class ApiCampaignRepository(
     private val api =
         RetrofitClient.create(sessionManager, authManager)
 
-    override suspend fun getCampaigns(): Result<List<Campaign>> {
-        return try {
-            val response = api.getCampaigns()
-            Result.success(response.map { it.toCampaign() })
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            Result.failure(AuthError.fromCode(e.code(), errorBody))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun getCampaigns(): Result<List<Campaign>> = safeApiCall {
+        api.getCampaigns().map { it.toCampaign() }
     }
 
     override suspend fun approveCampaign(
         eventId: String,
         comments: String
-    ): Result<Unit> {
-        return try {
-            val response = api.approveCampaign(
-                ApprovalRequest(
-                    eventId = eventId,
-                    comments = comments
-                )
+    ): Result<Unit> = safeApiCall {
+        api.approveCampaign(
+            ApprovalRequest(
+                eventId = eventId,
+                comments = comments
             )
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                Result.failure(AuthError.fromCode(response.code(), errorBody))
-            }
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            Result.failure(AuthError.fromCode(e.code(), errorBody))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        ).toResult().map { }
     }
 
     override suspend fun rejectCampaign(
         eventId: String,
         comments: String
-    ): Result<Unit> {
-        return try {
-            val response = api.rejectCampaign(
-                ApprovalRequest(
-                    eventId = eventId,
-                    comments = comments
-                )
+    ): Result<Unit> = safeApiCall {
+        api.rejectCampaign(
+            ApprovalRequest(
+                eventId = eventId,
+                comments = comments
             )
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                Result.failure(AuthError.fromCode(response.code(), errorBody))
-            }
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            Result.failure(AuthError.fromCode(e.code(), errorBody))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        ).toResult().map { }
     }
 
-    override suspend fun getCampaignById(id: String): Result<Campaign?> {
-        return try {
-            val campaigns = api.getCampaigns().map { it.toCampaign() }
-            Result.success(campaigns.find { it.campaignId.toString() == id })
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            Result.failure(AuthError.fromCode(e.code(), errorBody))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun getCampaignById(id: String): Result<Campaign?> = safeApiCall {
+        api.getCampaigns().map { it.toCampaign() }.find { it.campaignId.toString() == id }
     }
 
     override suspend fun uploadCampaignImage(
         eventId: String,
         imageUri: Uri
     ): Result<String> {
-        val tempFile = File(context.cacheDir, "campaign_upload_${System.currentTimeMillis()}.jpg")
-        return try {
-            val mimeType = context.contentResolver.getType(imageUri) ?: "image/jpeg"
-            val allowedTypes = listOf("image/png", "image/jpeg")
-            if (mimeType !in allowedTypes) {
-                return Result.failure(Exception("Only PNG and JPEG images are allowed"))
-            }
-
-            val inputStream = context.contentResolver.openInputStream(imageUri)
-                ?: return Result.failure(Exception("Cannot open image"))
-
-            inputStream.use { input ->
-                tempFile.outputStream().use { output ->
-                    input.copyTo(output)
+        return imageUri.toMultipartBodyPart(context, "image", "campaign_upload_") { part ->
+            safeApiCall {
+                val response = api.uploadCampaignImage(eventId, part)
+                if (response.imageUrl.isNotBlank()) {
+                    response.imageUrl
+                } else {
+                    throw Exception("Upload succeeded but no image URL returned")
                 }
             }
-
-            val maxSize = 10L * 1024 * 1024
-            if (tempFile.length() > maxSize) {
-                return Result.failure(Exception("File size must be under 10 MB"))
-            }
-
-            val requestBody = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
-            val part = MultipartBody.Part.createFormData("image", tempFile.name, requestBody)
-
-            val response = api.uploadCampaignImage(eventId, part)
-
-            if (response.imageUrl.isNotBlank()) {
-                Result.success(response.imageUrl)
-            } else {
-                Result.failure(Exception("Upload succeeded but no image URL returned"))
-            }
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            Result.failure(AuthError.fromCode(e.code(), errorBody))
-        } catch (e: Exception) {
-            Result.failure(e)
-        } finally {
-            tempFile.delete()
         }
     }
 
@@ -148,26 +73,13 @@ class ApiCampaignRepository(
         eventId: String,
         campaignPost: String,
         hashtags: String
-    ): Result<Unit> {
-        return try {
-            val response = api.editCampaign(
-                eventId,
-                EditCampaignRequest(
-                    campaignPost = campaignPost,
-                    hashtags = hashtags
-                )
+    ): Result<Unit> = safeApiCall {
+        api.editCampaign(
+            eventId,
+            EditCampaignRequest(
+                campaignPost = campaignPost,
+                hashtags = hashtags
             )
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                Result.failure(AuthError.fromCode(response.code(), errorBody))
-            }
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            Result.failure(AuthError.fromCode(e.code(), errorBody))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        ).toResult()
     }
 }

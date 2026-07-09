@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.ui.theme.CardBorder
 import com.speehive.speehiveaihub.ui.theme.PulseRed
-import com.speehive.speehiveaihub.ui.theme.PureBlack
+import com.speehive.speehiveaihub.ui.theme.AppBackground
 import com.speehive.speehiveaihub.ui.theme.TextPrimary
 import com.speehive.speehiveaihub.ui.theme.TextSecondary
 import com.speehive.speehiveaihub.viewmodel.LoginViewModel
@@ -49,7 +49,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PureBlack)
+            .background(AppBackground)
     ) {
 
         Column(
@@ -242,7 +242,7 @@ fun LoginScreen(
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PulseBlue,
-                    contentColor = PureBlack
+                    contentColor = AppBackground
                 )
             ) {
 
@@ -250,7 +250,7 @@ fun LoginScreen(
 
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = PureBlack,
+                        color = AppBackground,
                         strokeWidth = 2.dp
                     )
 
@@ -259,7 +259,7 @@ fun LoginScreen(
                     Text(
                         text = "Sign In",
                         style = MaterialTheme.typography.titleLarge,
-                        color = PureBlack
+                        color = AppBackground
                     )
                 }
             }

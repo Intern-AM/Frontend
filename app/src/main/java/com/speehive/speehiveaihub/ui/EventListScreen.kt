@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +31,7 @@ fun EventListScreen(
     onNavigateCampaigns: () -> Unit,
     onNavigateNotifications: () -> Unit
 ) {
+    var isRefreshing by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -44,7 +47,7 @@ fun EventListScreen(
                 onNotificationsClick = onNavigateNotifications
             )
         },
-        containerColor = PureBlack,
+        containerColor = AppBackground,
         topBar = {
             TopAppBar(
                 title = { 
@@ -53,10 +56,19 @@ fun EventListScreen(
                         Text("Events", style = MaterialTheme.typography.displayLarge)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = PureBlack)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground)
             )
         }
     ) { paddingValues ->
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                viewModel.loadEvents()
+                isRefreshing = false
+            },
+            state = rememberPullToRefreshState()
+        ) {
         Column(
             modifier = Modifier
                 .padding(paddingValues)
@@ -84,7 +96,7 @@ fun EventListScreen(
                 }
             }
 
-            if (viewModel.isLoading) {
+            if (viewModel.isLoading && viewModel.events.isEmpty()) {
 
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -122,11 +134,12 @@ fun EventListScreen(
                             },
                             isProcessing = viewModel.isProcessing
                         )
-                    }
                 }
+            }
             }
         }
     }
+}
 }
 @Composable
 fun FullEventCard(
@@ -244,7 +257,7 @@ fun FullEventCard(
                 ) {
                     Text(
                         text = "Reject Event",
-                        color = PureBlack
+                        color = AppBackground
                     )
 
                 }
