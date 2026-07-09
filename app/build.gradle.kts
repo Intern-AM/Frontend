@@ -59,7 +59,7 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons.extended)
 
-
+    implementation(libs.androidx.workmanager)
 
     testImplementation(libs.junit)
 

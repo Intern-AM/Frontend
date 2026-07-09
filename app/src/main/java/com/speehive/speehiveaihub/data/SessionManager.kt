@@ -85,6 +85,17 @@ class SessionManager(context: Context) {
             .remove("jwt_token")
             .remove("user_name")
             .remove("role")
+            .remove("seen_notification_ids")
+            .apply()
+    }
+
+    fun getSeenNotificationIds(): Set<String> {
+        return sharedPreferences.getStringSet("seen_notification_ids", emptySet()) ?: emptySet()
+    }
+
+    fun saveSeenNotificationIds(ids: Set<String>) {
+        sharedPreferences.edit()
+            .putStringSet("seen_notification_ids", ids)
             .apply()
     }
 
