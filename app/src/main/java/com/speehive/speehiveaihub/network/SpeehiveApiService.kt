@@ -84,4 +84,13 @@ interface SpeehiveApiService {
         @Path("eventId") eventId: String,
         @Part image: MultipartBody.Part
     ): UploadImageResponse
+
+    @GET("api/SocialMediaCredentials")
+    suspend fun getSocialMediaCredentials(): List<SocialMediaCredentialResponse>
+
+    @PUT("api/SocialMediaCredentials/{provider}")
+    suspend fun updateSocialMediaCredential(
+        @Path("provider") provider: String,
+        @Body request: UpdateSocialMediaCredentialRequest
+    ): retrofit2.Response<Unit>
 }

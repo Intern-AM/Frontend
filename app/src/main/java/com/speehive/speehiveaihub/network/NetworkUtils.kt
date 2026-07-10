@@ -19,7 +19,7 @@ inline fun <reified T> Response<T>.toResult(): Result<T> {
         val body = body()
         if (body != null) {
             Result.success(body)
-        } else if (Unit is T) {
+        } else if (T::class == Unit::class) {
             @Suppress("UNCHECKED_CAST")
             Result.success(Unit as T)
         } else {

@@ -86,8 +86,12 @@ fun NavGraph(navController: NavHostController) {
         DashboardViewModel(campaignRepository, eventRepository)
     }
 
+    val credentialRepository = remember {
+        ApiSocialMediaCredentialRepository(sessionManager, authManager)
+    }
+
     val adminViewModel: AdminViewModel = viewModel {
-        AdminViewModel(adminRepository, auditRepository)
+        AdminViewModel(adminRepository, auditRepository, credentialRepository)
     }
 
 
@@ -242,6 +246,19 @@ fun NavGraph(navController: NavHostController) {
                     navController.navigate(
                         Screen.AuditLogs.route
                     )
+                },
+                onNavigateToSettings = {
+                    navController.navigate(
+                        Screen.AdminSettings.route
+                    )
+                }
+            )
+        }
+        composable(Screen.AdminSettings.route) {
+            AdminSettingsScreen(
+                viewModel = adminViewModel,
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }

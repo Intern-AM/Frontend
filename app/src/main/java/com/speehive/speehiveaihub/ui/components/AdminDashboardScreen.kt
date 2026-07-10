@@ -5,7 +5,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,11 +35,19 @@ import com.speehive.speehiveaihub.utils.formatAuditDate
 fun AdminDashboardScreen(
     viewModel: AdminViewModel,
     onLogout: () -> Unit,
-    onViewAuditLogs: () -> Unit
+    onViewAuditLogs: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ){
 
     var showCreateDialog by remember {
         mutableStateOf(false)
+    }
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewModel.isLoading) {
+        if (isRefreshing && !viewModel.isLoading) {
+            isRefreshing = false
+        }
     }
 
     if (showCreateDialog) {
@@ -82,6 +92,13 @@ fun AdminDashboardScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
                 actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = TextPrimary
+                        )
+                    }
                     TextButton(onClick = onLogout) {
                         Text(
                             stringResource(R.string.logout_btn),
@@ -109,21 +126,31 @@ fun AdminDashboardScreen(
 
     ) { paddingValues ->
 
-        if (viewModel.isLoading) {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                viewModel.refresh()
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
 
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            if (viewModel.isLoading && !isRefreshing) {
 
-        } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+
+            } else {
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
                     .padding(20.dp),
 
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -282,6 +309,7 @@ fun AdminDashboardScreen(
                     )
                 }
             }
+        }
         }
     }
 }
