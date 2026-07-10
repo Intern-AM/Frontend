@@ -6,7 +6,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ fun AuditLogScreen(
     viewModel: AdminViewModel,
     onBack: () -> Unit
 ) {
+    var isRefreshing by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = AppBackground,
@@ -52,21 +54,46 @@ fun AuditLogScreen(
         }
     ) { paddingValues ->
 
-        LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                viewModel.refreshAuditLogs()
+            },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(20.dp),
-
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (viewModel.isLoading && !isRefreshing) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = PulseGreen)
+                }
+            } else {
+                LaunchedEffect(viewModel.isLoading) {
+                    if (isRefreshing && !viewModel.isLoading) {
+                        isRefreshing = false
+                    }
+                }
 
-            items(
-                items = viewModel.auditLogs,
-                key = { it.id }
-            ) { log ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
 
-                AuditLogCard(log)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+
+                    items(
+                        items = viewModel.auditLogs,
+                        key = { it.id }
+                    ) { log ->
+
+                        AuditLogCard(log)
+                    }
+                }
             }
         }
     }

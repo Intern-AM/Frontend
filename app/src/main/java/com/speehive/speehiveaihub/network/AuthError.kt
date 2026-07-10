@@ -6,7 +6,7 @@ sealed class AuthError(val errorMessage: String, val statusCode: Int) : Exceptio
     data object NoToken : AuthError("No authentication token found.", 401)
     data object InvalidCredentials : AuthError("Invalid email or password.", 401)
     data class Unknown(val code: Int, val detail: String? = null) :
-        AuthError(detail ?: "Request failed ($code)", code)
+        AuthError(if (detail.isNullOrBlank()) "Request failed ($code)" else detail, code)
 
     companion object {
         fun fromCode(code: Int, detail: String? = null): AuthError = when (code) {

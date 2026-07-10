@@ -5,7 +5,7 @@ import com.speehive.speehiveaihub.ui.theme.*
 
 fun statusColor(status: String): Color = when (status.lowercase()) {
     "approved", "active", "started" -> PulseGreen
-    "pending", "pending approval", "draft" -> PulseAmber
+    "pending", "pending approval", "draft", "not configured" -> PulseAmber
     "rejected", "cancelled", "inactive" -> PulseRed
     "generated", "posted" -> PulseBlue
     "scheduled" -> PulsePurple

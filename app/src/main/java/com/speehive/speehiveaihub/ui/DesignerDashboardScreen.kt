@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,9 +42,16 @@ fun DesignerDashboardScreen(
 ) {
     var showCampaigns by remember { mutableStateOf(false) }
     var showEvents by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
 
     val filteredCampaigns = viewModel.filteredCampaigns
     val filteredEvents = viewModel.filteredEvents
+
+    LaunchedEffect(viewModel.isLoading) {
+        if (isRefreshing && !viewModel.isLoading) {
+            isRefreshing = false
+        }
+    }
 
     Scaffold(
         containerColor = AppBackground,
@@ -67,18 +75,27 @@ fun DesignerDashboardScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                viewModel.loadData()
+            },
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 20.dp,
-                end = 20.dp,
-                top = 20.dp,
-                bottom = 40.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = 20.dp,
+                    bottom = 40.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
             if (viewModel.isLoading) {
                 item {
                     Box(
@@ -224,6 +241,7 @@ fun DesignerDashboardScreen(
                     }
                 )
             }
+        }
         }
     }
 }

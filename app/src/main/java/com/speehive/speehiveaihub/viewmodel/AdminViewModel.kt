@@ -6,14 +6,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.speehive.speehiveaihub.models.AdminUser
-import com.speehive.speehiveaihub.repository.AdminRepository
-import kotlinx.coroutines.launch
 import com.speehive.speehiveaihub.models.AuditLog
+import com.speehive.speehiveaihub.models.SocialMediaCredential
+import com.speehive.speehiveaihub.repository.AdminRepository
 import com.speehive.speehiveaihub.repository.AuditRepository
+import com.speehive.speehiveaihub.repository.SocialMediaCredentialRepository
+import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
+import java.time.Duration
 
 class AdminViewModel(
     private val repository: AdminRepository,
-    private val auditRepository: AuditRepository
+    private val auditRepository: AuditRepository,
+    private val credentialRepository: SocialMediaCredentialRepository
 ) : ViewModel() {
 
     var users by mutableStateOf<List<AdminUser>>(emptyList())
@@ -23,6 +28,9 @@ class AdminViewModel(
         private set
 
     var auditLogs by mutableStateOf<List<AuditLog>>(emptyList())
+        private set
+
+    var credentials by mutableStateOf<List<SocialMediaCredential>>(emptyList())
         private set
 
     var successMessage by mutableStateOf<String?>(null)
@@ -37,6 +45,46 @@ class AdminViewModel(
     init {
         loadUsers()
         loadAuditLogs()
+        loadCredentials()
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+
+            repository.getUsers().fold(
+                onSuccess = { users = it },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load users" }
+            )
+
+            auditRepository.getAuditLogs().fold(
+                onSuccess = { auditLogs = it },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load audit logs" }
+            )
+
+            credentialRepository.getCredentials().fold(
+                onSuccess = { responseList ->
+                    val finalList = responseList.toMutableList()
+                    val providers = responseList.map { it.provider.lowercase() }.toSet()
+                    if (!providers.contains("instagram")) {
+                        finalList.add(SocialMediaCredential(provider = "Instagram", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""))
+                    }
+                    if (!providers.contains("linkedin")) {
+                        finalList.add(SocialMediaCredential(provider = "LinkedIn", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""))
+                    }
+                    credentials = finalList
+                },
+                onFailure = {
+                    credentials = listOf(
+                        SocialMediaCredential(provider = "Instagram", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""),
+                        SocialMediaCredential(provider = "LinkedIn", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = "")
+                    )
+                }
+            )
+
+            isLoading = false
+        }
     }
 
     fun loadUsers() {
@@ -48,6 +96,114 @@ class AdminViewModel(
                 onFailure = { errorMessage = it.message ?: "Failed to load users" }
             )
             isLoading = false
+        }
+    }
+
+    fun loadCredentials() {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+            credentialRepository.getCredentials().fold(
+                onSuccess = { responseList ->
+                    val finalList = responseList.toMutableList()
+                    val providers = responseList.map { it.provider.lowercase() }.toSet()
+                    
+                    if (!providers.contains("instagram")) {
+                        finalList.add(
+                            SocialMediaCredential(
+                                provider = "Instagram",
+                                isActive = true,
+                                expiresAt = null,
+                                updatedAt = null,
+                                updatedBy = null,
+                                maskedToken = ""
+                            )
+                        )
+                    }
+                    
+                    if (!providers.contains("linkedin")) {
+                        finalList.add(
+                            SocialMediaCredential(
+                                provider = "LinkedIn",
+                                isActive = true,
+                                expiresAt = null,
+                                updatedAt = null,
+                                updatedBy = null,
+                                maskedToken = ""
+                            )
+                        )
+                    }
+                    
+                    credentials = finalList
+                },
+                onFailure = { err ->
+                    errorMessage = err.message ?: "Failed to load credentials"
+                    credentials = listOf(
+                        SocialMediaCredential(
+                            provider = "Instagram",
+                            isActive = true,
+                            expiresAt = null,
+                            updatedAt = null,
+                            updatedBy = null,
+                            maskedToken = ""
+                        ),
+                        SocialMediaCredential(
+                            provider = "LinkedIn",
+                            isActive = true,
+                            expiresAt = null,
+                            updatedAt = null,
+                            updatedBy = null,
+                            maskedToken = ""
+                        )
+                    )
+                }
+            )
+            isLoading = false
+        }
+    }
+
+    fun updateCredential(
+        provider: String,
+        accessToken: String,
+        expiresAt: String?,
+        isActive: Boolean
+    ) {
+        viewModelScope.launch {
+            isProcessing = true
+            errorMessage = null
+            credentialRepository.updateCredential(
+                provider = provider,
+                accessToken = accessToken,
+                expiresAt = expiresAt,
+                isActive = isActive
+            ).fold(
+                onSuccess = {
+                    successMessage = "$provider API credentials updated successfully"
+                    loadCredentials()
+                },
+                onFailure = {
+                    successMessage = null
+                    errorMessage = it.message ?: "Failed to update $provider credentials"
+                }
+            )
+            isProcessing = false
+        }
+    }
+
+    fun getExpiringCredentials(): List<SocialMediaCredential> {
+        return credentials.filter { cred ->
+            if (cred.isActive && !cred.expiresAt.isNullOrBlank()) {
+                try {
+                    val expiry = OffsetDateTime.parse(cred.expiresAt)
+                    val now = OffsetDateTime.now()
+                    val daysRemaining = Duration.between(now, expiry).toDays()
+                    daysRemaining in 0..7
+                } catch (e: Exception) {
+                    false
+                }
+            } else {
+                false
+            }
         }
     }
 
@@ -97,6 +253,17 @@ class AdminViewModel(
                 onSuccess = { auditLogs = it },
                 onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load audit logs" }
             )
+        }
+    }
+
+    fun refreshAuditLogs() {
+        viewModelScope.launch {
+            isLoading = true
+            auditRepository.getAuditLogs().fold(
+                onSuccess = { auditLogs = it },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load audit logs" }
+            )
+            isLoading = false
         }
     }
 
