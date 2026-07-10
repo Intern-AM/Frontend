@@ -262,8 +262,13 @@ private fun CredentialSettingsCard(
 
             if (isConfigured) {
                 Spacer(modifier = Modifier.height(8.dp))
+                val shortToken = if (credential.maskedToken.length > 8) {
+                    credential.maskedToken.take(4) + "****" + credential.maskedToken.takeLast(4)
+                } else {
+                    "****"
+                }
                 Text(
-                    text = "Token: ${credential.maskedToken}",
+                    text = "Token: $shortToken",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextSecondary
                 )
