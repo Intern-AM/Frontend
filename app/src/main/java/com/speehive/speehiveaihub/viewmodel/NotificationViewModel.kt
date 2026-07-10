@@ -108,4 +108,70 @@ class NotificationViewModel(
             isLoading = false
         }
     }
+
+    fun loadNotificationsSilently() {
+        viewModelScope.launch {
+            val campaignNotifications = mutableListOf<Notification>()
+            val eventNotifications = mutableListOf<Notification>()
+
+            campaignRepository.getCampaigns().fold(
+                onSuccess = { campaigns ->
+                    campaigns.mapNotNull { campaign ->
+                        when (campaign.status.lowercase()) {
+                            "generated" -> Notification(
+                                id = campaign.campaignId.toString(),
+                                title = "Review Required",
+                                message = "Campaign awaiting approval",
+                                timestamp = campaign.createdAt,
+                                type = NotificationType.REVIEW_REQUIRED
+                            )
+                            "approved" -> Notification(
+                                id = campaign.campaignId.toString(),
+                                title = "Campaign Approved",
+                                message = "Campaign approved successfully",
+                                timestamp = sessionManager.getActionTimestamp(campaign.eventId) ?: campaign.createdAt,
+                                type = NotificationType.APPROVED
+                            )
+                            "rejected" -> Notification(
+                                id = campaign.campaignId.toString(),
+                                title = "Campaign Rejected",
+                                message = "Campaign rejected by reviewer",
+                                timestamp = sessionManager.getActionTimestamp(campaign.eventId) ?: campaign.createdAt,
+                                type = NotificationType.REJECTED
+                            )
+                            "posted" -> Notification(
+                                id = campaign.campaignId.toString(),
+                                title = "Campaign Published",
+                                message = "Posted to LinkedIn",
+                                timestamp = campaign.createdAt,
+                                type = NotificationType.PUBLISHED
+                            )
+                            else -> null
+                        }
+                    }?.let { campaignNotifications.addAll(it) }
+                },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load campaigns" }
+            )
+
+            eventRepository.getEvents().fold(
+                onSuccess = { events ->
+                    events.filter {
+                        it.status.equals("Cancelled", true)
+                    }.map {
+                        Notification(
+                            id = it.id,
+                            title = "Event Cancelled",
+                            message = it.title,
+                            timestamp = it.startTime,
+                            type = NotificationType.EVENT_CANCELLED
+                        )
+                    }.let { eventNotifications.addAll(it) }
+                },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load events" }
+            )
+
+            notifications = (campaignNotifications + eventNotifications)
+                .sortedByDescending { it.timestamp }
+        }
+    }
 }

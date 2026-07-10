@@ -66,6 +66,26 @@ class DashboardViewModel(
         loadData()
     }
 
+    fun refreshSilently() {
+        viewModelScope.launch {
+            campaignRepository.getCampaigns().fold(
+                onSuccess = { campaigns = it },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load campaigns" }
+            )
+            eventRepository.getEvents().fold(
+                onSuccess = {
+                    events = it
+                        .distinctBy { it.id }
+                        .filter {
+                            !it.status.equals("Cancelled", ignoreCase = true)
+                        }
+                        .sortedBy { it.startTime }
+                },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load events" }
+            )
+        }
+    }
+
     private fun loadData() {
         viewModelScope.launch {
 

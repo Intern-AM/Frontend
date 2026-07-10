@@ -65,6 +65,19 @@ class DesignerViewModel(
         }
     }
 
+    fun loadDataSilently() {
+        viewModelScope.launch {
+            eventRepository.getEvents().fold(
+                onSuccess = { events = it },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load events" }
+            )
+            campaignRepository.getCampaigns().fold(
+                onSuccess = { campaigns = it },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load campaigns" }
+            )
+        }
+    }
+
     fun uploadEventImage(eventId: String, uri: Uri) {
         viewModelScope.launch {
             uploadingId = eventId
