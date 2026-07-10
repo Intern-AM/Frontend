@@ -7,6 +7,8 @@ import com.speehive.speehiveaihub.data.AuthManager
 import com.speehive.speehiveaihub.data.SessionManager
 import com.speehive.speehiveaihub.network.RetrofitClient
 import com.speehive.speehiveaihub.network.SpeehiveApiService
+import java.time.OffsetDateTime
+import java.time.Duration
 
 class NotificationWorker(
     context: Context,
@@ -61,6 +63,49 @@ class NotificationWorker(
             }
 
             sessionManager.saveSeenNotificationIds(currentIds)
+
+            // Check for expiring social media credentials if user is Admin
+            if (sessionManager.getRole().equals("admin", ignoreCase = true)) {
+                try {
+                    val credentials = api.getSocialMediaCredentials()
+                    for (cred in credentials) {
+                        if (cred.isActive && !cred.expiresAt.isNullOrBlank()) {
+                            val expiry = OffsetDateTime.parse(cred.expiresAt)
+                            val now = OffsetDateTime.now()
+                            val daysRemaining = Duration.between(now, expiry).toDays()
+                            if (daysRemaining in 0..7) {
+                                // Check if we already notified today to avoid spamming
+                                val lastNotified = sessionManager.getActionTimestamp("expiry_${cred.provider}")
+                                var shouldNotifyToday = true
+                                if (lastNotified != null) {
+                                    try {
+                                        val lastDate = OffsetDateTime.parse(lastNotified).toLocalDate()
+                                        val todayDate = OffsetDateTime.now().toLocalDate()
+                                        if (lastDate == todayDate) {
+                                            shouldNotifyToday = false
+                                        }
+                                    } catch (e: Exception) {
+                                        // Ignore parse error and allow notifying
+                                    }
+                                }
+
+                                if (shouldNotifyToday) {
+                                    NotificationHelper.showNotification(
+                                        context = applicationContext,
+                                        id = cred.provider.hashCode(),
+                                        title = "${cred.provider} Token Expiring",
+                                        message = "Token expires in $daysRemaining days. Tap to update."
+                                    )
+                                    sessionManager.saveActionTimestamp("expiry_${cred.provider}")
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Suppress API/mapping errors here so they don't break the main campaign polling
+                }
+            }
+
             Result.success()
         } catch (e: Exception) {
             Result.retry()
