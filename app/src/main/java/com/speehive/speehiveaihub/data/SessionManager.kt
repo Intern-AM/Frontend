@@ -86,7 +86,6 @@ class SessionManager(context: Context) {
             remove("jwt_token")
             remove("user_name")
             remove("role")
-            remove("seen_notification_ids")
         }
     }
 
