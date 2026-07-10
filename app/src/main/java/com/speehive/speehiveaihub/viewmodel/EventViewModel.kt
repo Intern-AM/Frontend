@@ -39,6 +39,19 @@ class EventViewModel(private val repository: EventRepository) : ViewModel() {
         }
     }
 
+    fun loadEventsSilently() {
+        viewModelScope.launch {
+            repository.getEvents().fold(
+                onSuccess = {
+                    events = it
+                        .distinctBy { it.id }
+                        .sortedBy { it.startTime }
+                },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load events" }
+            )
+        }
+    }
+
     fun cancelEvent(id: String) {
         viewModelScope.launch {
             isProcessing = true

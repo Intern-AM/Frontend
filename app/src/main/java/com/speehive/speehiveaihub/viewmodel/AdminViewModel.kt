@@ -87,6 +87,38 @@ class AdminViewModel(
         }
     }
 
+    fun refreshSilently() {
+        viewModelScope.launch {
+            repository.getUsers().fold(
+                onSuccess = { users = it },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load users" }
+            )
+            auditRepository.getAuditLogs().fold(
+                onSuccess = { auditLogs = it },
+                onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load audit logs" }
+            )
+            credentialRepository.getCredentials().fold(
+                onSuccess = { responseList ->
+                    val finalList = responseList.toMutableList()
+                    val providers = responseList.map { it.provider.lowercase() }.toSet()
+                    if (!providers.contains("instagram")) {
+                        finalList.add(SocialMediaCredential(provider = "Instagram", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""))
+                    }
+                    if (!providers.contains("linkedin")) {
+                        finalList.add(SocialMediaCredential(provider = "LinkedIn", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""))
+                    }
+                    credentials = finalList
+                },
+                onFailure = {
+                    credentials = listOf(
+                        SocialMediaCredential(provider = "Instagram", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""),
+                        SocialMediaCredential(provider = "LinkedIn", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = "")
+                    )
+                }
+            )
+        }
+    }
+
     fun loadUsers() {
         viewModelScope.launch {
             isLoading = true
@@ -159,6 +191,30 @@ class AdminViewModel(
                 }
             )
             isLoading = false
+        }
+    }
+
+    fun loadCredentialsSilently() {
+        viewModelScope.launch {
+            credentialRepository.getCredentials().fold(
+                onSuccess = { responseList ->
+                    val finalList = responseList.toMutableList()
+                    val providers = responseList.map { it.provider.lowercase() }.toSet()
+                    if (!providers.contains("instagram")) {
+                        finalList.add(SocialMediaCredential(provider = "Instagram", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""))
+                    }
+                    if (!providers.contains("linkedin")) {
+                        finalList.add(SocialMediaCredential(provider = "LinkedIn", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""))
+                    }
+                    credentials = finalList
+                },
+                onFailure = {
+                    credentials = listOf(
+                        SocialMediaCredential(provider = "Instagram", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = ""),
+                        SocialMediaCredential(provider = "LinkedIn", isActive = true, expiresAt = null, updatedAt = null, updatedBy = null, maskedToken = "")
+                    )
+                }
+            )
         }
     }
 
@@ -266,6 +322,8 @@ class AdminViewModel(
             isLoading = false
         }
     }
+
+    fun refreshAuditLogsSilently() = loadAuditLogs()
 
     fun deactivateUser(id: String) {
         viewModelScope.launch {
