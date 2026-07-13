@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
 
     private const val BASE_URL =
-        "http://172.16.50.91:5019/"
+        "http://172.16.70.37:5019/"
 
     @Volatile
     private var cachedClient: OkHttpClient? = null
