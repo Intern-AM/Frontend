@@ -75,7 +75,10 @@ fun ZoomableImageDialog(
             colors = CardDefaults.cardColors(containerColor = Color.Black),
             border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val width = constraints.maxWidth.toFloat()
+                val height = constraints.maxHeight.toFloat()
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -105,9 +108,13 @@ fun ZoomableImageDialog(
                                 coroutineScope.launch {
                                     val newScale = (scale.value * zoom).coerceIn(1f, 5f)
                                     scale.snapTo(newScale)
+
+                                    val maxOffsetX = (width * newScale - width) / 2
+                                    val maxOffsetY = (height * newScale - height) / 2
+
                                     if (newScale > 1f) {
-                                        offsetX.snapTo(offsetX.value + pan.x)
-                                        offsetY.snapTo(offsetY.value + pan.y)
+                                        offsetX.snapTo((offsetX.value + pan.x).coerceIn(-maxOffsetX, maxOffsetX))
+                                        offsetY.snapTo((offsetY.value + pan.y).coerceIn(-maxOffsetY, maxOffsetY))
                                     } else {
                                         offsetX.snapTo(0f)
                                         offsetY.snapTo(0f)
