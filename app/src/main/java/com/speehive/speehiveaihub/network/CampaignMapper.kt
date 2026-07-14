@@ -10,7 +10,7 @@ fun CampaignResponse.toCampaign(): Campaign {
         hashtags = hashtags,
         cta = cta,
         imagePrompt = imagePrompt,
-        imageUrl = imageUrl,
+        imageUrl = RetrofitClient.getFormattedImageUrl(imageUrl),
         status = status,
         createdAt = createdAt,
         linkedInPostId = linkedInPostId,

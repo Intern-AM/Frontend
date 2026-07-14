@@ -36,7 +36,7 @@ class ApiEventRepository(
             safeApiCall {
                 val response = api.uploadDesignerImage(eventId, part)
                 if (response.imageUrl.isNotBlank()) {
-                    response.imageUrl
+                    RetrofitClient.getFormattedImageUrl(response.imageUrl) ?: ""
                 } else {
                     throw Exception("Upload succeeded but no image URL returned")
                 }

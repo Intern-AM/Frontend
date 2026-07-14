@@ -57,7 +57,7 @@ class ApiCampaignRepository(
             safeApiCall {
                 val response = api.uploadCampaignImage(eventId, part)
                 if (response.imageUrl.isNotBlank()) {
-                    response.imageUrl
+                    RetrofitClient.getFormattedImageUrl(response.imageUrl) ?: ""
                 } else {
                     throw Exception("Upload succeeded but no image URL returned")
                 }
