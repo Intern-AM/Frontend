@@ -1,6 +1,7 @@
 package com.speehive.speehiveaihub.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,16 +11,18 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.speehive.speehiveaihub.ui.components.FigmaStatusBadge
+import com.speehive.speehiveaihub.ui.components.ZoomableImageDialog
 import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.viewmodel.CampaignDetailViewModel
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +37,7 @@ fun CampaignDetailScreen(
 
     val campaign = viewModel.campaign
     val isLoading = viewModel.isLoading
+    var showFullScreenImage by remember { mutableStateOf(false) }
     val isProcessing = viewModel.isProcessing
     val errorMessage = viewModel.errorMessage
 
@@ -310,7 +314,10 @@ fun CampaignDetailScreen(
                                         contentDescription = "Campaign Image",
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(250.dp)
+                                            .aspectRatio(1f)
+                                            .clip(RoundedCornerShape(20.dp))
+                                            .clickable { showFullScreenImage = true },
+                                        contentScale = ContentScale.FillWidth
                                     )
                                 }
                             }
@@ -354,6 +361,11 @@ fun CampaignDetailScreen(
         }
     }
 
+    if (showFullScreenImage) {
+        ZoomableImageDialog(imageUrl = campaign?.imageUrl) {
+            showFullScreenImage = false
+        }
+    }
 }
 
 @Composable

@@ -14,8 +14,10 @@ import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +34,7 @@ import coil.compose.AsyncImage
 import com.speehive.speehiveaihub.models.Campaign
 import com.speehive.speehiveaihub.models.Event
 import com.speehive.speehiveaihub.ui.components.statusColor
+import com.speehive.speehiveaihub.ui.components.ZoomableImageDialog
 import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import com.speehive.speehiveaihub.utils.formatEventDate
@@ -350,6 +353,7 @@ fun DesignerCampaignCard(
     var isEditing by remember { mutableStateOf(false) }
     var editCampaignPost by remember { mutableStateOf(campaign.campaignPost) }
     var editHashtags by remember { mutableStateOf(campaign.hashtags) }
+    var showFullScreenImage by remember { mutableStateOf(false) }
 
     val isLocked = campaign.status.lowercase().let {
         it == "approved" || it == "rejected" || it == "posted"
@@ -491,9 +495,10 @@ fun DesignerCampaignCard(
                         contentDescription = "Campaign image",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { showFullScreenImage = true },
+                        contentScale = ContentScale.FillWidth
                     )
                 }
 
@@ -506,8 +511,14 @@ fun DesignerCampaignCard(
                     if (!isLocked) {
                         OutlinedButton(
                             onClick = { isEditing = true },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, PulseBlue),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = PulseBlue
+                            )
                         ) {
                             Text("Edit", style = MaterialTheme.typography.titleSmall)
                         }
@@ -516,7 +527,9 @@ fun DesignerCampaignCard(
                     Button(
                         onClick = { launcher.launch(arrayOf("image/png", "image/jpeg")) },
                         enabled = !isUploading && !isLocked,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isLocked) TextMuted else PulseBlue,
                             contentColor = AppBackground
@@ -547,6 +560,12 @@ fun DesignerCampaignCard(
             }
         }
     }
+
+    if (showFullScreenImage) {
+        ZoomableImageDialog(imageUrl = campaign.imageUrl) {
+            showFullScreenImage = false
+        }
+    }
 }
 
 @Composable
@@ -560,6 +579,7 @@ fun DesignerEventCard(
     ) { uri -> uri?.let { onUpload(it) } }
 
     val eventStatusColor = statusColor(event.status)
+    var showFullScreenImage by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -626,9 +646,10 @@ fun DesignerEventCard(
                     contentDescription = "Designer poster",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { showFullScreenImage = true },
+                    contentScale = ContentScale.FillWidth
                 )
             }
 
@@ -642,7 +663,9 @@ fun DesignerEventCard(
                     contentColor = AppBackground
                 ),
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
             ) {
                 if (isUploading) {
                     CircularProgressIndicator(
@@ -664,6 +687,12 @@ fun DesignerEventCard(
                     style = MaterialTheme.typography.titleSmall
                 )
             }
+        }
+    }
+
+    if (showFullScreenImage) {
+        ZoomableImageDialog(imageUrl = event.designerImageUrl) {
+            showFullScreenImage = false
         }
     }
 }

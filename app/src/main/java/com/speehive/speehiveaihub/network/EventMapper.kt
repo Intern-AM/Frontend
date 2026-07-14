@@ -14,6 +14,6 @@ fun EventResponse.toEvent(): Event {
         eventType = eventType,
         status = status,
         approvalDeadline = approvalDeadline,
-        designerImageUrl = designerImageUrl
+        designerImageUrl = RetrofitClient.getFormattedImageUrl(designerImageUrl)
     )
 }
