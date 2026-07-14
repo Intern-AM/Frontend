@@ -40,12 +40,12 @@ fun NavGraph(navController: NavHostController) {
     val activity = context as? ComponentActivity
 
     LaunchedEffect(authState) {
-        when (val state = authState) {
+        when (authState) {
             is AuthState.Unauthenticated -> {
-                if (state.error != null && sessionManager.isLoggedIn()) {
+                if (sessionManager.isLoggedIn()) {
                     sessionManager.clearSession()
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                        popUpTo(navController.graph.id) { inclusive = true }
                     }
                 }
             }
@@ -195,130 +195,156 @@ fun NavGraph(navController: NavHostController) {
         }
 
         composable(Screen.Dashboard.route) {
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { !it.equals("Admin", ignoreCase = true) && !it.equals("Designer", ignoreCase = true) }
+            ) {
+                DashboardScreen(
+                    viewModel = dashboardViewModel,
+                    userName = currentUserName,
 
-            DashboardScreen(
-                viewModel = dashboardViewModel,
-                userName = currentUserName,
+                    onLogout = {
+                        authManager.logout()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    },
 
-                onLogout = {
-                    authManager.logout()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                    onNavigateToEvents = {
+                        navController.navigate(Screen.EventList.route) {
+                            launchSingleTop = true
+                        }
+                    },
+
+                    onNavigateToCampaigns = {
+                        navController.navigate(Screen.CampaignList.route) {
+                            launchSingleTop = true
+                        }
+                    },
+
+                    onNavigateToNotifications = {
+                        navController.navigate(Screen.Notifications.route) {
+                            launchSingleTop = true
+                        }
+                    },
+
+                    onNavigateToCampaignDetail = { id ->
+                        navController.navigate(
+                            Screen.CampaignDetail.createRoute(id)
+                        )
                     }
-                },
-
-                onNavigateToEvents = {
-                    navController.navigate(Screen.EventList.route) {
-                        launchSingleTop = true
-                    }
-                },
-
-                onNavigateToCampaigns = {
-                    navController.navigate(Screen.CampaignList.route) {
-                        launchSingleTop = true
-                    }
-                },
-
-                onNavigateToNotifications = {
-                    navController.navigate(Screen.Notifications.route) {
-                        launchSingleTop = true
-                    }
-                },
-
-                onNavigateToCampaignDetail = { id ->
-                    navController.navigate(
-                        Screen.CampaignDetail.createRoute(id)
-                    )
-                }
-            )
+                )
+            }
         }
         composable(Screen.AdminDashboard.route) {
-
-            AdminDashboardScreen(
-                viewModel = adminViewModel,
-                onLogout = {
-                    authManager.logout()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { it.equals("Admin", ignoreCase = true) }
+            ) {
+                AdminDashboardScreen(
+                    viewModel = adminViewModel,
+                    onLogout = {
+                        authManager.logout()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    },
+                    onViewAuditLogs = {
+                        navController.navigate(
+                            Screen.AuditLogs.route
+                        )
+                    },
+                    onNavigateToSettings = {
+                        navController.navigate(
+                            Screen.AdminSettings.route
+                        )
                     }
-                },
-                onViewAuditLogs = {
-                    navController.navigate(
-                        Screen.AuditLogs.route
-                    )
-                },
-                onNavigateToSettings = {
-                    navController.navigate(
-                        Screen.AdminSettings.route
-                    )
-                }
-            )
+                )
+            }
         }
         composable(Screen.AdminSettings.route) {
-            AdminSettingsScreen(
-                viewModel = adminViewModel,
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { it.equals("Admin", ignoreCase = true) }
+            ) {
+                AdminSettingsScreen(
+                    viewModel = adminViewModel,
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
         composable(Screen.EventList.route) {
-
-            val viewModel: EventViewModel = viewModel {
-                EventViewModel(eventRepository)
-            }
-
-            EventListScreen(
-                viewModel = viewModel,
-                onNavigateHome = {
-                    navController.navigate(Screen.Dashboard.route) {
-                        launchSingleTop = true
-                        popUpTo(Screen.Dashboard.route)
-                    }
-                },
-
-                onNavigateCampaigns = {
-                    navController.navigate(Screen.CampaignList.route) {
-                        launchSingleTop = true
-                    }
-                },
-
-                onNavigateNotifications = {
-                    navController.navigate(Screen.Notifications.route) {
-                        launchSingleTop = true
-                    }
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { !it.equals("Admin", ignoreCase = true) && !it.equals("Designer", ignoreCase = true) }
+            ) {
+                val viewModel: EventViewModel = viewModel {
+                    EventViewModel(eventRepository)
                 }
-            )
+
+                EventListScreen(
+                    viewModel = viewModel,
+                    onNavigateHome = {
+                        navController.navigate(Screen.Dashboard.route) {
+                            launchSingleTop = true
+                            popUpTo(Screen.Dashboard.route)
+                        }
+                    },
+
+                    onNavigateCampaigns = {
+                        navController.navigate(Screen.CampaignList.route) {
+                            launchSingleTop = true
+                        }
+                    },
+
+                    onNavigateNotifications = {
+                        navController.navigate(Screen.Notifications.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
         }
         composable(Screen.CampaignList.route) {
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { !it.equals("Admin", ignoreCase = true) && !it.equals("Designer", ignoreCase = true) }
+            ) {
+                CampaignListScreen(
+                    viewModel = dashboardViewModel,
+                    onNavigateHome = {
+                        navController.navigate(Screen.Dashboard.route) {
+                            launchSingleTop = true
+                            popUpTo(Screen.Dashboard.route)
+                        }
+                    },
 
-            CampaignListScreen(
-                viewModel = dashboardViewModel,
-                onNavigateHome = {
-                    navController.navigate(Screen.Dashboard.route) {
-                        launchSingleTop = true
-                        popUpTo(Screen.Dashboard.route)
+                    onNavigateEvents = {
+                        navController.navigate(Screen.EventList.route) {
+                            launchSingleTop = true
+                        }
+                    },
+
+                    onNavigateNotifications = {
+                        navController.navigate(Screen.Notifications.route) {
+                            launchSingleTop = true
+                        }
+                    },
+
+                    onCampaignClick = { id ->
+                        navController.navigate(
+                            Screen.CampaignDetail.createRoute(id)
+                        )
                     }
-                },
-
-                onNavigateEvents = {
-                    navController.navigate(Screen.EventList.route) {
-                        launchSingleTop = true
-                    }
-                },
-
-                onNavigateNotifications = {
-                    navController.navigate(Screen.Notifications.route) {
-                        launchSingleTop = true
-                    }
-                },
-
-                onCampaignClick = { id ->
-                    navController.navigate(
-                        Screen.CampaignDetail.createRoute(id)
-                    )
-                }
-            )
+                )
+            }
         }
         composable(
             route = Screen.CampaignDetail.route,
@@ -328,88 +354,108 @@ fun NavGraph(navController: NavHostController) {
                 }
             )
         ) { backStackEntry ->
-
-            val campaignId =
-                backStackEntry.arguments?.getString("campaignId") ?: ""
-
-            val viewModel: CampaignDetailViewModel = viewModel(
-                key = campaignId
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { !it.equals("Admin", ignoreCase = true) && !it.equals("Designer", ignoreCase = true) }
             ) {
-                CampaignDetailViewModel(
-                    campaignRepository,
-                    eventRepository,
-                    sessionManager
+                val campaignId =
+                    backStackEntry.arguments?.getString("campaignId") ?: ""
+
+                val viewModel: CampaignDetailViewModel = viewModel(
+                    key = campaignId
+                ) {
+                    CampaignDetailViewModel(
+                        campaignRepository,
+                        eventRepository,
+                        sessionManager
+                    )
+                }
+
+                CampaignDetailScreen(
+                    campaignId = campaignId,
+                    viewModel = viewModel,
+                    onBack = {
+                        dashboardViewModel.refresh()
+                        navController.popBackStack()
+                    }
                 )
             }
-
-            CampaignDetailScreen(
-                campaignId = campaignId,
-                viewModel = viewModel,
-                onBack = {
-                    dashboardViewModel.refresh()
-                    navController.popBackStack()
-                }
-            )
         }
         composable(Screen.AuditLogs.route) {
-
-            AuditLogScreen(
-                viewModel = adminViewModel,
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-        composable(Screen.Notifications.route) {
-
-            val viewModel: NotificationViewModel = viewModel {
-                NotificationViewModel(
-                    campaignRepository,
-                    eventRepository,
-                    sessionManager
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { it.equals("Admin", ignoreCase = true) }
+            ) {
+                AuditLogScreen(
+                    viewModel = adminViewModel,
+                    onBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
-
-            NotificationScreen(
-                viewModel = viewModel,
-                onNavigateHome = {
-                    navController.navigate(Screen.Dashboard.route) {
-                        launchSingleTop = true
-                        popUpTo(Screen.Dashboard.route)
-                    }
-                },
-
-                onNavigateEvents = {
-                    navController.navigate(Screen.EventList.route) {
-                        launchSingleTop = true
-                        popUpTo(Screen.EventList.route)
-                    }
-                },
-
-                onNavigateCampaigns = {
-                    navController.navigate(Screen.CampaignList.route) {
-                        launchSingleTop = true
-                        popUpTo(Screen.CampaignList.route)
-                    }
+        }
+        composable(Screen.Notifications.route) {
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { !it.equals("Admin", ignoreCase = true) && !it.equals("Designer", ignoreCase = true) }
+            ) {
+                val viewModel: NotificationViewModel = viewModel {
+                    NotificationViewModel(
+                        campaignRepository,
+                        eventRepository,
+                        sessionManager
+                    )
                 }
-            )
+
+                NotificationScreen(
+                    viewModel = viewModel,
+                    onNavigateHome = {
+                        navController.navigate(Screen.Dashboard.route) {
+                            launchSingleTop = true
+                            popUpTo(Screen.Dashboard.route)
+                        }
+                    },
+
+                    onNavigateEvents = {
+                        navController.navigate(Screen.EventList.route) {
+                            launchSingleTop = true
+                            popUpTo(Screen.EventList.route)
+                        }
+                    },
+
+                    onNavigateCampaigns = {
+                        navController.navigate(Screen.CampaignList.route) {
+                            launchSingleTop = true
+                            popUpTo(Screen.CampaignList.route)
+                        }
+                    }
+                )
+            }
         }
 
         composable(Screen.DesignerDashboard.route) {
-
-            val viewModel: DesignerViewModel = viewModel {
-                DesignerViewModel(eventRepository, campaignRepository)
-            }
-
-            DesignerDashboardScreen(
-                viewModel = viewModel,
-                onLogout = {
-                    authManager.logout()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                    }
+            RoleGuard(
+                sessionManager = sessionManager,
+                navController = navController,
+                isAllowed = { it.equals("Designer", ignoreCase = true) }
+            ) {
+                val viewModel: DesignerViewModel = viewModel {
+                    DesignerViewModel(eventRepository, campaignRepository)
                 }
-            )
+
+                DesignerDashboardScreen(
+                    viewModel = viewModel,
+                    onLogout = {
+                        authManager.logout()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }
