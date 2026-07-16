@@ -39,7 +39,9 @@ fun AdminDashboardScreen(
     viewModel: AdminViewModel,
     onLogout: () -> Unit,
     onViewAuditLogs: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToDesigner: () -> Unit,
+    onNavigateToReviewer: () -> Unit
 ){
 
     var showCreateDialog by remember {
@@ -267,20 +269,56 @@ fun AdminDashboardScreen(
                 }
 
                 item {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Button(
+                            onClick = onViewAuditLogs,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = PulseBlue
+                            )
+                        ) {
+                            Text(
+                                text = stringResource(R.string.view_history_btn),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = AppBackground
+                            )
+                        }
 
-                    Button(
-                        onClick = onViewAuditLogs,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PulseBlue
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(R.string.view_history_btn),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = AppBackground
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = onNavigateToDesigner,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = PulseGreen
+                                )
+                            ) {
+                                Text(
+                                    text = "Designer View",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = AppBackground
+                                )
+                            }
+
+                            Button(
+                                onClick = onNavigateToReviewer,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = PulseBlue
+                                )
+                            ) {
+                                Text(
+                                    text = "Reviewer View",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = AppBackground
+                                )
+                            }
+                        }
                     }
                 }
 

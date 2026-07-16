@@ -43,7 +43,9 @@ import com.speehive.speehiveaihub.viewmodel.DesignerViewModel
 @Composable
 fun DesignerDashboardScreen(
     viewModel: DesignerViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    isAdmin: Boolean = false,
+    onNavigateToAdmin: (() -> Unit)? = null
 ) {
     var showCampaigns by remember { mutableStateOf(false) }
     var showEvents by remember { mutableStateOf(false) }
@@ -79,6 +81,15 @@ fun DesignerDashboardScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
                 actions = {
+                    if (isAdmin && onNavigateToAdmin != null) {
+                        TextButton(onClick = onNavigateToAdmin) {
+                            Text(
+                                "Admin View",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = PulseBlue
+                            )
+                        }
+                    }
                     TextButton(onClick = onLogout) {
                         Text(
                             "Logout",
