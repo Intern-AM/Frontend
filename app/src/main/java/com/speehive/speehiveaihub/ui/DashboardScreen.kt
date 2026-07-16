@@ -206,7 +206,7 @@ fun DashboardScreen(
                                                 },
                                                 leadingIcon = {
                                                     Icon(
-                                                        imageVector = Icons.Default.Settings,
+                                                        imageVector = Icons.Default.Dashboard,
                                                         contentDescription = null,
                                                         tint = PulseBlue
                                                     )

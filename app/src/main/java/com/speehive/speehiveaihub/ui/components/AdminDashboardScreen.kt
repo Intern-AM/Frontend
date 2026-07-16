@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -29,6 +31,8 @@ import com.speehive.speehiveaihub.ui.theme.PulseBlue
 import com.speehive.speehiveaihub.ui.theme.PulseRed
 import com.speehive.speehiveaihub.ui.theme.PulseGreen
 import com.speehive.speehiveaihub.ui.theme.PulseGreenLight
+import com.speehive.speehiveaihub.ui.theme.PulsePurple
+import com.speehive.speehiveaihub.ui.theme.PulseAmber
 import androidx.compose.ui.res.stringResource
 import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.utils.formatAuditDate
@@ -190,6 +194,60 @@ fun AdminDashboardScreen(
                 }
 
                 item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = onNavigateToDesigner,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = PulsePurple
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Brush,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = AppBackground
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Designer View",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = AppBackground
+                            )
+                        }
+
+                        Button(
+                            onClick = onNavigateToReviewer,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = PulseAmber
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Visibility,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = AppBackground
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Reviewer View",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = AppBackground
+                            )
+                        }
+                    }
+                }
+
+                item {
 
                     Text(
                         text = "Admin Dashboard",
@@ -269,56 +327,19 @@ fun AdminDashboardScreen(
                 }
 
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(
-                            onClick = onViewAuditLogs,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = PulseBlue
-                            )
-                        ) {
-                            Text(
-                                text = stringResource(R.string.view_history_btn),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = AppBackground
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Button(
-                                onClick = onNavigateToDesigner,
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(20.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = PulseGreen
-                                )
-                            ) {
-                                Text(
-                                    text = "Designer View",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = AppBackground
-                                )
-                            }
-
-                            Button(
-                                onClick = onNavigateToReviewer,
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(20.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = PulseBlue
-                                )
-                            ) {
-                                Text(
-                                    text = "Reviewer View",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = AppBackground
-                                )
-                            }
-                        }
+                    Button(
+                        onClick = onViewAuditLogs,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = PulseBlue
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.view_history_btn),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = AppBackground
+                        )
                     }
                 }
 
