@@ -46,7 +46,9 @@ fun DashboardScreen(
     onNavigateToCampaigns: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToCampaignDetail: (String) -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    isAdmin: Boolean = false,
+    onNavigateToAdmin: (() -> Unit)? = null
 ) {
     var showMenu by remember {
     mutableStateOf(false)
@@ -183,38 +185,59 @@ fun DashboardScreen(
                                         )
                                     }
                                 }
-
-                                DropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = {
-                                        showMenu = false
-                                    },
-                                    containerColor = CardSurface,
-                                    tonalElevation = 0.dp,
-                                    shadowElevation = 0.dp,
-                                    shape = RoundedCornerShape(12.dp),
-                                ){
-                                    DropdownMenuItem(
-                                        text = {
-                                        Text(
-                                            text = "Logout",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = TextPrimary
-                                            )
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.AutoMirrored.Filled.Logout,
-                                                contentDescription = null,
-                                                tint = PulseRed
-                                            )
-                                        },
-                                        onClick = {
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = {
                                             showMenu = false
-                                            onLogout()
+                                        },
+                                        containerColor = CardSurface,
+                                        tonalElevation = 0.dp,
+                                        shadowElevation = 0.dp,
+                                        shape = RoundedCornerShape(12.dp),
+                                    ){
+                                        if (isAdmin && onNavigateToAdmin != null) {
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        text = "Admin Dashboard",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = TextPrimary
+                                                    )
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Settings,
+                                                        contentDescription = null,
+                                                        tint = PulseBlue
+                                                    )
+                                                },
+                                                onClick = {
+                                                    showMenu = false
+                                                    onNavigateToAdmin()
+                                                }
+                                            )
                                         }
-                                    )
-                                }
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = "Logout",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = TextPrimary
+                                                )
+                                            },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                                                    contentDescription = null,
+                                                    tint = PulseRed
+                                                )
+                                            },
+                                            onClick = {
+                                                showMenu = false
+                                                onLogout()
+                                            }
+                                        )
+                                    }
                             }
                         }
 
