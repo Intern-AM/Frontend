@@ -13,6 +13,9 @@ import com.speehive.speehiveaihub.network.toCampaign
 import com.speehive.speehiveaihub.network.toResult
 import com.speehive.speehiveaihub.utils.toMultipartBodyPart
 
+import com.speehive.speehiveaihub.network.CampaignScheduleResponse
+import com.speehive.speehiveaihub.network.UpdateScheduleRequest
+
 class ApiCampaignRepository(
     sessionManager: SessionManager,
     authManager: AuthManager,
@@ -78,4 +81,16 @@ class ApiCampaignRepository(
             )
         ).toResult()
     }
+
+    override suspend fun getCampaignSchedule(eventId: String): Result<CampaignScheduleResponse> = safeApiCall {
+        api.getCampaignSchedule(eventId)
+    }
+
+    override suspend fun updateCampaignSchedule(
+        eventId: String,
+        request: UpdateScheduleRequest
+    ): Result<Unit> = safeApiCall {
+        api.updateCampaignSchedule(eventId, request).toResult()
+    }
 }
+

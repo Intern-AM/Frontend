@@ -289,10 +289,8 @@ fun DashboardScreen(
             items(
                 items = viewModel.campaigns
                     .filter {
-                        it.status.equals(
-                            "Generated",
-                            ignoreCase = true
-                        )
+                        it.status.equals("Generated", ignoreCase = true) ||
+                        it.status.equals("Approved", ignoreCase = true)
                     }
                     .take(4),
                 key = { it.campaignId }

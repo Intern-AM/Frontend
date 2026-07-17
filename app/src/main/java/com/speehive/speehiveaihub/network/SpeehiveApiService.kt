@@ -63,6 +63,17 @@ interface SpeehiveApiService {
         @Body request: ApprovalRequest
     ): retrofit2.Response<okhttp3.ResponseBody>
 
+    @GET("api/Approval/{eventId}/schedule")
+    suspend fun getCampaignSchedule(
+        @Path("eventId") eventId: String
+    ): CampaignScheduleResponse
+
+    @PUT("api/Approval/{eventId}/schedule")
+    suspend fun updateCampaignSchedule(
+        @Path("eventId") eventId: String,
+        @Body request: UpdateScheduleRequest
+    ): retrofit2.Response<Unit>
+
     // Designer
 
     @Multipart

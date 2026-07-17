@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.speehive.speehiveaihub.data.SessionManager
 import com.speehive.speehiveaihub.models.Campaign
 import com.speehive.speehiveaihub.network.AuthError
+import com.speehive.speehiveaihub.network.CampaignScheduleResponse
+import com.speehive.speehiveaihub.network.UpdateScheduleRequest
 import com.speehive.speehiveaihub.repository.CampaignRepository
 import com.speehive.speehiveaihub.repository.EventRepository
 import kotlinx.coroutines.launch
@@ -27,6 +29,12 @@ class CampaignDetailViewModel(
         private set
     var isProcessing by mutableStateOf(false)
         private set
+    var scheduleState by mutableStateOf<CampaignScheduleResponse?>(null)
+        private set
+    var isLoadingSchedule by mutableStateOf(false)
+        private set
+    var isUpdatingSchedule by mutableStateOf(false)
+        private set
 
     fun loadCampaign(id: String) {
         viewModelScope.launch {
@@ -43,6 +51,7 @@ class CampaignDetailViewModel(
                             },
                             onFailure = { eventTitle = "Unknown Event" }
                         )
+                        loadSchedule(currentCampaign.eventId)
                     }
                 },
                 onFailure = {
@@ -63,6 +72,8 @@ class CampaignDetailViewModel(
                 campaignRepository.approveCampaign(eventId = currentCampaign.eventId).fold(
                     onSuccess = {
                         sessionManager.saveActionTimestamp(currentCampaign.eventId)
+                        campaign = currentCampaign.copy(status = "Approved")
+                        loadSchedule(currentCampaign.eventId)
                         onSuccess()
                     },
                     onFailure = { error ->
@@ -105,6 +116,46 @@ class CampaignDetailViewModel(
                 errorMessage = "Campaign not found"
             }
             isProcessing = false
+        }
+    }
+
+    fun loadSchedule(eventId: String) {
+        viewModelScope.launch {
+            isLoadingSchedule = true
+            campaignRepository.getCampaignSchedule(eventId).fold(
+                onSuccess = { schedule ->
+                    scheduleState = schedule
+                },
+                onFailure = { error ->
+                    scheduleState = null
+                }
+            )
+            isLoadingSchedule = false
+        }
+    }
+
+    fun updateSchedule(request: UpdateScheduleRequest, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            isUpdatingSchedule = true
+            errorMessage = null
+            campaign?.let { currentCampaign ->
+                campaignRepository.updateCampaignSchedule(currentCampaign.eventId, request).fold(
+                    onSuccess = {
+                        loadSchedule(currentCampaign.eventId)
+                        onSuccess()
+                    },
+                    onFailure = { error ->
+                        errorMessage = when (error) {
+                            is AuthError.Unauthorized -> "You don't have permission to modify schedules"
+                            is AuthError.TokenExpired -> "Session expired. Please log in again"
+                            else -> error.message ?: "Failed to update schedule"
+                        }
+                    }
+                )
+            } ?: run {
+                errorMessage = "Campaign not found"
+            }
+            isUpdatingSchedule = false
         }
     }
 
