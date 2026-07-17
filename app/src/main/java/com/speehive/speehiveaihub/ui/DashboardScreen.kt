@@ -1,4 +1,6 @@
 package com.speehive.speehiveaihub.ui
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -50,6 +52,7 @@ fun DashboardScreen(
     isAdmin: Boolean = false,
     onNavigateToAdmin: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     var showMenu by remember {
     mutableStateOf(false)
 }
@@ -213,6 +216,7 @@ fun DashboardScreen(
                                                 },
                                                 onClick = {
                                                     showMenu = false
+                                                    Toast.makeText(context, "Switched back to Admin Dashboard", Toast.LENGTH_SHORT).show()
                                                     onNavigateToAdmin()
                                                 }
                                             )
@@ -234,6 +238,7 @@ fun DashboardScreen(
                                             },
                                             onClick = {
                                                 showMenu = false
+                                                Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
                                                 onLogout()
                                             }
                                         )

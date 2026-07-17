@@ -1,5 +1,7 @@
 package com.speehive.speehiveaihub.ui
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,6 +33,7 @@ fun CampaignDetailScreen(
     viewModel: CampaignDetailViewModel,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     LaunchedEffect(campaignId) {
         viewModel.loadCampaign(campaignId)
     }
@@ -127,6 +130,7 @@ fun CampaignDetailScreen(
                             viewModel.rejectCampaign(
                                 comments = "Rejected by reviewer"
                             ) {
+                                Toast.makeText(context, "Campaign rejected successfully", Toast.LENGTH_SHORT).show()
                                 onBack()
                             }
                         },
@@ -161,6 +165,7 @@ fun CampaignDetailScreen(
                         onClick = {
 
                             viewModel.approveCampaign {
+                                Toast.makeText(context, "Campaign approved successfully", Toast.LENGTH_SHORT).show()
                                 onBack()
                             }
                         },

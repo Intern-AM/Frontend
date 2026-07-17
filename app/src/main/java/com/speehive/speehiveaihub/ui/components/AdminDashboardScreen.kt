@@ -1,5 +1,7 @@
 package com.speehive.speehiveaihub.ui.components
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,6 +49,7 @@ fun AdminDashboardScreen(
     onNavigateToDesigner: () -> Unit,
     onNavigateToReviewer: () -> Unit
 ){
+    val context = LocalContext.current
 
     var showCreateDialog by remember {
         mutableStateOf(false)
@@ -117,7 +120,10 @@ fun AdminDashboardScreen(
                             tint = TextPrimary
                         )
                     }
-                    TextButton(onClick = onLogout) {
+                    TextButton(onClick = {
+                        Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                        onLogout()
+                    }) {
                         Text(
                             stringResource(R.string.logout_btn),
                             style = MaterialTheme.typography.bodyMedium
@@ -200,7 +206,10 @@ fun AdminDashboardScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Button(
-                            onClick = onNavigateToDesigner,
+                            onClick = {
+                                Toast.makeText(context, "Switched to Designer Dashboard", Toast.LENGTH_SHORT).show()
+                                onNavigateToDesigner()
+                            },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -223,7 +232,10 @@ fun AdminDashboardScreen(
                         }
 
                         Button(
-                            onClick = onNavigateToReviewer,
+                            onClick = {
+                                Toast.makeText(context, "Switched to Reviewer Dashboard", Toast.LENGTH_SHORT).show()
+                                onNavigateToReviewer()
+                            },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(

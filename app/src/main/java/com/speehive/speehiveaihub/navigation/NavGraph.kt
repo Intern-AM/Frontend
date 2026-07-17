@@ -1,4 +1,5 @@
 package com.speehive.speehiveaihub.navigation
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -147,6 +148,8 @@ fun NavGraph(navController: NavHostController) {
                     currentUserName =
                         viewModel.currentUser?.name ?: "User"
 
+                    Toast.makeText(context, "Welcome back, $currentUserName!", Toast.LENGTH_SHORT).show()
+
                     val role =
                         sessionManager.getRole()
 
@@ -237,7 +240,8 @@ fun NavGraph(navController: NavHostController) {
                     isAdmin = sessionManager.getRole().equals("Admin", ignoreCase = true),
                     onNavigateToAdmin = {
                         navController.navigate(Screen.AdminDashboard.route) {
-                            popUpTo(Screen.AdminDashboard.route) { inclusive = true }
+                            popUpTo(Screen.AdminDashboard.route) { inclusive = false }
+                            launchSingleTop = true
                         }
                     }
                 )
@@ -469,7 +473,8 @@ fun NavGraph(navController: NavHostController) {
                     isAdmin = sessionManager.getRole().equals("Admin", ignoreCase = true),
                     onNavigateToAdmin = {
                         navController.navigate(Screen.AdminDashboard.route) {
-                            popUpTo(Screen.AdminDashboard.route) { inclusive = true }
+                            popUpTo(Screen.AdminDashboard.route) { inclusive = false }
+                            launchSingleTop = true
                         }
                     }
                 )
