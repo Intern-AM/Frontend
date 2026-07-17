@@ -1,6 +1,8 @@
 package com.speehive.speehiveaihub.ui
 
 import android.net.Uri
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -47,6 +49,7 @@ fun DesignerDashboardScreen(
     isAdmin: Boolean = false,
     onNavigateToAdmin: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     var showCampaigns by remember { mutableStateOf(false) }
     var showEvents by remember { mutableStateOf(false) }
     var isRefreshing by remember { mutableStateOf(false) }
@@ -82,7 +85,10 @@ fun DesignerDashboardScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
                 actions = {
                     if (isAdmin && onNavigateToAdmin != null) {
-                        TextButton(onClick = onNavigateToAdmin) {
+                        TextButton(onClick = {
+                            Toast.makeText(context, "Switched back to Admin Dashboard", Toast.LENGTH_SHORT).show()
+                            onNavigateToAdmin()
+                        }) {
                             Text(
                                 "Admin View",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -90,7 +96,10 @@ fun DesignerDashboardScreen(
                             )
                         }
                     }
-                    TextButton(onClick = onLogout) {
+                    TextButton(onClick = {
+                        Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                        onLogout()
+                    }) {
                         Text(
                             "Logout",
                             style = MaterialTheme.typography.bodyMedium
