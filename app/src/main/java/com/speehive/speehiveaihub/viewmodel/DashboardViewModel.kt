@@ -53,10 +53,8 @@ class DashboardViewModel(
         }
     val reviewQueue: List<Campaign>
         get() = campaigns.filter {
-            it.status.equals(
-                "Generated",
-                ignoreCase = true
-            )
+            it.status.equals("Generated", ignoreCase = true) ||
+            it.status.equals("Approved", ignoreCase = true)
         }
     init {
         loadData()
