@@ -12,6 +12,14 @@ import androidx.compose.ui.res.stringResource
 import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.ui.theme.*
 
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
 enum class BottomNavItem {
     HOME,
     EVENTS,
@@ -38,9 +46,24 @@ fun BottomNavBar(
         indicatorColor = PulseBlue.copy(alpha = 0.12f)
     )
 
-    NavigationBar(
-        containerColor = CardSurface
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .shadow(
+                elevation = 16.dp,
+                shape = RoundedCornerShape(28.dp),
+                spotColor = Color(0x380F172A),
+                ambientColor = Color(0x200F172A)
+            )
+            .clip(RoundedCornerShape(28.dp)),
+        color = CardSurface,
+        shape = RoundedCornerShape(28.dp),
+        border = BorderStroke(1.5.dp, Color.White)
     ) {
+        NavigationBar(
+            containerColor = CardSurface
+        ) {
         if (BottomNavItem.HOME in visibleItems) {
             NavigationBarItem(
                 selected = selected == BottomNavItem.HOME,
@@ -115,4 +138,5 @@ fun BottomNavBar(
             )
         }
     }
+}
 }

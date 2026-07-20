@@ -28,6 +28,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.speehive.speehiveaihub.ui.theme.*
 
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+
 enum class DashboardView {
     ADMIN,
     DESIGNER,
@@ -42,15 +46,18 @@ fun ViewModeSwitcher(
 ) {
     val views = DashboardView.values()
 
-    val indicatorColor = PulseGreenBright
-
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp),
-        shape = RoundedCornerShape(25.dp),
-        color = CardSurface,
-        border = BorderStroke(1.dp, CardBorder)
+            .height(52.dp)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(26.dp),
+                spotColor = Color(0x280F172A)
+            ),
+        shape = RoundedCornerShape(26.dp),
+        color = ElevatedSurface,
+        border = BorderStroke(1.5.dp, Color(0xFFCBD5E1))
     ) {
         BoxWithConstraints(
             modifier = Modifier
@@ -68,14 +75,27 @@ fun ViewModeSwitcher(
                 label = "indicatorOffset"
             )
 
-            // Animated floating green pill
+            // Floating 3D green pill with light green gradient and drop shadow
             Box(
                 modifier = Modifier
                     .offset(x = indicatorOffset)
                     .width(segmentWidth)
                     .fillMaxHeight()
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(21.dp),
+                        spotColor = PulseGreenBright.copy(alpha = 0.45f),
+                        ambientColor = PulseGreenBright.copy(alpha = 0.2f)
+                    )
                     .clip(RoundedCornerShape(21.dp))
-                    .background(indicatorColor)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF34D399), // Top highlight
+                                PulseGreenBright   // Normal light green
+                            )
+                        )
+                    )
             )
 
             // Segment touch targets & labels
@@ -85,6 +105,7 @@ fun ViewModeSwitcher(
             ) {
                 views.forEach { view ->
                     val isSelected = view == currentView
+                    val itemInteractionSource = remember { MutableInteractionSource() }
 
                     val (label, icon) = when (view) {
                         DashboardView.ADMIN -> "Admin" to Icons.Default.Person
@@ -97,14 +118,14 @@ fun ViewModeSwitcher(
                             .weight(1f)
                             .fillMaxHeight()
                             .clip(RoundedCornerShape(20.dp))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                if (!isSelected) {
-                                    onViewSelected(view)
+                            .deep3DPress(
+                                interactionSource = itemInteractionSource,
+                                onClick = {
+                                    if (!isSelected) {
+                                        onViewSelected(view)
+                                    }
                                 }
-                            },
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(

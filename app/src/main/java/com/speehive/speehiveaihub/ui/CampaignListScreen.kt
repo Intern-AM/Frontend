@@ -129,6 +129,7 @@ fun CampaignListCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .deep3DCard(elevation = 10.dp)
             .clickable {
                 onClick()
             },
