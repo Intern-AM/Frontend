@@ -37,6 +37,7 @@ import com.speehive.speehiveaihub.ui.theme.PulsePurple
 import com.speehive.speehiveaihub.ui.theme.PulseAmber
 import androidx.compose.ui.res.stringResource
 import com.speehive.speehiveaihub.R
+import com.speehive.speehiveaihub.ui.theme.deep3DCard
 import com.speehive.speehiveaihub.utils.formatAuditDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -357,7 +358,9 @@ private fun StatsCard(
 ) {
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .deep3DCard(elevation = 10.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardSurface
@@ -400,7 +403,9 @@ private fun UserCard(
 ) {
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .deep3DCard(elevation = 10.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardSurface

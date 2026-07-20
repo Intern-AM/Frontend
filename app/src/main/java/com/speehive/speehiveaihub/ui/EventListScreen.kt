@@ -157,7 +157,9 @@ fun FullEventCard(
     val eventStatusColor = statusColor(event.status)
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .deep3DCard(elevation = 10.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardSurface
