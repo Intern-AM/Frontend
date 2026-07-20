@@ -36,6 +36,8 @@ import com.speehive.speehiveaihub.models.Campaign
 import com.speehive.speehiveaihub.models.Event
 import com.speehive.speehiveaihub.ui.components.statusColor
 import com.speehive.speehiveaihub.ui.components.ZoomableImageDialog
+import com.speehive.speehiveaihub.ui.components.ViewModeSwitcher
+import com.speehive.speehiveaihub.ui.components.DashboardView
 import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import com.speehive.speehiveaihub.utils.formatEventDate
@@ -47,7 +49,8 @@ fun DesignerDashboardScreen(
     viewModel: DesignerViewModel,
     onLogout: () -> Unit,
     isAdmin: Boolean = false,
-    onNavigateToAdmin: (() -> Unit)? = null
+    onNavigateToAdmin: (() -> Unit)? = null,
+    onNavigateToReviewer: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     var showCampaigns by remember { mutableStateOf(false) }
@@ -84,18 +87,6 @@ fun DesignerDashboardScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
                 actions = {
-                    if (isAdmin && onNavigateToAdmin != null) {
-                        TextButton(onClick = {
-                            Toast.makeText(context, "Switched back to Admin Dashboard", Toast.LENGTH_SHORT).show()
-                            onNavigateToAdmin()
-                        }) {
-                            Text(
-                                "Admin View",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = PulseBlue
-                            )
-                        }
-                    }
                     TextButton(onClick = {
                         Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
                         onLogout()
@@ -130,6 +121,20 @@ fun DesignerDashboardScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                if (isAdmin) {
+                    item {
+                        ViewModeSwitcher(
+                            currentView = DashboardView.DESIGNER,
+                            onViewSelected = { targetView ->
+                                when (targetView) {
+                                    DashboardView.ADMIN -> onNavigateToAdmin?.invoke()
+                                    DashboardView.DESIGNER -> { /* Already on Designer */ }
+                                    DashboardView.REVIEWER -> onNavigateToReviewer?.invoke()
+                                }
+                            }
+                        )
+                    }
+                }
             if (viewModel.isLoading) {
                 item {
                     Box(
