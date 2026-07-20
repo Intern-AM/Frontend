@@ -1,4 +1,4 @@
-# 🐝 Speehive AI Hub - Android Mobile Application
+# 🐝 Hive AI - Android Mobile Application
 
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-blue?style=flat&logo=kotlin)
 ![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3-4285F4?style=flat&logo=android)
@@ -6,13 +6,13 @@
 ![Target SDK](https://img.shields.io/badge/Target%20SDK-37-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
-**Speehive AI Hub** is a modern Android application built with Jetpack Compose, Material 3, and Kotlin Coroutines. It serves as a central hub for managing marketing campaigns, event schedules, creative media assets, audit logs, and social media credentials across multi-tiered user roles.
+**Hive AI** is a modern Android application built with Jetpack Compose, Material 3, and Kotlin Coroutines. It serves as a central hub for managing marketing campaigns, event schedules, creative media assets, audit logs, and social media credentials across multi-tiered user roles.
 
 ---
 
 ## 🚀 Features & Role-Based Access Control (RBAC)
 
-Speehive AI Hub supports 3 distinct user roles with strict UI and navigation authorization:
+Hive AI supports 3 distinct user roles with strict UI and navigation authorization:
 
 ### 👑 Admin
 - **User Management**: Create new platform accounts, assign roles (`Admin`, `Designer`, `Reviewer`), and view account details.
@@ -144,4 +144,4 @@ This repository includes an **AI Engineering Workspace** under `.ai/` containing
 ---
 
 ## 📄 License
-This project is proprietary software belonging to **Speehive AI Hub**. All rights reserved.
+This project is proprietary software belonging to **Hive AI**. All rights reserved.
