@@ -200,63 +200,16 @@ fun AdminDashboardScreen(
                 }
 
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            onClick = {
-                                Toast.makeText(context, "Switched to Designer Dashboard", Toast.LENGTH_SHORT).show()
-                                onNavigateToDesigner()
-                            },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = PulsePurple
-                            ),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Brush,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = AppBackground
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Designer View",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = AppBackground
-                            )
+                    ViewModeSwitcher(
+                        currentView = DashboardView.ADMIN,
+                        onViewSelected = { targetView ->
+                            when (targetView) {
+                                DashboardView.ADMIN -> { /* Already on Admin Dashboard */ }
+                                DashboardView.DESIGNER -> onNavigateToDesigner()
+                                DashboardView.REVIEWER -> onNavigateToReviewer()
+                            }
                         }
-
-                        Button(
-                            onClick = {
-                                Toast.makeText(context, "Switched to Reviewer Dashboard", Toast.LENGTH_SHORT).show()
-                                onNavigateToReviewer()
-                            },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = PulseAmber
-                            ),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Visibility,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = AppBackground
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Reviewer View",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = AppBackground
-                            )
-                        }
-                    }
+                    )
                 }
 
                 item {

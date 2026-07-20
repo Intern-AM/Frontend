@@ -148,8 +148,6 @@ fun NavGraph(navController: NavHostController) {
                     currentUserName =
                         viewModel.currentUser?.name ?: "User"
 
-                    Toast.makeText(context, "Welcome back, $currentUserName!", Toast.LENGTH_SHORT).show()
-
                     val role =
                         sessionManager.getRole()
 
@@ -243,6 +241,9 @@ fun NavGraph(navController: NavHostController) {
                             popUpTo(Screen.AdminDashboard.route) { inclusive = false }
                             launchSingleTop = true
                         }
+                    },
+                    onNavigateToDesigner = {
+                        navController.navigate(Screen.DesignerDashboard.route)
                     }
                 )
             }
@@ -476,6 +477,9 @@ fun NavGraph(navController: NavHostController) {
                             popUpTo(Screen.AdminDashboard.route) { inclusive = false }
                             launchSingleTop = true
                         }
+                    },
+                    onNavigateToReviewer = {
+                        navController.navigate(Screen.Dashboard.route)
                     }
                 )
             }

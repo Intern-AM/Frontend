@@ -50,7 +50,8 @@ fun DashboardScreen(
     onNavigateToCampaignDetail: (String) -> Unit,
     onLogout: () -> Unit,
     isAdmin: Boolean = false,
-    onNavigateToAdmin: (() -> Unit)? = null
+    onNavigateToAdmin: (() -> Unit)? = null,
+    onNavigateToDesigner: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     var showMenu by remember {
@@ -68,6 +69,30 @@ fun DashboardScreen(
 
     Scaffold(
         containerColor = AppBackground,
+        topBar = {
+            if (isAdmin) {
+                TopAppBar(
+                    title = {
+                        Column {
+                            Text("REVIEWER", style = MaterialTheme.typography.labelSmall)
+                            Text("Dashboard", style = MaterialTheme.typography.displayLarge)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
+                    actions = {
+                        TextButton(onClick = {
+                            Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                            onLogout()
+                        }) {
+                            Text(
+                                "Logout",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                )
+            }
+        },
         bottomBar = {
             BottomNavBar(
                 selected = BottomNavItem.HOME,
@@ -97,8 +122,22 @@ fun DashboardScreen(
                 top = 20.dp,
                 bottom = 80.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (isAdmin) {
+                item {
+                    ViewModeSwitcher(
+                        currentView = DashboardView.REVIEWER,
+                        onViewSelected = { targetView ->
+                            when (targetView) {
+                                DashboardView.ADMIN -> onNavigateToAdmin?.invoke()
+                                DashboardView.DESIGNER -> onNavigateToDesigner?.invoke()
+                                DashboardView.REVIEWER -> { /* Already on Reviewer */ }
+                            }
+                        }
+                    )
+                }
+            }
             // Dashboard Header (Chart Area Placeholder)
             item {
 
@@ -166,7 +205,7 @@ fun DashboardScreen(
                                 Surface(
                                     modifier = Modifier
                                         .size(40.dp)
-                                        .clickable {
+                                        .clickable(enabled = !isAdmin) {
                                             showMenu = true
                                         },
                                     shape = RoundedCornerShape(20.dp),
@@ -188,6 +227,7 @@ fun DashboardScreen(
                                         )
                                     }
                                 }
+                                if (!isAdmin) {
                                     DropdownMenu(
                                         expanded = showMenu,
                                         onDismissRequest = {
@@ -198,29 +238,6 @@ fun DashboardScreen(
                                         shadowElevation = 0.dp,
                                         shape = RoundedCornerShape(12.dp),
                                     ){
-                                        if (isAdmin && onNavigateToAdmin != null) {
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(
-                                                        text = "Admin Dashboard",
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        color = TextPrimary
-                                                    )
-                                                },
-                                                leadingIcon = {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Dashboard,
-                                                        contentDescription = null,
-                                                        tint = PulseBlue
-                                                    )
-                                                },
-                                                onClick = {
-                                                    showMenu = false
-                                                    Toast.makeText(context, "Switched back to Admin Dashboard", Toast.LENGTH_SHORT).show()
-                                                    onNavigateToAdmin()
-                                                }
-                                            )
-                                        }
                                         DropdownMenuItem(
                                             text = {
                                                 Text(
@@ -243,6 +260,7 @@ fun DashboardScreen(
                                             }
                                         )
                                     }
+                                }
                             }
                         }
 
