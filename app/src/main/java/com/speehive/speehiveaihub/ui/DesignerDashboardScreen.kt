@@ -141,7 +141,7 @@ fun DesignerDashboardScreen(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = PulseGreen)
+                        CircularProgressIndicator()
                     }
                 }
             }

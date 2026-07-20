@@ -80,7 +80,7 @@ fun NotificationScreen(
         ) {
         if (viewModel.isLoading && viewModel.notifications.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = TextPrimary, strokeWidth = 1.dp)
+                CircularProgressIndicator()
             }
         } else {
             LazyColumn(

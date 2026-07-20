@@ -110,9 +110,7 @@ fun EventListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        color = PulseGreen
-                    )
+                    CircularProgressIndicator()
                 }
 
             } else {

@@ -81,7 +81,7 @@ fun AuditLogScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = PulseGreen)
+                    CircularProgressIndicator()
                 }
             } else {
                 LaunchedEffect(viewModel.isLoading) {
