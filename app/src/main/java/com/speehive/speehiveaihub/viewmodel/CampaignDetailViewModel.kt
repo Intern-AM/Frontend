@@ -159,6 +159,42 @@ class CampaignDetailViewModel(
         }
     }
 
+    fun uploadCampaignImage(uri: android.net.Uri) {
+        viewModelScope.launch {
+            campaign?.let { currentCampaign ->
+                isProcessing = true
+                errorMessage = null
+                campaignRepository.uploadCampaignImage(currentCampaign.eventId, uri).fold(
+                    onSuccess = {
+                        loadCampaign(currentCampaign.campaignId.toString())
+                    },
+                    onFailure = { error ->
+                        errorMessage = error.message ?: "Failed to upload image"
+                    }
+                )
+                isProcessing = false
+            }
+        }
+    }
+
+    fun editCampaign(campaignPost: String, hashtags: String) {
+        viewModelScope.launch {
+            campaign?.let { currentCampaign ->
+                isProcessing = true
+                errorMessage = null
+                campaignRepository.editCampaign(currentCampaign.eventId, campaignPost, hashtags).fold(
+                    onSuccess = {
+                        loadCampaign(currentCampaign.campaignId.toString())
+                    },
+                    onFailure = { error ->
+                        errorMessage = error.message ?: "Failed to update campaign"
+                    }
+                )
+                isProcessing = false
+            }
+        }
+    }
+
     fun clearError() {
         errorMessage = null
     }

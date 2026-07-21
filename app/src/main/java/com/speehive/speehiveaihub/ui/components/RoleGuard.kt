@@ -26,7 +26,6 @@ fun RoleGuard(
         LaunchedEffect(role) {
             val targetRoute = when {
                 role.equals("Admin", ignoreCase = true) -> Screen.AdminDashboard.route
-                role.equals("Designer", ignoreCase = true) -> Screen.DesignerDashboard.route
                 else -> Screen.Dashboard.route
             }
             navController.navigate(targetRoute) {

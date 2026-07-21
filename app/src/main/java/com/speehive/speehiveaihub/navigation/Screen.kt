@@ -25,7 +25,5 @@ sealed class Screen(val route: String) {
 
     object Notifications : Screen("notifications")
 
-    object DesignerDashboard : Screen("designer_dashboard")
-
     object AdminSettings : Screen("admin_settings")
 }

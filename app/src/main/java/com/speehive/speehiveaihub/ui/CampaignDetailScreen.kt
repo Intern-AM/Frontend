@@ -35,6 +35,9 @@ import java.time.LocalTime
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Clear
 import com.speehive.speehiveaihub.network.UpdateScheduleRequest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.Upload
 import com.speehive.speehiveaihub.ui.components.statusColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +94,16 @@ fun CampaignDetailScreen(
             }
         )
     }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.uploadCampaignImage(it) }
+    }
+
+    var isEditingPost by remember { mutableStateOf(false) }
+    var editCampaignPost by remember(campaign?.campaignPost) { mutableStateOf(campaign?.campaignPost ?: "") }
+    var editHashtags by remember(campaign?.hashtags) { mutableStateOf(campaign?.hashtags ?: "") }
 
     Scaffold(
         containerColor = AppBackground,
@@ -469,34 +482,54 @@ fun CampaignDetailScreen(
                             )
                         }
 
-                        /* INSERT IMAGE BLOCK HERE */
-
-                        if (!campaign.imageUrl.isNullOrBlank()) {
-
-                            Card(
-                                shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = CardSurface
-                                ),
-                                border = BorderStroke(1.dp, CardBorder)
+                        // Campaign Image Card with Upload / Replace Button
+                        Card(
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = CardSurface
+                            ),
+                            border = BorderStroke(1.dp, CardBorder)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(20.dp)
                             ) {
-
-                                Column(
-                                    modifier = Modifier.padding(20.dp)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-
                                     Text(
-                                        text = "Generated Image",
+                                        text = "Campaign Poster",
                                         style = MaterialTheme.typography.titleMedium
                                     )
 
-                                    Spacer(
-                                        modifier = Modifier.height(12.dp)
-                                    )
+                                    Button(
+                                        onClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = PulseBlue,
+                                            contentColor = AppBackground
+                                        )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Upload,
+                                            contentDescription = "Upload Poster",
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = if (!campaign.imageUrl.isNullOrBlank()) "Replace Poster" else "Upload Poster",
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
+                                    }
+                                }
 
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                if (!campaign.imageUrl.isNullOrBlank()) {
                                     AsyncImage(
                                         model = campaign.imageUrl,
-                                        contentDescription = "Campaign Image",
+                                        contentDescription = "Campaign Poster",
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .aspectRatio(1f)
@@ -504,42 +537,155 @@ fun CampaignDetailScreen(
                                             .clickable { showFullScreenImage = true },
                                         contentScale = ContentScale.FillWidth
                                     )
-                                }
-                            }
-
-                        } else {
-
-                            Card(
-                                shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = CardSurface
-                                ),
-                                border = BorderStroke(1.dp, CardBorder)
-                            ) {
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(250.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Image not generated yet",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = TextMuted
-                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(180.dp)
+                                            .background(AppBackground, RoundedCornerShape(16.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No poster uploaded yet. Tap Upload Poster to add one.",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = TextMuted
+                                        )
+                                    }
                                 }
                             }
                         }
-                        DetailSection(
-                            title = "Campaign Post",
-                            content = campaign.campaignPost
-                        )
 
-                        DetailSection(
-                            title = "Hashtags",
-                            content = campaign.hashtags
-                        )
+                        // Editable Post & Hashtags Card
+                        Card(
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = CardSurface
+                            ),
+                            border = BorderStroke(1.dp, CardBorder)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(20.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Campaign Post & Hashtags",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+
+                                    if (!isEditingPost) {
+                                        IconButton(onClick = { isEditingPost = true }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Edit Post",
+                                                tint = PulseBlue
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                if (isEditingPost) {
+                                    OutlinedTextField(
+                                        value = editCampaignPost,
+                                        onValueChange = { editCampaignPost = it },
+                                        label = { Text("Campaign Post") },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = PulseBlue,
+                                            unfocusedBorderColor = CardBorder,
+                                            focusedTextColor = TextPrimary,
+                                            unfocusedTextColor = TextPrimary,
+                                            cursorColor = PulseBlue
+                                        )
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    OutlinedTextField(
+                                        value = editHashtags,
+                                        onValueChange = { editHashtags = it },
+                                        label = { Text("Hashtags") },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = PulseBlue,
+                                            unfocusedBorderColor = CardBorder,
+                                            focusedTextColor = TextPrimary,
+                                            unfocusedTextColor = TextPrimary,
+                                            cursorColor = PulseBlue
+                                        )
+                                    )
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                isEditingPost = false
+                                                editCampaignPost = campaign.campaignPost
+                                                editHashtags = campaign.hashtags
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Text("Cancel", style = MaterialTheme.typography.titleSmall)
+                                        }
+
+                                        Button(
+                                            onClick = {
+                                                viewModel.editCampaign(editCampaignPost, editHashtags)
+                                                isEditingPost = false
+                                                Toast.makeText(context, "Campaign updated", Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = PulseBlue,
+                                                contentColor = AppBackground
+                                            ),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Text("Save Changes", style = MaterialTheme.typography.titleSmall)
+                                        }
+                                    }
+                                } else {
+                                    Text(
+                                        text = "Post Copy",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TextSecondary
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = campaign.campaignPost,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = TextPrimary
+                                    )
+
+                                    if (campaign.hashtags.isNotBlank()) {
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Text(
+                                            text = "Hashtags",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = TextSecondary
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = campaign.hashtags,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = PulseBlue
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

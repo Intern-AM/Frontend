@@ -26,6 +26,14 @@ import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.viewmodel.EventViewModel
 import com.speehive.speehiveaihub.ui.components.BottomNavBar
 import com.speehive.speehiveaihub.ui.components.BottomNavItem
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.clickable
+import coil.compose.AsyncImage
+import com.speehive.speehiveaihub.ui.components.ZoomableImageDialog
 import com.speehive.speehiveaihub.utils.formatEventDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -138,6 +146,7 @@ fun EventListScreen(
                                     event.id
                                 )
                             },
+                            onUploadImage = { uri -> viewModel.uploadEventImage(event.id, uri) },
                             isProcessing = viewModel.isProcessing
                         )
                 }
@@ -147,14 +156,22 @@ fun EventListScreen(
     }
 }
 }
+
 @Composable
 fun FullEventCard(
     event: Event,
     onReject: () -> Unit,
+    onUploadImage: ((android.net.Uri) -> Unit)? = null,
     isProcessing: Boolean = false
 ){
-
     val eventStatusColor = statusColor(event.status)
+    var showZoomDialog by remember { mutableStateOf(false) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { onUploadImage?.invoke(it) }
+    }
 
     Card(
         modifier = Modifier
@@ -164,23 +181,16 @@ fun FullEventCard(
         colors = CardDefaults.cardColors(
             containerColor = CardSurface
         ),
-        border = BorderStroke(
-            1.dp,
-            CardBorder
-        )
+        border = BorderStroke(1.dp, CardBorder)
     ) {
-
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement =
-                    Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-
                 Text(
                     text = event.title,
                     style = MaterialTheme.typography.titleLarge,
@@ -203,18 +213,13 @@ fun FullEventCard(
                             text = event.eventType,
                             color = PulseBlue,
                             maxLines = 1,
-                            modifier = Modifier.padding(
-                                horizontal = 6.dp,
-                                vertical = 2.dp
-                            )
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
                 }
             }
 
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = event.description,
@@ -222,34 +227,64 @@ fun FullEventCard(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            Spacer(
-                modifier = Modifier.height(16.dp)
-            )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    Icons.Default.Event,
-                    contentDescription = null,
-                    tint = TextMuted,
-                    modifier = Modifier.size(14.dp)
-                )
-
-                Spacer(
-                    modifier = Modifier.width(6.dp)
-                )
-
-                Text(
-                    text = formatEventDate(event.startTime),
-                    style = MaterialTheme.typography.labelMedium
+            if (!event.designerImageUrl.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                AsyncImage(
+                    model = event.designerImageUrl,
+                    contentDescription = "Event Poster",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { showZoomDialog = true },
+                    contentScale = ContentScale.Crop
                 )
             }
-            Spacer(
-                modifier = Modifier.height(16.dp)
-            )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Event,
+                        contentDescription = null,
+                        tint = TextMuted,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = formatEventDate(event.startTime),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                if (onUploadImage != null) {
+                    OutlinedButton(
+                        onClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = PulseBlue),
+                        border = BorderStroke(1.dp, CardBorder)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Upload,
+                            contentDescription = "Upload Poster",
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (!event.designerImageUrl.isNullOrBlank()) "Replace Poster" else "Upload Poster",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             if (event.status.equals("Pending", true)) {
 
