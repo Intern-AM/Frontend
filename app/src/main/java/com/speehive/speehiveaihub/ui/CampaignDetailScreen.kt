@@ -534,7 +534,7 @@ fun CampaignDetailScreen(
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.End
+                                        horizontalArrangement = Arrangement.Center
                                     ) {
                                         Button(
                                             onClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
