@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Brush
 
 enum class DashboardView {
     ADMIN,
-    DESIGNER,
     REVIEWER
 }
 
@@ -109,7 +108,6 @@ fun ViewModeSwitcher(
 
                     val (label, icon) = when (view) {
                         DashboardView.ADMIN -> "Admin" to Icons.Default.Person
-                        DashboardView.DESIGNER -> "Designer" to Icons.Default.Brush
                         DashboardView.REVIEWER -> "Reviewer" to Icons.Default.Visibility
                     }
 

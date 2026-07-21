@@ -29,7 +29,7 @@ fun CreateUserDialog(
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
 
-    val roles = listOf("Reviewer", "Designer", "Admin")
+    val roles = listOf("Reviewer", "Admin")
 
     AlertDialog(
         onDismissRequest = onDismiss,

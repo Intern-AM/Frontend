@@ -50,13 +50,10 @@ fun DashboardScreen(
     onNavigateToCampaignDetail: (String) -> Unit,
     onLogout: () -> Unit,
     isAdmin: Boolean = false,
-    onNavigateToAdmin: (() -> Unit)? = null,
-    onNavigateToDesigner: (() -> Unit)? = null
+    onNavigateToAdmin: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
-    var showMenu by remember {
-    mutableStateOf(false)
-}
+    var showMenu by remember { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -70,39 +67,41 @@ fun DashboardScreen(
     Scaffold(
         containerColor = AppBackground,
         topBar = {
-            if (isAdmin) {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text("REVIEWER", style = MaterialTheme.typography.labelSmall)
-                            Text("Dashboard", style = MaterialTheme.typography.displayLarge)
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
-                    actions = {
-                        TextButton(onClick = {
-                            Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
-                            onLogout()
-                        }) {
-                            Text(
-                                "Logout",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = if (isAdmin) "REVIEWER" else "HIVE AI HUB",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            text = "Dashboard",
+                            style = MaterialTheme.typography.displayLarge
+                        )
                     }
-                )
-            }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = AppBackground
+                ),
+                actions = {
+                    TextButton(onClick = {
+                        Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                        onLogout()
+                    }) {
+                        Text(
+                            "Logout",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            )
         },
         bottomBar = {
             BottomNavBar(
                 selected = BottomNavItem.HOME,
-
                 onHomeClick = {},
-
                 onEventsClick = onNavigateToEvents,
-
                 onCampaignsClick = onNavigateToCampaigns,
-
                 onNotificationsClick = onNavigateToNotifications
             )
         }
@@ -110,12 +109,13 @@ fun DashboardScreen(
         PullToRefreshBox(
             isRefreshing = viewModel.isLoading,
             onRefresh = { viewModel.refresh() },
-            state = rememberPullToRefreshState()
-        ) {
-        LazyColumn(
+            state = rememberPullToRefreshState(),
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxSize(),
+                .fillMaxSize()
+        ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = 20.dp,
                 end = 20.dp,
@@ -131,7 +131,6 @@ fun DashboardScreen(
                         onViewSelected = { targetView ->
                             when (targetView) {
                                 DashboardView.ADMIN -> onNavigateToAdmin?.invoke()
-                                DashboardView.DESIGNER -> onNavigateToDesigner?.invoke()
                                 DashboardView.REVIEWER -> { /* Already on Reviewer */ }
                             }
                         }
