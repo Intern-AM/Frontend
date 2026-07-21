@@ -67,34 +67,36 @@ fun DashboardScreen(
     Scaffold(
         containerColor = AppBackground,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = if (isAdmin) "REVIEWER" else "HIVE AI HUB",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            text = "Dashboard",
-                            style = MaterialTheme.typography.displayLarge
-                        )
+            if (isAdmin) {
+                TopAppBar(
+                    title = {
+                        Column {
+                            Text(
+                                text = "REVIEWER",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                text = "Dashboard",
+                                style = MaterialTheme.typography.displayLarge
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = AppBackground
+                    ),
+                    actions = {
+                        TextButton(onClick = {
+                            Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                            onLogout()
+                        }) {
+                            Text(
+                                "Logout",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AppBackground
-                ),
-                actions = {
-                    TextButton(onClick = {
-                        Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
-                        onLogout()
-                    }) {
-                        Text(
-                            "Logout",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            )
+                )
+            }
         },
         bottomBar = {
             BottomNavBar(
