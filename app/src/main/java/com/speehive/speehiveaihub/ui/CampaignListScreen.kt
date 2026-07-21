@@ -119,7 +119,6 @@ fun CampaignListScreen(
                     CampaignListCard(
                         campaign = campaign,
                         title = eventTitle,
-                        onUploadImage = { uri -> viewModel.uploadCampaignImage(campaign.eventId, uri) },
                         onClick = {
                             onCampaignClick(
                                 campaign.campaignId.toString()
@@ -136,17 +135,8 @@ fun CampaignListScreen(
 fun CampaignListCard(
     campaign: Campaign,
     title: String,
-    onUploadImage: ((android.net.Uri) -> Unit)? = null,
     onClick: () -> Unit
 ) {
-    var showZoomDialog by remember { mutableStateOf(false) }
-
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let { onUploadImage?.invoke(it) }
-    }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -184,60 +174,13 @@ fun CampaignListCard(
                 color = TextSecondary
             )
 
-            if (!campaign.imageUrl.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                AsyncImage(
-                    model = campaign.imageUrl,
-                    contentDescription = "Campaign Poster",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { showZoomDialog = true },
-                    contentScale = ContentScale.Crop
-                )
-            }
-
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = formatCampaignDate(campaign.createdAt),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TextSecondary
-                )
-
-                if (onUploadImage != null) {
-                    OutlinedButton(
-                        onClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = PulseBlue),
-                        border = BorderStroke(1.dp, CardBorder)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Upload,
-                            contentDescription = "Upload Poster",
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = if (!campaign.imageUrl.isNullOrBlank()) "Replace" else "Upload",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    if (showZoomDialog) {
-        ZoomableImageDialog(imageUrl = campaign.imageUrl ?: "") {
-            showZoomDialog = false
+            Text(
+                text = formatCampaignDate(campaign.createdAt),
+                style = MaterialTheme.typography.labelSmall,
+                color = TextSecondary
+            )
         }
     }
 }

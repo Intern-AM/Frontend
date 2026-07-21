@@ -234,10 +234,10 @@ fun FullEventCard(
                     contentDescription = "Event Poster",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .wrapContentHeight()
+                        .clip(RoundedCornerShape(16.dp))
                         .clickable { showZoomDialog = true },
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Fit
                 )
             }
 
@@ -262,7 +262,7 @@ fun FullEventCard(
                     )
                 }
 
-                if (onUploadImage != null) {
+                if (onUploadImage != null && event.status.equals("Pending", ignoreCase = true)) {
                     OutlinedButton(
                         onClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
                         shape = RoundedCornerShape(10.dp),

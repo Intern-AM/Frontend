@@ -532,10 +532,10 @@ fun CampaignDetailScreen(
                                         contentDescription = "Campaign Poster",
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .aspectRatio(1f)
+                                            .wrapContentHeight()
                                             .clip(RoundedCornerShape(20.dp))
                                             .clickable { showFullScreenImage = true },
-                                        contentScale = ContentScale.FillWidth
+                                        contentScale = ContentScale.Fit
                                     )
                                 } else {
                                     Box(
