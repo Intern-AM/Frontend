@@ -493,36 +493,10 @@ fun CampaignDetailScreen(
                             Column(
                                 modifier = Modifier.padding(20.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Campaign Poster",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-
-                                    Button(
-                                        onClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = PulseBlue,
-                                            contentColor = AppBackground
-                                        )
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Upload,
-                                            contentDescription = "Upload Poster",
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text(
-                                            text = if (!campaign.imageUrl.isNullOrBlank()) "Replace Poster" else "Upload Poster",
-                                            style = MaterialTheme.typography.labelMedium
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = "Campaign Poster",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
 
                                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -546,10 +520,41 @@ fun CampaignDetailScreen(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            text = "No poster uploaded yet. Tap Upload Poster to add one.",
+                                            text = if (campaign.status.equals("Posted", ignoreCase = true))
+                                                "No poster uploaded for this campaign."
+                                            else
+                                                "No poster uploaded yet. Tap Upload Poster to add one.",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = TextMuted
                                         )
+                                    }
+                                }
+
+                                if (!campaign.status.equals("Posted", ignoreCase = true)) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        Button(
+                                            onClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = PulseBlue,
+                                                contentColor = AppBackground
+                                            )
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Upload,
+                                                contentDescription = "Upload Poster",
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = if (!campaign.imageUrl.isNullOrBlank()) "Replace Poster" else "Upload Poster",
+                                                style = MaterialTheme.typography.labelMedium
+                                            )
+                                        }
                                     }
                                 }
                             }
