@@ -71,7 +71,7 @@ fun ZoomableImageDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .wrapContentHeight()
                     .align(Alignment.Center)
                     .graphicsLayer(
                         scaleX = animatedScale,
@@ -122,7 +122,8 @@ fun ZoomableImageDialog(
                     model = imageUrl,
                     contentDescription = "Zoomable Image",
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
+                        .wrapContentHeight()
                         .graphicsLayer(
                             scaleX = scale.value,
                             scaleY = scale.value,

@@ -51,6 +51,9 @@ object RetrofitClient {
             if (cachedSessionManager === sessionManager && cachedClient != null) {
                 cachedClient!!
             } else {
+                val loggingInterceptor = okhttp3.logging.HttpLoggingInterceptor().apply {
+                    level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+                }
                 OkHttpClient.Builder()
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
@@ -61,6 +64,7 @@ object RetrofitClient {
                     .addInterceptor(
                         TokenValidationInterceptor(authManager)
                     )
+                    .addInterceptor(loggingInterceptor)
                     .build()
                     .also {
                         cachedClient = it

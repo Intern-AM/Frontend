@@ -318,6 +318,18 @@ fun CampaignDetailScreen(
                         val isLoadingSchedule = viewModel.isLoadingSchedule
                         val isUpdatingSchedule = viewModel.isUpdatingSchedule
 
+                        val postedPlatforms = scheduleState?.platforms
+                            ?.filter { it.status.equals("Posted", ignoreCase = true) }
+                            ?.map { it.platform.lowercase() }
+                            ?.toSet() ?: emptySet()
+
+                        val unpostedPlatforms = scheduleState?.platforms
+                            ?.filter { !it.status.equals("Posted", ignoreCase = true) }
+                            ?: emptyList()
+
+                        val isCompletelyPosted = campaign.status.equals("Posted", ignoreCase = true) ||
+                                (scheduleState != null && scheduleState.platforms.isNotEmpty() && scheduleState.platforms.all { it.status.equals("Posted", ignoreCase = true) })
+
                         if (campaign.status.equals("Approved", ignoreCase = true)) {
                             Card(
                                 shape = RoundedCornerShape(20.dp),
@@ -341,10 +353,7 @@ fun CampaignDetailScreen(
                                             style = MaterialTheme.typography.titleMedium
                                         )
 
-                                        val canModifySchedule = campaign.status.equals("Approved", ignoreCase = true) &&
-                                                (scheduleState == null || scheduleState.platforms.all {
-                                                    it.status.equals("Scheduled", ignoreCase = true)
-                                                })
+                                        val canModifySchedule = campaign.status.equals("Approved", ignoreCase = true) && !isCompletelyPosted
 
                                         if (canModifySchedule && !isUpdatingSchedule) {
                                             IconButton(onClick = { showEditScheduleDialog = true }) {
@@ -368,13 +377,13 @@ fun CampaignDetailScreen(
                                         ) {
                                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                                         }
-                                    } else if (scheduleState != null) {
-                                        scheduleState.platforms.forEachIndexed { index, platformInfo ->
+                                    } else if (scheduleState != null && unpostedPlatforms.isNotEmpty()) {
+                                        unpostedPlatforms.forEachIndexed { index, platformInfo ->
                                             val platformTime = when {
-                                                platformInfo.platform.equals("LinkedIn", ignoreCase = true) -> scheduleState.schdtimeLinkedIn
-                                                platformInfo.platform.equals("Instagram", ignoreCase = true) -> scheduleState.schdtimeInstagram
-                                                platformInfo.platform.equals("Teams", ignoreCase = true) -> scheduleState.schdtimeTeams
-                                                platformInfo.platform.equals("Whatsapp", ignoreCase = true) || platformInfo.platform.equals("WhatsApp", ignoreCase = true) -> scheduleState.schdtimeWhatsapp
+                                                platformInfo.platform.contains("LinkedIn", ignoreCase = true) -> scheduleState.schdtimeLinkedIn
+                                                platformInfo.platform.contains("Instagram", ignoreCase = true) -> scheduleState.schdtimeInstagram
+                                                platformInfo.platform.contains("Teams", ignoreCase = true) -> scheduleState.schdtimeTeams
+                                                platformInfo.platform.contains("Whatsapp", ignoreCase = true) || platformInfo.platform.contains("WhatsApp", ignoreCase = true) -> scheduleState.schdtimeWhatsapp
                                                 else -> null
                                             }
 
@@ -439,7 +448,7 @@ fun CampaignDetailScreen(
                                                     )
                                                 }
                                             }
-                                            if (index < scheduleState.platforms.lastIndex) {
+                                            if (index < unpostedPlatforms.lastIndex) {
                                                 Box(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
@@ -450,7 +459,7 @@ fun CampaignDetailScreen(
                                         }
                                     } else {
                                         Text(
-                                            text = "No schedules configured. Tap edit to set up.",
+                                            text = if (isCompletelyPosted) "All scheduled posts have been published." else "No schedules configured. Tap edit to set up.",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = TextMuted
                                         )
@@ -465,17 +474,11 @@ fun CampaignDetailScreen(
                                 initialInstagram = scheduleState?.schdtimeInstagram,
                                 initialTeams = scheduleState?.schdtimeTeams,
                                 initialWhatsapp = scheduleState?.schdtimeWhatsapp,
+                                postedPlatforms = postedPlatforms,
                                 onDismiss = { showEditScheduleDialog = false },
-                                onSave = { lTime, iTime, tTime, wTime ->
+                                onSave = { request ->
                                     showEditScheduleDialog = false
-                                    viewModel.updateSchedule(
-                                        UpdateScheduleRequest(
-                                            schdtimeLinkedIn = lTime,
-                                            schdtimeInstagram = iTime,
-                                            schdtimeTeams = tTime,
-                                            schdtimeWhatsapp = wTime
-                                        )
-                                    ) {
+                                    viewModel.updateSchedule(request) {
                                         Toast.makeText(context, "Schedules updated successfully", Toast.LENGTH_SHORT).show()
                                     }
                                 }
@@ -747,8 +750,9 @@ fun EditScheduleDialog(
     initialInstagram: String?,
     initialTeams: String?,
     initialWhatsapp: String?,
+    postedPlatforms: Set<String> = emptySet(),
     onDismiss: () -> Unit,
-    onSave: (String?, String?, String?, String?) -> Unit
+    onSave: (UpdateScheduleRequest) -> Unit
 ) {
     val context = LocalContext.current
     var linkedInTime by remember { mutableStateOf(initialLinkedIn) }
@@ -768,7 +772,7 @@ fun EditScheduleDialog(
             else -> null
         }?.let {
             try {
-                Instant.parse(it).toEpochMilli()
+                java.time.OffsetDateTime.parse(it).toInstant().toEpochMilli()
             } catch (e: Exception) {
                 null
             }
@@ -800,7 +804,7 @@ fun EditScheduleDialog(
                                 else -> null
                             }?.let {
                                 try {
-                                    LocalDateTime.ofInstant(Instant.parse(it), ZoneId.of("Asia/Kolkata"))
+                                    java.time.OffsetDateTime.parse(it).atZoneSameInstant(ZoneId.of("Asia/Kolkata")).toLocalDateTime()
                                 } catch (e: Exception) {
                                     null
                                 }
@@ -811,13 +815,17 @@ fun EditScheduleDialog(
                                 { _, hour, minute ->
                                     val localDateTime = LocalDateTime.of(localDate, LocalTime.of(hour, minute))
                                     val istZonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Kolkata"))
-                                    val isoString = istZonedDateTime.toInstant().toString()
-                                    
-                                    when (activePickerPlatform) {
-                                        "LinkedIn" -> linkedInTime = isoString
-                                        "Instagram" -> instagramTime = isoString
-                                        "Teams" -> teamsTime = isoString
-                                        "Whatsapp" -> whatsappTime = isoString
+                                    val instant = istZonedDateTime.toInstant()
+                                    if (instant.isBefore(Instant.now())) {
+                                        Toast.makeText(context, "Schedule time cannot be in the past", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        val isoString = instant.toString()
+                                        when (activePickerPlatform) {
+                                            "LinkedIn" -> linkedInTime = isoString
+                                            "Instagram" -> instagramTime = isoString
+                                            "Teams" -> teamsTime = isoString
+                                            "Whatsapp" -> whatsappTime = isoString
+                                        }
                                     }
                                     activePickerPlatform = null
                                 },
@@ -867,12 +875,16 @@ fun EditScheduleDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val platforms = listOf(
+                val allPlatforms = listOf(
                     Triple("LinkedIn", "LinkedIn", linkedInTime),
                     Triple("Instagram", "Instagram", instagramTime),
                     Triple("Teams", "MS Teams Group", teamsTime),
                     Triple("Whatsapp", "WhatsApp Channel", whatsappTime)
                 )
+
+                val platforms = allPlatforms.filter { (key, _, _) ->
+                    key.lowercase() !in postedPlatforms
+                }
 
                 platforms.forEach { (platformKey, platformLabel, currentTime) ->
                     Column(
@@ -947,10 +959,26 @@ fun EditScheduleDialog(
             }
         },
         confirmButton = {
-            val isSaveEnabled = linkedInTime != null || instagramTime != null || teamsTime != null || whatsappTime != null
+            val hasLinkedInChanged = linkedInTime != initialLinkedIn
+            val hasInstagramChanged = instagramTime != initialInstagram
+            val hasTeamsChanged = teamsTime != initialTeams
+            val hasWhatsappChanged = whatsappTime != initialWhatsapp
+            val isSaveEnabled = hasLinkedInChanged || hasInstagramChanged || hasTeamsChanged || hasWhatsappChanged
+
             Button(
                 onClick = {
-                    onSave(linkedInTime, instagramTime, teamsTime, whatsappTime)
+                    onSave(
+                        UpdateScheduleRequest(
+                            schdtimeLinkedIn = linkedInTime,
+                            schdtimeInstagram = instagramTime,
+                            schdtimeTeams = teamsTime,
+                            schdtimeWhatsapp = whatsappTime,
+                            isLinkedInModified = hasLinkedInChanged,
+                            isInstagramModified = hasInstagramChanged,
+                            isTeamsModified = hasTeamsChanged,
+                            isWhatsappModified = hasWhatsappChanged
+                        )
+                    )
                 },
                 enabled = isSaveEnabled,
                 shape = RoundedCornerShape(20.dp),

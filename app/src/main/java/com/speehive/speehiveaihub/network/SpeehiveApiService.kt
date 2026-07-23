@@ -68,10 +68,11 @@ interface SpeehiveApiService {
         @Path("eventId") eventId: String
     ): CampaignScheduleResponse
 
-    @PUT("api/Approval/{eventId}/schedule")
-    suspend fun updateCampaignSchedule(
+    @PUT("api/Approval/{eventId}/schedule/{platform}")
+    suspend fun updatePlatformSchedule(
         @Path("eventId") eventId: String,
-        @Body request: UpdateScheduleRequest
+        @Path("platform") platform: String,
+        @Body request: UpdatePlatformScheduleRequest
     ): retrofit2.Response<Unit>
 
     // Designer
@@ -104,4 +105,9 @@ interface SpeehiveApiService {
         @Path("provider") provider: String,
         @Body request: UpdateSocialMediaCredentialRequest
     ): retrofit2.Response<Unit>
+
+    @GET("api/platform-postings/{campaignId}")
+    suspend fun getPlatformPostings(
+        @Path("campaignId") campaignId: String
+    ): retrofit2.Response<List<PlatformPostingResponse>>
 }
