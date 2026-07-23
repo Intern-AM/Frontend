@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
 
     private const val BASE_URL =
-        "https://debian.tailbd6bc8.ts.net/"
+        "https://debian.tailbd6bc8.ts.net:8443/"
 
     fun getFormattedImageUrl(url: String?): String? {
         if (url.isNullOrBlank()) return null
