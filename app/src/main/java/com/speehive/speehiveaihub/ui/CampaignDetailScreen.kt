@@ -493,6 +493,116 @@ fun CampaignDetailScreen(
                             )
                         }
 
+                        // AI Creative Image Prompt Card (Always visible with Copy Prompt button)
+                        Card(
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = CardSurface
+                            ),
+                            border = BorderStroke(1.dp, CardBorder)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { showImagePromptDropdown = !showImagePromptDropdown },
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .background(PulseBlue.copy(alpha = 0.15f), RoundedCornerShape(10.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Lightbulb,
+                                                contentDescription = null,
+                                                tint = PulseBlue,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Column {
+                                            Text(
+                                                text = "AI CREATIVE IMAGE PROMPT",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = PulseBlue
+                                            )
+                                            Text(
+                                                text = if (showImagePromptDropdown) "Tap to collapse" else "Tap to view full prompt details",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = TextSecondary
+                                            )
+                                        }
+                                    }
+
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Button(
+                                            onClick = {
+                                                val promptToCopy = campaign.imagePrompt
+                                                if (!promptToCopy.isNullOrBlank()) {
+                                                    clipboardManager.setText(AnnotatedString(promptToCopy))
+                                                    Toast.makeText(context, "Image prompt copied to clipboard!", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    Toast.makeText(context, "No image prompt available for this campaign", Toast.LENGTH_SHORT).show()
+                                                }
+                                            },
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = PulseBlue.copy(alpha = 0.15f),
+                                                contentColor = PulseBlue
+                                            ),
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.ContentCopy,
+                                                contentDescription = "Copy Image Prompt",
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = "Copy",
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        }
+
+                                        IconButton(onClick = { showImagePromptDropdown = !showImagePromptDropdown }) {
+                                            Icon(
+                                                imageVector = if (showImagePromptDropdown) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                                contentDescription = null,
+                                                tint = TextSecondary
+                                            )
+                                        }
+                                    }
+                                }
+
+                                if (showImagePromptDropdown) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(AppBackground, RoundedCornerShape(12.dp))
+                                            .padding(12.dp)
+                                    ) {
+                                        Text(
+                                            text = if (!campaign.imagePrompt.isNullOrBlank()) campaign.imagePrompt else "No image prompt available for this campaign.",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = TextPrimary
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         // Campaign Image Card with Upload / Replace Button
                         Card(
                             shape = RoundedCornerShape(20.dp),
@@ -504,93 +614,10 @@ fun CampaignDetailScreen(
                             Column(
                                 modifier = Modifier.padding(20.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Campaign Poster",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-
-                                    Box {
-                                        OutlinedButton(
-                                            onClick = { showImagePromptDropdown = !showImagePromptDropdown },
-                                            shape = RoundedCornerShape(12.dp),
-                                            colors = ButtonDefaults.outlinedButtonColors(
-                                                contentColor = PulseBlue
-                                            ),
-                                            border = BorderStroke(1.dp, PulseBlue.copy(alpha = 0.5f)),
-                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Lightbulb,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                text = "Image Prompt",
-                                                style = MaterialTheme.typography.labelMedium
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Icon(
-                                                imageVector = if (showImagePromptDropdown) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-
-                                        DropdownMenu(
-                                            expanded = showImagePromptDropdown,
-                                            onDismissRequest = { showImagePromptDropdown = false },
-                                            modifier = Modifier
-                                                .widthIn(min = 260.dp, max = 320.dp)
-                                                .background(CardSurface)
-                                                .padding(12.dp)
-                                        ) {
-                                            Column(modifier = Modifier.padding(4.dp)) {
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        text = "Prompt Details",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = TextSecondary
-                                                    )
-                                                    IconButton(
-                                                        onClick = {
-                                                            val promptToCopy = campaign.imagePrompt
-                                                            if (promptToCopy.isNotBlank()) {
-                                                                clipboardManager.setText(AnnotatedString(promptToCopy))
-                                                                Toast.makeText(context, "Image prompt copied to clipboard", Toast.LENGTH_SHORT).show()
-                                                            } else {
-                                                                Toast.makeText(context, "No prompt available to copy", Toast.LENGTH_SHORT).show()
-                                                            }
-                                                        },
-                                                        modifier = Modifier.size(28.dp)
-                                                    ) {
-                                                        Icon(
-                                                            imageVector = Icons.Default.ContentCopy,
-                                                            contentDescription = "Copy Image Prompt",
-                                                            tint = PulseBlue,
-                                                            modifier = Modifier.size(18.dp)
-                                                        )
-                                                    }
-                                                }
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    text = if (campaign.imagePrompt.isNotBlank()) campaign.imagePrompt else "No image prompt available.",
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = TextPrimary
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
+                                Text(
+                                    text = "Campaign Poster",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
 
                                 Spacer(modifier = Modifier.height(12.dp))
 
