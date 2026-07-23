@@ -5,6 +5,7 @@ import android.net.Uri
 import com.speehive.speehiveaihub.data.AuthManager
 import com.speehive.speehiveaihub.data.SessionManager
 import com.speehive.speehiveaihub.models.Campaign
+import com.speehive.speehiveaihub.models.PlatformPosting
 import com.speehive.speehiveaihub.network.ApprovalRequest
 import com.speehive.speehiveaihub.network.EditCampaignRequest
 import com.speehive.speehiveaihub.network.RetrofitClient
@@ -31,26 +32,22 @@ class ApiCampaignRepository(
     override suspend fun approveCampaign(
         eventId: String,
         comments: String
-    ): Result<Unit> = safeApiCall {
-        api.approveCampaign(
-            ApprovalRequest(
-                eventId = eventId,
-                comments = comments
-            )
-        ).toResult().map { }
-    }
+    ): Result<Unit> = api.approveCampaign(
+        ApprovalRequest(
+            eventId = eventId,
+            comments = comments
+        )
+    ).toResult().map { }
 
     override suspend fun rejectCampaign(
         eventId: String,
         comments: String
-    ): Result<Unit> = safeApiCall {
-        api.rejectCampaign(
-            ApprovalRequest(
-                eventId = eventId,
-                comments = comments
-            )
-        ).toResult().map { }
-    }
+    ): Result<Unit> = api.rejectCampaign(
+        ApprovalRequest(
+            eventId = eventId,
+            comments = comments
+        )
+    ).toResult().map { }
 
     override suspend fun uploadCampaignImage(
         eventId: String,
@@ -72,25 +69,45 @@ class ApiCampaignRepository(
         eventId: String,
         campaignPost: String,
         hashtags: String
-    ): Result<Unit> = safeApiCall {
-        api.editCampaign(
-            eventId,
-            EditCampaignRequest(
-                campaignPost = campaignPost,
-                hashtags = hashtags
-            )
-        ).toResult()
-    }
+    ): Result<Unit> = api.editCampaign(
+        eventId,
+        EditCampaignRequest(
+            campaignPost = campaignPost,
+            hashtags = hashtags
+        )
+    ).toResult()
 
     override suspend fun getCampaignSchedule(eventId: String): Result<CampaignScheduleResponse> = safeApiCall {
         api.getCampaignSchedule(eventId)
     }
 
-    override suspend fun updateCampaignSchedule(
+    override suspend fun updatePlatformSchedule(
         eventId: String,
-        request: UpdateScheduleRequest
-    ): Result<Unit> = safeApiCall {
-        api.updateCampaignSchedule(eventId, request).toResult()
+        platform: String,
+        scheduledTime: String?
+    ): Result<Unit> = api.updatePlatformSchedule(
+        eventId = eventId,
+        platform = platform,
+        request = com.speehive.speehiveaihub.network.UpdatePlatformScheduleRequest(scheduledTime)
+    ).toResult()
+
+    override suspend fun getPlatformPostings(eventId: String): Result<List<PlatformPosting>> = safeApiCall {
+        val response = api.getPlatformPostings(eventId)
+        if (response.code() == 404 || response.body() == null) {
+            emptyList()
+        } else if (response.isSuccessful) {
+            response.body()!!.map { dto ->
+                PlatformPosting(
+                    platform = dto.platform,
+                    status = dto.status,
+                    createdAt = dto.createdAt,
+                    postedAt = dto.postedAt,
+                    errorMessage = dto.errorMessage
+                )
+            }
+        } else {
+            emptyList()
+        }
     }
 }
 

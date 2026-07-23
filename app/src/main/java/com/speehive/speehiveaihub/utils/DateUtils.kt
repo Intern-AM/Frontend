@@ -25,9 +25,14 @@ fun formatCampaignDate(dateString: String): String = formatDate(dateString)
 fun formatNotificationDate(dateString: String): String {
     return try {
         val date = OffsetDateTime.parse(dateString).atZoneSameInstant(istZone)
-        date.format(DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.US))
+        date.format(DateTimeFormatter.ofPattern("dd MMM yyyy • hh:mm a", Locale.US))
     } catch (e: Exception) {
-        dateString
+        try {
+            val date = java.time.Instant.parse(dateString).atZone(istZone)
+            date.format(DateTimeFormatter.ofPattern("dd MMM yyyy • hh:mm a", Locale.US))
+        } catch (e2: Exception) {
+            dateString
+        }
     }
 }
 

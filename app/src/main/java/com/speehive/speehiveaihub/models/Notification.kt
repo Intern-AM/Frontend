@@ -5,7 +5,10 @@ data class Notification(
     val title: String,
     val message: String,
     val timestamp: String,
-    val type: NotificationType
+    val type: NotificationType,
+    val eventId: String? = null,
+    val eventName: String? = null,
+    val platformPostings: List<PlatformPosting> = emptyList()
 )
 enum class NotificationType {
     REVIEW_REQUIRED,

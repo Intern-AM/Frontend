@@ -30,5 +30,11 @@ interface CampaignRepository {
 
     suspend fun getCampaignSchedule(eventId: String): Result<CampaignScheduleResponse>
 
-    suspend fun updateCampaignSchedule(eventId: String, request: UpdateScheduleRequest): Result<Unit>
+    suspend fun updatePlatformSchedule(
+        eventId: String,
+        platform: String,
+        scheduledTime: String?
+    ): Result<Unit>
+
+    suspend fun getPlatformPostings(eventId: String): Result<List<com.speehive.speehiveaihub.models.PlatformPosting>>
 }

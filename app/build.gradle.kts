@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(libs.androidx.workmanager)
+    implementation(libs.okhttp.logging.interceptor)
 
     testImplementation(libs.junit)
 
