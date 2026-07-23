@@ -38,6 +38,12 @@ import com.speehive.speehiveaihub.network.UpdateScheduleRequest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import com.speehive.speehiveaihub.ui.components.statusColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,6 +54,7 @@ fun CampaignDetailScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
     LaunchedEffect(campaignId) {
         viewModel.loadCampaign(campaignId)
     }
@@ -55,6 +62,7 @@ fun CampaignDetailScreen(
     val campaign = viewModel.campaign
     val isLoading = viewModel.isLoading
     var showFullScreenImage by remember { mutableStateOf(false) }
+    var showImagePromptDropdown by remember { mutableStateOf(false) }
     val isProcessing = viewModel.isProcessing
     val errorMessage = viewModel.errorMessage
     var showEditScheduleDialog by remember { mutableStateOf(false) }
@@ -496,10 +504,93 @@ fun CampaignDetailScreen(
                             Column(
                                 modifier = Modifier.padding(20.dp)
                             ) {
-                                Text(
-                                    text = "Campaign Poster",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Campaign Poster",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+
+                                    Box {
+                                        OutlinedButton(
+                                            onClick = { showImagePromptDropdown = !showImagePromptDropdown },
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = ButtonDefaults.outlinedButtonColors(
+                                                contentColor = PulseBlue
+                                            ),
+                                            border = BorderStroke(1.dp, PulseBlue.copy(alpha = 0.5f)),
+                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Lightbulb,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = "Image Prompt",
+                                                style = MaterialTheme.typography.labelMedium
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Icon(
+                                                imageVector = if (showImagePromptDropdown) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+
+                                        DropdownMenu(
+                                            expanded = showImagePromptDropdown,
+                                            onDismissRequest = { showImagePromptDropdown = false },
+                                            modifier = Modifier
+                                                .widthIn(min = 260.dp, max = 320.dp)
+                                                .background(CardSurface)
+                                                .padding(12.dp)
+                                        ) {
+                                            Column(modifier = Modifier.padding(4.dp)) {
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = "Prompt Details",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = TextSecondary
+                                                    )
+                                                    IconButton(
+                                                        onClick = {
+                                                            val promptToCopy = campaign.imagePrompt
+                                                            if (promptToCopy.isNotBlank()) {
+                                                                clipboardManager.setText(AnnotatedString(promptToCopy))
+                                                                Toast.makeText(context, "Image prompt copied to clipboard", Toast.LENGTH_SHORT).show()
+                                                            } else {
+                                                                Toast.makeText(context, "No prompt available to copy", Toast.LENGTH_SHORT).show()
+                                                            }
+                                                        },
+                                                        modifier = Modifier.size(28.dp)
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.ContentCopy,
+                                                            contentDescription = "Copy Image Prompt",
+                                                            tint = PulseBlue,
+                                                            modifier = Modifier.size(18.dp)
+                                                        )
+                                                    }
+                                                }
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    text = if (campaign.imagePrompt.isNotBlank()) campaign.imagePrompt else "No image prompt available.",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = TextPrimary
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
 
                                 Spacer(modifier = Modifier.height(12.dp))
 

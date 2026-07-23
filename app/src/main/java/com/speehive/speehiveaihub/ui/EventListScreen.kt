@@ -327,4 +327,10 @@ fun FullEventCard(
             }
         }
     }
+
+    if (showZoomDialog) {
+        ZoomableImageDialog(imageUrl = event.designerImageUrl) {
+            showZoomDialog = false
+        }
+    }
 }
