@@ -220,8 +220,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       {/* Metric Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white space-y-1 shadow-lg shadow-blue-500/25 border border-blue-500/80">
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-100 font-mono">Active Campaigns</span>
-          <div className="text-3xl font-extrabold font-heading text-white">{campaigns.length}</div>
+          <span className="text-xs font-bold uppercase tracking-wider text-blue-100 font-mono">Active Events</span>
+          <div className="text-3xl font-extrabold font-heading text-white">{events.length}</div>
           <p className="text-[11px] text-blue-100 font-medium">Live in backend database</p>
         </div>
 
