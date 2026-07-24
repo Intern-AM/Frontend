@@ -70,6 +70,11 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
   };
 
   const filteredCampaigns = campaigns.filter((c) => {
+    // Exclude posted/published campaigns matching mobile app (CampaignListScreen.kt)
+    const statusLower = (c.status || '').toLowerCase();
+    const isPosted = statusLower === 'published' || statusLower === 'posted' || Boolean(c.postedAt);
+    if (isPosted) return false;
+
     const post = c.campaignPost || '';
     const tags = c.hashtags || '';
     const evtId = c.eventId || '';
@@ -155,8 +160,8 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
       ) : filteredCampaigns.length === 0 ? (
         <div className="deep-3d-card p-12 text-center bg-white/90">
           <Megaphone className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-slate-800">No campaigns found on server</h3>
-          <p className="text-xs text-slate-500 mt-1">There are currently 0 campaigns returned by GET /api/Campaigns.</p>
+          <h3 className="text-lg font-bold text-slate-800">No campaigns found</h3>
+          <p className="text-xs text-slate-500 mt-1">There are currently 0 active campaigns matching your filter.</p>
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

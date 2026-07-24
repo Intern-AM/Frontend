@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutGrid, List, AlignJustify } from 'lucide-react';
+import { LayoutGrid, List } from 'lucide-react';
 
-export type ViewMode = 'grid' | 'compact' | 'detailed';
+export type ViewMode = 'grid' | 'compact';
 
 interface ViewModeSwitcherProps {
   currentMode: ViewMode;
@@ -35,19 +35,6 @@ export const ViewModeSwitcher: React.FC<ViewModeSwitcherProps> = ({ currentMode,
       >
         <List className="w-4 h-4" />
         <span className="hidden sm:inline">Compact</span>
-      </button>
-
-      <button
-        onClick={() => onModeChange('detailed')}
-        className={`deep-3d-press flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-          currentMode === 'detailed'
-            ? 'bg-white text-blue-600 shadow-md border border-slate-200'
-            : 'text-slate-600 hover:text-slate-900'
-        }`}
-        title="Detailed View"
-      >
-        <AlignJustify className="w-4 h-4" />
-        <span className="hidden sm:inline">Detailed</span>
       </button>
     </div>
   );
