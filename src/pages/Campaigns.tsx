@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Megaphone, CheckCircle2 } from 'lucide-react';
+import { Search, Filter, Megaphone, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
 import { Campaign, SpeehiveEvent } from '../types';
 import { apiClient, getFormattedImageUrl } from '../api/client';
 import { StatusBadge } from '../components/StatusBadge';
 import { ViewModeSwitcher, ViewMode } from '../components/ViewModeSwitcher';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 interface CampaignsProps {
   onSelectCampaign: (eventId: string) => void;
@@ -12,6 +13,7 @@ interface CampaignsProps {
 
 export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
   const { role } = useAuth();
+  const { showToast } = useToast();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [eventTitleMap, setEventTitleMap] = useState<Map<string, string>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
@@ -34,17 +36,20 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
         setCampaigns(campaignData);
       } else {
         setCampaigns([]);
+        setErrorMessage('Could not load campaigns from backend server.');
       }
 
       if (eventRes.status === 'fulfilled') {
         const eventData: SpeehiveEvent[] = Array.isArray(eventRes.value.data) ? eventRes.value.data : [];
         const titleMap = new Map<string, string>();
-        eventData.forEach((e) => titleMap.set(e.id, e.title));
+        eventData.forEach((e) => {
+          if (e && e.id) titleMap.set(e.id, e.title || `Event #${e.id}`);
+        });
         setEventTitleMap(titleMap);
       }
     } catch (err: any) {
       console.error('API call failed:', err);
-      setErrorMessage('Failed to fetch campaigns from backend server.');
+      setErrorMessage(err.response?.data?.message || 'Failed to fetch campaigns from backend server.');
       setCampaigns([]);
     } finally {
       setIsLoading(false);
@@ -59,9 +64,11 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
     e.stopPropagation();
     try {
       await apiClient.post('/api/Approval/approve', { eventId, comments: 'Approved' });
+      showToast('Campaign approved successfully!', 'success');
       fetchCampaignsAndEvents();
     } catch (err: any) {
       console.error('Approve failed:', err);
+      showToast(err.response?.data?.message || 'Failed to approve campaign.', 'error');
     }
   };
 
@@ -70,6 +77,7 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
   };
 
   const filteredCampaigns = campaigns.filter((c) => {
+    if (!c) return false;
     // Exclude posted/published campaigns matching mobile app (CampaignListScreen.kt)
     const statusLower = (c.status || '').toLowerCase();
     const isPosted = statusLower === 'published' || statusLower === 'posted' || Boolean(c.postedAt);
@@ -92,7 +100,6 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
     return matchesSearch && matchesStatus;
   });
 
-  // Parity with CampaignListScreen.kt (ALL, GENERATED, APPROVED, REJECTED)
   const statuses = ['ALL', 'GENERATED', 'APPROVED', 'REJECTED'];
 
   return (
@@ -109,7 +116,13 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
           </p>
         </div>
 
-        <ViewModeSwitcher currentMode={viewMode} onModeChange={setViewMode} />
+        <div className="flex items-center gap-3">
+          <button onClick={fetchCampaignsAndEvents} className="deep-3d-press btn-secondary text-xs">
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <ViewModeSwitcher currentMode={viewMode} onModeChange={setViewMode} />
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -146,8 +159,14 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
       </div>
 
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-red-50 text-red-700 text-xs font-bold border border-red-200">
-          {errorMessage}
+        <div className="p-4 rounded-xl bg-red-50 text-red-700 text-xs font-bold border border-red-200 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            <span>{errorMessage}</span>
+          </div>
+          <button onClick={fetchCampaignsAndEvents} className="underline text-xs font-bold text-red-800">
+            Retry Connection
+          </button>
         </div>
       )}
 
@@ -210,7 +229,7 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-slate-400">
+                    <span className="text-[11px] font-semibold text-slate-400 font-mono">
                       {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'Live Data'}
                     </span>
 
