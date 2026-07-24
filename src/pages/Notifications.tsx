@@ -34,10 +34,11 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      // 1. Fetch Live Campaigns and Events directly from Backend Database
-      const [campaignRes, eventRes] = await Promise.allSettled([
+      // 1. Fetch Live Campaigns, Events, and Social Media Credentials from Backend
+      const [campaignRes, eventRes, credRes] = await Promise.allSettled([
         apiClient.get('/api/Campaigns'),
         apiClient.get('/api/Events'),
+        apiClient.get('/api/SocialMediaCredentials'),
       ]);
 
       const liveCampaigns: Campaign[] =
@@ -50,6 +51,11 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
           ? eventRes.value.data
           : [];
 
+      const credentialsList =
+        credRes.status === 'fulfilled' && Array.isArray(credRes.value.data)
+          ? credRes.value.data
+          : [];
+
       const eventIdToTitleMap = new Map<string, string>();
       liveEvents.forEach((e) => eventIdToTitleMap.set(e.id, e.title));
 
@@ -57,14 +63,14 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
       const lastViewedTime = lastViewedTimeStr ? new Date(lastViewedTimeStr).getTime() : 0;
 
       const campaignNotifications: NotificationItem[] = [];
-      const eventNotifications: NotificationItem[] = [];
+      const systemNotifications: NotificationItem[] = [];
 
       // 2. Process Cancelled Events (Normal Notification Card)
       liveEvents
         .filter((e) => e.status && e.status.toLowerCase() === 'cancelled')
         .forEach((e) => {
           const createdTime = e.startTime ? new Date(e.startTime).getTime() : 0;
-          eventNotifications.push({
+          systemNotifications.push({
             id: `evt-${e.id}`,
             title: e.title,
             message: 'Event has been cancelled',
@@ -76,7 +82,30 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
           });
         });
 
-      // 3. Process Live Campaigns from Backend
+      // 3. Process API Key Token Expiration System Reminders (Parity with NotificationWorker.kt)
+      credentialsList.forEach((cred: any) => {
+        if (!cred.expiresAt) return;
+        const expires = new Date(cred.expiresAt).getTime();
+        if (isNaN(expires)) return;
+        const diffDays = Math.ceil((expires - Date.now()) / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 7) {
+          const isExpired = diffDays <= 0;
+          systemNotifications.push({
+            id: `token-warning-${cred.provider}`,
+            title: `${cred.provider} Token Expiration Reminder`,
+            message: isExpired
+              ? `API token for ${cred.provider} HAS EXPIRED. Please update key in Dashboard.`
+              : `API token for ${cred.provider} expires in ${diffDays} ${diffDays === 1 ? 'day' : 'days'}. Please update key in Dashboard.`,
+            timestamp: cred.expiresAt,
+            type: 'REVIEW_REQUIRED',
+            isRead: false,
+            platformPostings: [],
+          });
+        }
+      });
+
+      // 4. Process Live Campaigns from Backend
       await Promise.all(
         liveCampaigns.map(async (campaign) => {
           const displayTitle = eventIdToTitleMap.get(campaign.eventId) || `Campaign #${campaign.campaignId}`;
@@ -169,7 +198,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
       );
 
       // Sort by timestamp descending
-      const sorted = [...campaignNotifications, ...eventNotifications].sort((a, b) => {
+      const sorted = [...campaignNotifications, ...systemNotifications].sort((a, b) => {
         const timeA = new Date(a.timestamp).getTime();
         const timeB = new Date(b.timestamp).getTime();
         return timeB - timeA;
