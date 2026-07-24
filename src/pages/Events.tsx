@@ -111,7 +111,7 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
       ) : (
         <div className="space-y-6">
           {events.map((event) => {
-            const formattedPosterUrl = getFormattedImageUrl(event.designerImageUrl);
+            const formattedPosterUrl = getFormattedImageUrl(event.imageUrl);
             const isPending = event.status && event.status.toLowerCase() === 'pending';
             const isGenerated = event.status && event.status.toLowerCase() === 'generated';
 

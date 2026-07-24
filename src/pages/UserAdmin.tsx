@@ -75,14 +75,7 @@ export const UserAdmin: React.FC = () => {
       fetchUsers();
     } catch (err: any) {
       console.warn('Backend user creation error:', err);
-      const serverErr =
-        err.response?.data?.message ||
-        err.response?.data?.title ||
-        err.response?.data ||
-        err.message ||
-        'Failed to create user on backend';
 
-      // Fallback local user creation to prevent blocking admin workflows
       const newUser: User = {
         id: `usr-local-${Date.now()}`,
         name: displayName,
@@ -130,7 +123,7 @@ export const UserAdmin: React.FC = () => {
   const totalUsers = users.length;
   const activeUsers = users.filter((u) => u.isActive).length;
   const inactiveUsers = users.filter((u) => !u.isActive).length;
-  const designerUsers = users.filter((u) => (u.role || '').toLowerCase() === 'designer').length;
+  const reviewerUsers = users.filter((u) => (u.role || '').toLowerCase() === 'reviewer').length;
   const adminUsers = users.filter((u) => (u.role || '').toLowerCase() === 'admin').length;
 
   return (
@@ -143,7 +136,7 @@ export const UserAdmin: React.FC = () => {
             <span>User Administration</span>
           </h1>
           <p className="text-sm font-medium text-slate-500 mt-1">
-            Manage user accounts, assign roles (Admin / Reviewer / Designer), and control platform access
+            Manage user accounts, assign roles (Admin / Reviewer), and control platform access
           </p>
         </div>
 
@@ -170,7 +163,7 @@ export const UserAdmin: React.FC = () => {
       )}
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="deep-3d-card p-4 bg-white text-center">
           <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Users</p>
           <h3 className="text-2xl font-extrabold text-slate-900 mt-1 font-heading">{totalUsers}</h3>
@@ -179,13 +172,9 @@ export const UserAdmin: React.FC = () => {
           <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Active</p>
           <h3 className="text-2xl font-extrabold text-emerald-600 mt-1 font-heading">{activeUsers}</h3>
         </div>
-        <div className="deep-3d-card p-4 bg-red-50 border border-red-200 text-center">
-          <p className="text-xs font-bold text-red-700 uppercase tracking-wider">Inactive</p>
-          <h3 className="text-2xl font-extrabold text-red-600 mt-1 font-heading">{inactiveUsers}</h3>
-        </div>
         <div className="deep-3d-card p-4 bg-blue-50 border border-blue-200 text-center">
-          <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Designers</p>
-          <h3 className="text-2xl font-extrabold text-blue-600 mt-1 font-heading">{designerUsers}</h3>
+          <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Reviewers</p>
+          <h3 className="text-2xl font-extrabold text-blue-600 mt-1 font-heading">{reviewerUsers}</h3>
         </div>
         <div className="deep-3d-card p-4 bg-purple-50 border border-purple-200 text-center">
           <p className="text-xs font-bold text-purple-700 uppercase tracking-wider">Admins</p>
@@ -325,7 +314,6 @@ export const UserAdmin: React.FC = () => {
                 >
                   <option value="Reviewer">Reviewer (Campaigns & Scheduling)</option>
                   <option value="Admin">Admin (Full System Access)</option>
-                  <option value="Designer">Designer (Graphics & Collateral)</option>
                 </select>
               </div>
 

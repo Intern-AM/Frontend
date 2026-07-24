@@ -57,8 +57,8 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     formData.append('image', selectedFile);
 
     const endpoint = type === 'campaign'
-      ? `/api/designer/campaigns/${eventId}/image`
-      : `/api/designer/events/${eventId}/image`;
+      ? `/api/Campaigns/${eventId}/image`
+      : `/api/Events/${eventId}/image`;
 
     try {
       const response = await apiClient.post(endpoint, formData, {
