@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const SERVER_ORIGIN = 'https://debian.tailbd6bc8.ts.net:8443/';
+export const SERVER_ORIGIN = 'https://debian.tailbd6bc8.ts.net/';
 
 // In Vite dev mode, route via proxy /api, otherwise use SERVER_ORIGIN
 export const BASE_URL = import.meta.env.DEV ? '' : SERVER_ORIGIN;
