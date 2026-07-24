@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-export const SERVER_ORIGIN = 'https://debian.tailbd6bc8.ts.net/';
+export const SERVER_ORIGIN = import.meta.env.VITE_API_BASE_URL || 'https://debian.tailbd6bc8.ts.net/';
 
-// In Vite dev mode, route via proxy /api, otherwise use SERVER_ORIGIN
-export const BASE_URL = import.meta.env.DEV ? '' : SERVER_ORIGIN;
+// In Vite dev mode or Vercel edge proxy, route via relative base URL if configured, otherwise use SERVER_ORIGIN
+export const BASE_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_BASE_URL || SERVER_ORIGIN);
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
