@@ -131,12 +131,6 @@ export const Login: React.FC = () => {
               )}
             </button>
           </form>
-
-          <div className="mt-6 pt-4 border-t border-slate-200 text-center">
-            <p className="text-[11px] text-slate-500 font-medium font-mono">
-              Connected to backend: https://debian.tailbd6bc8.ts.net/
-            </p>
-          </div>
         </div>
       </div>
     </div>

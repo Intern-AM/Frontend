@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Megaphone, Calendar, Clock, Key, ChevronRight, MapPin, AlertTriangle, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Megaphone, Calendar, Clock, Key, ChevronRight, MapPin, AlertTriangle, RefreshCw, AlertCircle } from 'lucide-react';
 import { Campaign, SpeehiveEvent, SocialMediaCredential } from '../types';
 import { apiClient } from '../api/client';
 import { StatusBadge } from '../components/StatusBadge';
@@ -29,7 +29,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       id: 'cred-1',
       provider: 'LinkedIn',
       maskedToken: 'pk_live_9921827419',
-      expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days left
+      expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
       isActive: true,
       updatedAt: '2026-07-20T10:00:00Z',
     },
@@ -139,6 +139,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     return status === 'generated' || status === 'approved' || status === 'active';
   });
 
+  // Count of Posted Campaigns/Events directly from database
+  const postedEventsCount = campaigns.filter((c) => {
+    const status = (c.status || '').toLowerCase();
+    return status === 'published' || status === 'posted' || Boolean(c.postedAt);
+  }).length;
+
   // Upcoming Active Events
   const upcomingEvents = events.filter((e) => {
     const status = (e.status || '').toLowerCase();
@@ -183,7 +189,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* API CREDENTIALS EXPIRING SOON BANNER (Parity with AdminSettingsScreen.kt) */}
+      {/* API CREDENTIALS EXPIRING SOON BANNER */}
       {expiringCredentials.length > 0 && (
         <div className="deep-3d-card p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/5 border border-amber-300 space-y-2">
           <div className="flex items-center gap-2 text-amber-700 font-extrabold text-xs uppercase tracking-wider">
@@ -226,9 +232,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
 
         <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 text-white space-y-1 shadow-lg shadow-emerald-500/25 border border-emerald-500/80">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-100 font-mono">Synced Events</span>
-          <div className="text-3xl font-extrabold font-heading text-white">{upcomingEvents.length}</div>
-          <p className="text-[11px] text-emerald-100 font-medium">Upcoming schedule events</p>
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-100 font-mono">Posted Events</span>
+          <div className="text-3xl font-extrabold font-heading text-white">{postedEventsCount}</div>
+          <p className="text-[11px] text-emerald-100 font-medium">Published to social media</p>
         </div>
       </div>
 
@@ -349,9 +355,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               Admin configuration for OAuth access tokens, API keys, expiration dates, and active status
             </p>
           </div>
-          <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 self-start sm:self-auto">
-            RBAC Token Protection Active
-          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
