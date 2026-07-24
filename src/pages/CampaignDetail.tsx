@@ -158,7 +158,7 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
     if (!campaign) return;
     setIsProcessing(true);
     try {
-      await apiClient.put(`/api/designer/campaigns/${campaign.eventId}`, {
+      await apiClient.put(`/api/Campaigns/${campaign.eventId}`, {
         campaignPost: editCampaignPost,
         hashtags: editHashtags,
       });

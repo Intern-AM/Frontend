@@ -1,4 +1,4 @@
-export type UserRole = 'Admin' | 'Reviewer' | 'Designer';
+export type UserRole = 'Admin' | 'Reviewer';
 
 export type CampaignStatus = 'Active' | 'Generated' | 'Approved' | 'Rejected' | 'Published' | string;
 
@@ -41,7 +41,7 @@ export interface SpeehiveEvent {
   eventType: string;
   status: string;
   approvalDeadline?: string | null;
-  designerImageUrl?: string | null;
+  imageUrl?: string | null;
 }
 
 export interface PlatformPosting {
