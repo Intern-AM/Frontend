@@ -24,50 +24,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [isConnected, setIsConnected] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const defaultCredentials: SocialMediaCredential[] = [
-    {
-      id: 'cred-1',
-      provider: 'LinkedIn',
-      maskedToken: 'pk_live_9921827419',
-      expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-      isActive: true,
-      updatedAt: '2026-07-20T10:00:00Z',
-    },
-    {
-      id: 'cred-2',
-      provider: 'Instagram',
-      maskedToken: 'ig_live_4492810481',
-      expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-      isActive: true,
-      updatedAt: '2026-07-10T14:00:00Z',
-    },
-    {
-      id: 'cred-3',
-      provider: 'Teams',
-      maskedToken: 'ms_live_8830192841',
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      isActive: true,
-      updatedAt: '2026-07-01T09:00:00Z',
-    },
-    {
-      id: 'cred-4',
-      provider: 'WhatsApp',
-      maskedToken: 'wa_live_7719203841',
-      expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
-      isActive: true,
-      updatedAt: '2026-07-01T09:00:00Z',
-    },
-  ];
-
   const fetchDashboardData = async () => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const [campaignRes, eventRes, credRes] = await Promise.allSettled([
+      const promises: Promise<any>[] = [
         apiClient.get('/api/Campaigns'),
         apiClient.get('/api/Events'),
-        apiClient.get('/api/SocialMediaCredentials'),
-      ]);
+      ];
+
+      if (role === 'Admin') {
+        promises.push(apiClient.get('/api/SocialMediaCredentials'));
+      }
+
+      const results = await Promise.allSettled(promises);
+      const campaignRes = results[0];
+      const eventRes = results[1];
+      const credRes = role === 'Admin' ? results[2] : null;
 
       if (campaignRes.status === 'fulfilled') {
         setCampaigns(Array.isArray(campaignRes.value.data) ? campaignRes.value.data : []);
@@ -87,15 +60,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         setEvents([]);
       }
 
-      if (credRes.status === 'fulfilled' && Array.isArray(credRes.value.data) && credRes.value.data.length > 0) {
+      if (credRes && credRes.status === 'fulfilled' && Array.isArray(credRes.value.data)) {
         setCredentials(credRes.value.data);
       } else {
-        setCredentials(defaultCredentials);
+        setCredentials([]);
       }
     } catch (err: any) {
       console.error('Failed to fetch live dashboard data:', err);
       setErrorMessage('Operating with local fallback states due to API connection warning.');
-      setCredentials(defaultCredentials);
+      setCredentials([]);
       setIsConnected(false);
     } finally {
       setIsLoading(false);
@@ -104,7 +77,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [role]);
 
   const getEventName = (eventId: string) => {
     return eventTitleMap.get(eventId) || `Event: ${eventId}`;
@@ -151,12 +124,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     return status !== 'cancelled';
   });
 
-  // Credentials expiring within 7 days or expired
-  const expiringCredentials = credentials.filter((c) => {
+  // Credentials expiring within 7 days or expired (Admin Only)
+  const expiringCredentials = role === 'Admin' ? credentials.filter((c) => {
     if (!c.expiresAt) return false;
     const daysLeft = getDaysUntilExpiration(c.expiresAt);
     return daysLeft !== null && daysLeft <= 7;
-  });
+  }) : [];
 
   return (
     <div className="space-y-6 pb-12">
@@ -167,7 +140,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             Dashboard Overview
           </h1>
           <p className="text-sm font-medium text-slate-500 mt-1">
-            Real-time campaign management, event syncing, and API key token administration
+            Real-time campaign management, event syncing, and platform overview
           </p>
         </div>
         <div className="flex items-center gap-3 self-start sm:self-auto">
@@ -189,8 +162,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* API CREDENTIALS EXPIRING SOON BANNER */}
-      {expiringCredentials.length > 0 && (
+      {/* API CREDENTIALS EXPIRING SOON BANNER (Admin Only) */}
+      {role === 'Admin' && expiringCredentials.length > 0 && (
         <div className="deep-3d-card p-5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/5 border border-amber-300 space-y-2">
           <div className="flex items-center gap-2 text-amber-700 font-extrabold text-xs uppercase tracking-wider">
             <AlertTriangle className="w-4 h-4 text-amber-600 animate-bounce" />
@@ -343,105 +316,107 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         )}
       </div>
 
-      {/* Section 3: ADMIN API KEY / OAUTH CREDENTIAL CONFIG MANAGER */}
-      <div className="deep-3d-card p-6 bg-white/90 space-y-4 overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 font-heading">
-              <Key className="w-5 h-5 text-blue-600" />
-              <span>Social Media API Credentials & Token Expiration Config</span>
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Admin configuration for OAuth access tokens, API keys, expiration dates, and active status
-            </p>
+      {/* Section 3: ADMIN API KEY / OAUTH CREDENTIAL CONFIG MANAGER (Admin Only) */}
+      {role === 'Admin' && (
+        <div className="deep-3d-card p-6 bg-white/90 space-y-4 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 font-heading">
+                <Key className="w-5 h-5 text-blue-600" />
+                <span>Social Media API Credentials & Token Expiration Config</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Admin configuration for OAuth access tokens, API keys, expiration dates, and active status
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {credentials.map((cred) => {
-            const rawToken = cred.maskedToken || '';
-            const shortToken =
-              rawToken.length > 8
-                ? `${rawToken.slice(0, 4)}****${rawToken.slice(-4)}`
-                : '****';
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {credentials.map((cred) => {
+              const rawToken = cred.maskedToken || '';
+              const shortToken =
+                rawToken.length > 8
+                  ? `${rawToken.slice(0, 4)}****${rawToken.slice(-4)}`
+                  : '****';
 
-            const daysLeft = getDaysUntilExpiration(cred.expiresAt);
-            const isExpired = daysLeft !== null && daysLeft <= 0;
-            const isExpiringSoon = daysLeft !== null && daysLeft > 0 && daysLeft <= 7;
+              const daysLeft = getDaysUntilExpiration(cred.expiresAt);
+              const isExpired = daysLeft !== null && daysLeft <= 0;
+              const isExpiringSoon = daysLeft !== null && daysLeft > 0 && daysLeft <= 7;
 
-            return (
-              <div
-                key={cred.id || cred.provider}
-                className={`p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 bg-white ${
-                  isExpired
-                    ? 'border-red-300 bg-red-50/30'
-                    : isExpiringSoon
-                    ? 'border-amber-300 bg-amber-50/30'
-                    : 'border-slate-200 hover:border-blue-300'
-                }`}
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-extrabold text-base text-slate-900">{cred.provider}</h4>
-                    <div className="flex items-center gap-1.5">
-                      {isExpired ? (
-                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-red-100 text-red-700 border border-red-300 animate-pulse uppercase">
-                          EXPIRED
+              return (
+                <div
+                  key={cred.id || cred.provider}
+                  className={`p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 bg-white ${
+                    isExpired
+                      ? 'border-red-300 bg-red-50/30'
+                      : isExpiringSoon
+                      ? 'border-amber-300 bg-amber-50/30'
+                      : 'border-slate-200 hover:border-blue-300'
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-extrabold text-base text-slate-900">{cred.provider}</h4>
+                      <div className="flex items-center gap-1.5">
+                        {isExpired ? (
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-red-100 text-red-700 border border-red-300 animate-pulse uppercase">
+                            EXPIRED
+                          </span>
+                        ) : isExpiringSoon ? (
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 uppercase">
+                            EXPIRING SOON
+                          </span>
+                        ) : null}
+                        <span
+                          className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${
+                            cred.isActive
+                              ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                              : 'bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {cred.isActive ? 'ACTIVE' : 'INACTIVE'}
                         </span>
-                      ) : isExpiringSoon ? (
-                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 uppercase">
-                          EXPIRING SOON
-                        </span>
-                      ) : null}
-                      <span
-                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${
-                          cred.isActive
-                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                            : 'bg-slate-200 text-slate-600'
-                        }`}
-                      >
-                        {cred.isActive ? 'ACTIVE' : 'INACTIVE'}
-                      </span>
+                      </div>
                     </div>
+
+                    <p className="text-xs text-slate-500 font-mono">
+                      Token: <span className="font-bold text-slate-700">{shortToken}</span>
+                    </p>
+
+                    {cred.expiresAt && (
+                      <div className="text-[11px] font-semibold text-slate-600 space-y-0.5">
+                        <p>
+                          Expires:{' '}
+                          <span className="text-slate-800 font-bold font-mono">
+                            {formatEventDate(cred.expiresAt)}
+                          </span>
+                        </p>
+                        {daysLeft !== null && (
+                          <p className={`font-mono text-[10px] font-bold ${
+                            isExpired ? 'text-red-600' : isExpiringSoon ? 'text-amber-700' : 'text-slate-400'
+                          }`}>
+                            {isExpired
+                              ? '⚠️ Key expired! Please update token.'
+                              : `⏰ ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} remaining`}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <p className="text-xs text-slate-500 font-mono">
-                    Token: <span className="font-bold text-slate-700">{shortToken}</span>
-                  </p>
-
-                  {cred.expiresAt && (
-                    <div className="text-[11px] font-semibold text-slate-600 space-y-0.5">
-                      <p>
-                        Expires:{' '}
-                        <span className="text-slate-800 font-bold font-mono">
-                          {formatEventDate(cred.expiresAt)}
-                        </span>
-                      </p>
-                      {daysLeft !== null && (
-                        <p className={`font-mono text-[10px] font-bold ${
-                          isExpired ? 'text-red-600' : isExpiringSoon ? 'text-amber-700' : 'text-slate-400'
-                        }`}>
-                          {isExpired
-                            ? '⚠️ Key expired! Please update token.'
-                            : `⏰ ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} remaining`}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  <button
+                    onClick={() => setSelectedCred(cred)}
+                    className="deep-3d-press btn-primary py-2 justify-center text-xs font-bold w-full"
+                  >
+                    <Key className="w-3.5 h-3.5" />
+                    {rawToken ? 'Update Token & Expiration' : 'Add Token'}
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => setSelectedCred(cred)}
-                  className="deep-3d-press btn-primary py-2 justify-center text-xs font-bold w-full"
-                >
-                  <Key className="w-3.5 h-3.5" />
-                  {rawToken ? 'Update Token & Expiration' : 'Add Token'}
-                </button>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Update Credential Modal */}
       {selectedCred && (
