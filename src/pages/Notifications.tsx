@@ -59,7 +59,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
       const campaignNotifications: NotificationItem[] = [];
       const eventNotifications: NotificationItem[] = [];
 
-      // 2. Process Cancelled Events from Backend
+      // 2. Process Cancelled Events (Normal Notification Card)
       liveEvents
         .filter((e) => e.status && e.status.toLowerCase() === 'cancelled')
         .forEach((e) => {
@@ -72,66 +72,17 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
             type: 'EVENT_CANCELLED',
             isRead: createdTime <= lastViewedTime,
             eventId: e.id,
+            platformPostings: [],
           });
         });
 
-      // 3. Process Live Campaigns from Backend and fetch platform schedule times
+      // 3. Process Live Campaigns from Backend
       await Promise.all(
         liveCampaigns.map(async (campaign) => {
           const displayTitle = eventIdToTitleMap.get(campaign.eventId) || `Campaign #${campaign.campaignId}`;
           const status = (campaign.status || '').toLowerCase();
           const createdTime = campaign.createdAt ? new Date(campaign.createdAt).getTime() : 0;
           const isRead = createdTime <= lastViewedTime;
-
-          let postings: PlatformPosting[] = [];
-
-          try {
-            const schedRes = await apiClient.get(`/api/Approval/${campaign.eventId}/schedule`);
-            const data = schedRes.data || {};
-
-            const linkedInTime =
-              data.schdtimeLinkedIn || data.SchdtimeLinkedIn || data.schdtimeLinkedin || data.SchdTimeLinkedIn;
-            const instagramTime =
-              data.schdtimeInstagram || data.SchdtimeInstagram || data.schdtimeinstagram || data.SchdTimeInstagram;
-            const teamsTime =
-              data.schdtimeTeams || data.SchdtimeTeams || data.schdtimeteams || data.SchdTimeTeams;
-            const whatsappTime =
-              data.schdtimeWhatsapp || data.SchdtimeWhatsapp || data.schdtimeWhatsApp || data.SchdTimeWhatsapp;
-
-            const isPublished = status === 'published' || status === 'posted' || Boolean(campaign.postedAt);
-
-            postings = [
-              {
-                platform: 'LinkedIn',
-                status: isPublished ? 'Posted' : linkedInTime ? 'Scheduled' : 'Pending',
-                postedAt: linkedInTime || campaign.postedAt || campaign.createdAt,
-              },
-              {
-                platform: 'Instagram',
-                status: isPublished ? 'Posted' : instagramTime ? 'Posted' : 'Pending',
-                postedAt: instagramTime || campaign.postedAt || campaign.createdAt,
-              },
-              {
-                platform: 'Teams',
-                status: isPublished ? 'Posted' : teamsTime ? 'Posted' : 'Pending',
-                postedAt: teamsTime || campaign.postedAt || campaign.createdAt,
-              },
-              {
-                platform: 'WhatsApp',
-                status: isPublished ? 'Posted' : whatsappTime ? 'Posted' : 'Pending',
-                postedAt: whatsappTime || campaign.postedAt || campaign.createdAt,
-              },
-            ];
-          } catch (e) {
-            if (status === 'approved' || status === 'published' || status === 'posted') {
-              postings = [
-                { platform: 'LinkedIn', status: 'Scheduled', postedAt: campaign.createdAt },
-                { platform: 'Instagram', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
-                { platform: 'Teams', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
-                { platform: 'WhatsApp', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
-              ];
-            }
-          }
 
           let notifType: NotificationType | null = null;
           let notifMessage = '';
@@ -148,6 +99,57 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
           } else if (status === 'posted' || status === 'published') {
             notifType = 'PUBLISHED';
             notifMessage = 'Campaign posted to social media channels';
+          }
+
+          let postings: PlatformPosting[] = [];
+
+          // ONLY APPROVED or PUBLISHED notifications show platform postings matching mobile app logic
+          if (notifType === 'APPROVED' || notifType === 'PUBLISHED') {
+            try {
+              const schedRes = await apiClient.get(`/api/Approval/${campaign.eventId}/schedule`);
+              const data = schedRes.data || {};
+
+              const linkedInTime =
+                data.schdtimeLinkedIn || data.SchdtimeLinkedIn || data.schdtimeLinkedin || data.SchdTimeLinkedIn;
+              const instagramTime =
+                data.schdtimeInstagram || data.SchdtimeInstagram || data.schdtimeinstagram || data.SchdTimeInstagram;
+              const teamsTime =
+                data.schdtimeTeams || data.SchdtimeTeams || data.schdtimeteams || data.SchdTimeTeams;
+              const whatsappTime =
+                data.schdtimeWhatsapp || data.SchdtimeWhatsapp || data.schdtimeWhatsApp || data.SchdTimeWhatsapp;
+
+              const isPublished = status === 'published' || status === 'posted' || Boolean(campaign.postedAt);
+
+              postings = [
+                {
+                  platform: 'LinkedIn',
+                  status: isPublished ? 'Posted' : linkedInTime ? 'Scheduled' : 'Pending',
+                  postedAt: linkedInTime || campaign.postedAt || campaign.createdAt,
+                },
+                {
+                  platform: 'Instagram',
+                  status: isPublished ? 'Posted' : instagramTime ? 'Posted' : 'Pending',
+                  postedAt: instagramTime || campaign.postedAt || campaign.createdAt,
+                },
+                {
+                  platform: 'Teams',
+                  status: isPublished ? 'Posted' : teamsTime ? 'Posted' : 'Pending',
+                  postedAt: teamsTime || campaign.postedAt || campaign.createdAt,
+                },
+                {
+                  platform: 'WhatsApp',
+                  status: isPublished ? 'Posted' : whatsappTime ? 'Posted' : 'Pending',
+                  postedAt: whatsappTime || campaign.postedAt || campaign.createdAt,
+                },
+              ];
+            } catch (e) {
+              postings = [
+                { platform: 'LinkedIn', status: 'Scheduled', postedAt: campaign.createdAt },
+                { platform: 'Instagram', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
+                { platform: 'Teams', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
+                { platform: 'WhatsApp', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
+              ];
+            }
           }
 
           if (notifType) {
@@ -278,7 +280,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
                   </span>
                 </div>
 
-                {/* Platform Postings Section */}
+                {/* Platform Postings Section (ONLY rendered for APPROVED or PUBLISHED status) */}
                 {notification.platformPostings && notification.platformPostings.length > 0 && (
                   <div className="pt-4 border-t border-slate-100 space-y-3">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
