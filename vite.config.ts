@@ -13,7 +13,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'https://debian.tailbd6bc8.ts.net:8443',
+        target: 'https://debian.tailbd6bc8.ts.net',
         changeOrigin: true,
         secure: false, // Allows bypass of SSL/TLS certificate constraints during dev
       }
