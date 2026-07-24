@@ -213,22 +213,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       {/* Metric Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="deep-3d-card p-5 bg-gradient-to-br from-blue-500 to-blue-600 text-white space-y-1 shadow-lg shadow-blue-500/20">
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white space-y-1 shadow-lg shadow-blue-500/25 border border-blue-500/80">
           <span className="text-xs font-bold uppercase tracking-wider text-blue-100 font-mono">Active Campaigns</span>
-          <div className="text-3xl font-extrabold font-heading">{campaigns.length}</div>
-          <p className="text-[11px] text-blue-100">Live in backend database</p>
+          <div className="text-3xl font-extrabold font-heading text-white">{campaigns.length}</div>
+          <p className="text-[11px] text-blue-100 font-medium">Live in backend database</p>
         </div>
 
-        <div className="deep-3d-card p-5 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white space-y-1 shadow-lg shadow-indigo-500/20">
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-700 text-white space-y-1 shadow-lg shadow-indigo-500/25 border border-indigo-500/80">
           <span className="text-xs font-bold uppercase tracking-wider text-indigo-100 font-mono">Pending Approval</span>
-          <div className="text-3xl font-extrabold font-heading">{campaignQueue.length}</div>
-          <p className="text-[11px] text-indigo-100">Awaiting reviewer action</p>
+          <div className="text-3xl font-extrabold font-heading text-white">{campaignQueue.length}</div>
+          <p className="text-[11px] text-indigo-100 font-medium">Awaiting reviewer action</p>
         </div>
 
-        <div className="deep-3d-card p-5 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white space-y-1 shadow-lg shadow-emerald-500/20">
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 text-white space-y-1 shadow-lg shadow-emerald-500/25 border border-emerald-500/80">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-100 font-mono">Synced Events</span>
-          <div className="text-3xl font-extrabold font-heading">{upcomingEvents.length}</div>
-          <p className="text-[11px] text-emerald-100">Upcoming schedule events</p>
+          <div className="text-3xl font-extrabold font-heading text-white">{upcomingEvents.length}</div>
+          <p className="text-[11px] text-emerald-100 font-medium">Upcoming schedule events</p>
         </div>
       </div>
 
