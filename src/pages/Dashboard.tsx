@@ -150,9 +150,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Live API Banner */}
-      <ApiConnectionBanner isConnected={isConnected} />
-
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -163,13 +160,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             Real-time campaign management, event syncing, and API key token administration
           </p>
         </div>
-        <button
-          onClick={fetchDashboardData}
-          className="deep-3d-press btn-secondary self-start sm:self-auto text-xs"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh Live Data
-        </button>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <ApiConnectionBanner isConnected={isConnected} />
+          <button
+            onClick={fetchDashboardData}
+            className="deep-3d-press btn-secondary text-xs"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh Live Data
+          </button>
+        </div>
       </div>
 
       {errorMessage && (
