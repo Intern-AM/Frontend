@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { RoleGuard } from './components/RoleGuard';
 import { Navbar } from './components/Navbar';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -109,9 +110,17 @@ const MainAppContent: React.FC = () => {
           <Notifications onNavigateToCampaign={handleNavigateToCampaignDetail} />
         )}
 
-        {activeTab === 'audit-logs' && <AuditLogs />}
+        {activeTab === 'audit-logs' && (
+          <RoleGuard requiredRole="Admin" onFallback={() => handleTabChange('dashboard')}>
+            <AuditLogs />
+          </RoleGuard>
+        )}
 
-        {activeTab === 'users' && <UserAdmin />}
+        {activeTab === 'users' && (
+          <RoleGuard requiredRole="Admin" onFallback={() => handleTabChange('dashboard')}>
+            <UserAdmin />
+          </RoleGuard>
+        )}
       </main>
 
       <footer className="border-t border-slate-200 py-6 bg-white text-center text-xs font-semibold text-slate-500">

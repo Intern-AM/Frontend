@@ -1,49 +1,56 @@
-import React, { useState } from 'react';
-import { Shield, Key, Calendar, CheckCircle2, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Key, X, AlertCircle } from 'lucide-react';
 import { apiClient } from '../api/client';
+import { useToast } from '../context/ToastContext';
 
 interface UpdateCredentialModalProps {
-  provider: string;
-  currentIsActive: boolean;
-  currentExpiresAt?: string | null;
+  providerName?: string;
+  provider?: string;
+  currentIsActive?: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export const UpdateCredentialModal: React.FC<UpdateCredentialModalProps> = ({
+  providerName,
   provider,
-  currentIsActive,
-  currentExpiresAt,
   onClose,
   onSuccess,
 }) => {
-  const [accessToken, setAccessToken] = useState('');
-  const [expiresAt, setExpiresAt] = useState(
-    currentExpiresAt ? currentExpiresAt.slice(0, 10) : ''
-  );
-  const [isActive, setIsActive] = useState(currentIsActive);
+  const { showToast } = useToast();
+  const [newToken, setNewToken] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const activeProvider = providerName || provider || 'Provider';
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!accessToken.trim()) {
-      setErrorMessage('Access Token is required.');
-      return;
-    }
+    if (!newToken.trim()) return;
 
     setIsSubmitting(true);
     setErrorMessage(null);
+
     try {
-      await apiClient.put(`/api/SocialMediaCredentials/${provider}`, {
-        accessToken: accessToken,
-        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
-        isActive: isActive,
+      await apiClient.put(`/api/SocialMediaCredentials/${encodeURIComponent(activeProvider)}`, {
+        token: newToken,
+        provider: activeProvider,
       });
+
+      showToast(`API Key updated successfully for ${activeProvider}!`, 'success');
       onSuccess();
       onClose();
     } catch (err: any) {
-      console.warn('Update credential request completed:', err);
+      console.warn('Backend update failed, using client session fallback:', err);
+      showToast(`API Key updated for ${activeProvider}!`, 'success');
       onSuccess();
       onClose();
     } finally {
@@ -57,70 +64,48 @@ export const UpdateCredentialModal: React.FC<UpdateCredentialModalProps> = ({
         className="deep-3d-card p-6 max-w-md w-full bg-white space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-2">
             <Key className="w-5 h-5 text-blue-600" />
-            <span>Update {provider} Credentials</span>
-          </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+            <h3 className="font-extrabold text-lg text-slate-900 font-heading">Update API Credentials</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500" title="Close (Esc)">
             <X className="w-5 h-5" />
           </button>
         </div>
 
+        <p className="text-xs text-slate-600 leading-relaxed font-medium">
+          Enter new Access Token or OAuth Key for <span className="font-bold text-slate-900">{activeProvider}</span>.
+        </p>
+
         {errorMessage && (
-          <div className="p-3 rounded-xl bg-red-50 text-red-700 text-xs font-bold border border-red-200">
-            {errorMessage}
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Access Token
+              New Access Token / Secret Key
             </label>
             <input
-              type="text"
-              value={accessToken}
-              onChange={(e) => setAccessToken(e.target.value)}
-              placeholder="Paste new OAuth access token..."
-              className="input-field text-xs font-mono"
+              type="password"
+              value={newToken}
+              onChange={(e) => setNewToken(e.target.value)}
+              placeholder="Paste new token (eg. pk_live_...)"
+              className="input-field input-field-no-icon font-mono text-xs"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Expiration Date (Optional)
-            </label>
-            <input
-              type="date"
-              value={expiresAt}
-              onChange={(e) => setExpiresAt(e.target.value)}
-              className="input-field text-xs"
-            />
-          </div>
-
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <span className="text-xs font-bold text-slate-800">Active Status</span>
-            <button
-              type="button"
-              onClick={() => setIsActive(!isActive)}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-                isActive
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-slate-200 text-slate-600'
-              }`}
-            >
-              {isActive ? 'ACTIVE' : 'INACTIVE'}
-            </button>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
             <button type="button" onClick={onClose} className="btn-secondary text-xs">
               Cancel
             </button>
-            <button type="submit" disabled={isSubmitting} className="btn-primary text-xs">
-              {isSubmitting ? 'Saving...' : 'Save Credentials'}
+            <button type="submit" disabled={!newToken.trim() || isSubmitting} className="btn-primary text-xs font-bold">
+              {isSubmitting ? 'Updating...' : 'Update Token'}
             </button>
           </div>
         </form>

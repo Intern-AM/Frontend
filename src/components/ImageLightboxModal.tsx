@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 
 interface ImageLightboxModalProps {
@@ -15,6 +15,14 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleZoomIn = () => setScale((prev) => Math.min(prev + 0.3, 3));
   const handleZoomOut = () => setScale((prev) => Math.max(prev - 0.3, 0.5));
   const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
@@ -27,7 +35,7 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
       >
         {/* Modal Header */}
         <div className="w-full flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
-          <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+          <h3 className="text-lg font-bold text-slate-900 font-heading">{title}</h3>
           <div className="flex items-center gap-2">
             <button
               onClick={handleZoomIn}
@@ -53,7 +61,7 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
             <button
               onClick={onClose}
               className="deep-3d-press p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 ml-2"
-              title="Close"
+              title="Close (Esc)"
             >
               <X className="w-5 h-5" />
             </button>

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Upload, X, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { apiClient, BASE_URL } from '../api/client';
+import React, { useState, useEffect } from 'react';
+import { Upload, X, AlertCircle } from 'lucide-react';
+import { apiClient } from '../api/client';
 
 interface ImageUploadModalProps {
   eventId: string;
@@ -21,6 +21,14 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -78,8 +86,8 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <h3 className="font-extrabold text-lg text-slate-900">{title}</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500">
+          <h3 className="font-extrabold text-lg text-slate-900 font-heading">{title}</h3>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500" title="Close (Esc)">
             <X className="w-5 h-5" />
           </button>
         </div>
