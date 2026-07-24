@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, RefreshCw, CheckCheck } from 'lucide-react';
 import { NotificationItem, Campaign, SpeehiveEvent, PlatformPosting, NotificationType } from '../types';
 import { apiClient } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 interface NotificationsProps {
   onNavigateToCampaign: (campaignId: string) => void;
@@ -10,6 +11,7 @@ interface NotificationsProps {
 const LAST_VIEWED_KEY = 'hive_last_viewed_notifications_timestamp';
 
 export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampaign }) => {
+  const { role } = useAuth();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -34,12 +36,20 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      // 1. Fetch Live Campaigns, Events, and Social Media Credentials from Backend
-      const [campaignRes, eventRes, credRes] = await Promise.allSettled([
+      // 1. Fetch Live Campaigns, Events, and (for Admins) Social Media Credentials
+      const promises: Promise<any>[] = [
         apiClient.get('/api/Campaigns'),
         apiClient.get('/api/Events'),
-        apiClient.get('/api/SocialMediaCredentials'),
-      ]);
+      ];
+
+      if (role === 'Admin') {
+        promises.push(apiClient.get('/api/SocialMediaCredentials'));
+      }
+
+      const results = await Promise.allSettled(promises);
+      const campaignRes = results[0];
+      const eventRes = results[1];
+      const credRes = role === 'Admin' ? results[2] : null;
 
       const liveCampaigns: Campaign[] =
         campaignRes.status === 'fulfilled' && Array.isArray(campaignRes.value.data)
@@ -52,8 +62,8 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
           : [];
 
       const credentialsList =
-        credRes.status === 'fulfilled' && Array.isArray(credRes.value.data)
-          ? credRes.value.data
+        credRes && credRes.status === 'fulfilled' && Array.isArray((credRes as any).value?.data)
+          ? (credRes as any).value.data
           : [];
 
       const eventIdToTitleMap = new Map<string, string>();
@@ -172,11 +182,13 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
                 },
               ];
             } catch (e) {
+              const isPublished = status === 'published' || status === 'posted' || Boolean(campaign.postedAt);
+              const defaultStatus = isPublished ? 'Posted' : 'Pending';
               postings = [
-                { platform: 'LinkedIn', status: 'Scheduled', postedAt: campaign.createdAt },
-                { platform: 'Instagram', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
-                { platform: 'Teams', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
-                { platform: 'WhatsApp', status: 'Posted', postedAt: campaign.postedAt || campaign.createdAt },
+                { platform: 'LinkedIn', status: isPublished ? 'Posted' : 'Scheduled', postedAt: campaign.postedAt || campaign.createdAt },
+                { platform: 'Instagram', status: defaultStatus, postedAt: campaign.postedAt || campaign.createdAt },
+                { platform: 'Teams', status: defaultStatus, postedAt: campaign.postedAt || campaign.createdAt },
+                { platform: 'WhatsApp', status: defaultStatus, postedAt: campaign.postedAt || campaign.createdAt },
               ];
             }
           }
