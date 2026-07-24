@@ -2,15 +2,46 @@ package com.speehive.speehiveaihub.network
 
 import com.speehive.speehiveaihub.data.AuthManager
 import com.speehive.speehiveaihub.data.SessionManager
+import okhttp3.Dns
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
+import okhttp3.dnsoverhttps.DnsOverHttps
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.InetAddress
+import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
     private const val BASE_URL =
-        "https://debian.tailbd6bc8.ts.net:8443/"
+        "https://debian.tailbd6bc8.ts.net/"
+
+    private val cloudflareDns: Dns by lazy {
+        val bootstrapClient = OkHttpClient.Builder().build()
+        DnsOverHttps.Builder()
+            .client(bootstrapClient)
+            .url("https://1.1.1.1/dns-query".toHttpUrl())
+            .bootstrapDnsHosts(
+                InetAddress.getByName("1.1.1.1"),
+                InetAddress.getByName("1.0.0.1")
+            )
+            .build()
+    }
+
+    private val hybridDns = object : Dns {
+        override fun lookup(hostname: String): List<InetAddress> {
+            return try {
+                Dns.SYSTEM.lookup(hostname)
+            } catch (e: UnknownHostException) {
+                try {
+                    cloudflareDns.lookup(hostname)
+                } catch (_: Exception) {
+                    throw e
+                }
+            }
+        }
+    }
 
     fun getFormattedImageUrl(url: String?): String? {
         if (url.isNullOrBlank()) return null
@@ -55,6 +86,7 @@ object RetrofitClient {
                     level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
                 }
                 OkHttpClient.Builder()
+                    .dns(hybridDns)
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
@@ -82,4 +114,4 @@ object RetrofitClient {
             .build()
             .create(SpeehiveApiService::class.java)
     }
-}
+}
