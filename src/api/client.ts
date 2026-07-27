@@ -52,6 +52,10 @@ export const getFormattedImageUrl = (url: string | null | undefined): string => 
   if (!url || typeof url !== 'string' || url.trim().length === 0) return '';
   
   const trimmed = url.trim();
+
+  if (trimmed.startsWith('blob:') || trimmed.startsWith('data:')) {
+    return trimmed;
+  }
   
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     if (

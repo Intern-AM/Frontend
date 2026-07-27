@@ -6,6 +6,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { ViewModeSwitcher, ViewMode } from '../components/ViewModeSwitcher';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { getErrorMessage } from '../utils/error';
 
 interface CampaignsProps {
   onSelectCampaign: (eventId: string) => void;
@@ -47,9 +48,9 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
         });
         setEventTitleMap(titleMap);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('API call failed:', err);
-      setErrorMessage(err.response?.data?.message || 'Failed to fetch campaigns from backend server.');
+      setErrorMessage(getErrorMessage(err, 'Failed to fetch campaigns from backend server.'));
       setCampaigns([]);
     } finally {
       setIsLoading(false);
@@ -71,9 +72,9 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
       });
       showToast('Campaign approved successfully!', 'success');
       fetchCampaignsAndEvents();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Approve failed:', err);
-      showToast(err.response?.data?.message || 'Failed to approve campaign.', 'error');
+      showToast(getErrorMessage(err, 'Failed to approve campaign.'), 'error');
     }
   };
 

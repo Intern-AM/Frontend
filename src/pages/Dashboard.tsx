@@ -7,6 +7,8 @@ import { ApiConnectionBanner } from '../components/ApiConnectionBanner';
 import { UpdateCredentialModal } from '../components/UpdateCredentialModal';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { formatEventDate, getDaysUntilExpiration } from '../utils/date';
+import { getErrorMessage } from '../utils/error';
 
 interface DashboardProps {
   onNavigate: (tab: string, campaignId?: string) => void;
@@ -65,8 +67,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       } else {
         setCredentials([]);
       }
-    } catch (err: any) {
-      console.error('Failed to fetch live dashboard data:', err);
+    } catch (err) {
+      console.error('Failed to fetch live dashboard data:', getErrorMessage(err, 'Dashboard sync warning'));
       setErrorMessage('Operating with local fallback states due to API connection warning.');
       setCredentials([]);
       setIsConnected(false);
@@ -81,29 +83,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   const getEventName = (eventId: string) => {
     return eventTitleMap.get(eventId) || `Event: ${eventId}`;
-  };
-
-  const formatEventDate = (dateStr?: string) => {
-    if (!dateStr) return 'TBD';
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    } catch (e) {
-      return dateStr;
-    }
-  };
-
-  const getDaysUntilExpiration = (expiresAtStr?: string | null) => {
-    if (!expiresAtStr) return null;
-    try {
-      const expires = new Date(expiresAtStr).getTime();
-      if (isNaN(expires)) return null;
-      const diff = expires - Date.now();
-      return Math.ceil(diff / (1000 * 60 * 60 * 24));
-    } catch (e) {
-      return null;
-    }
   };
 
   // Active Pending Campaign Queue (Generated or Approved)

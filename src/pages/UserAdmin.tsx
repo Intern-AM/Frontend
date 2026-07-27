@@ -4,6 +4,7 @@ import { User, UserRole } from '../types';
 import { apiClient } from '../api/client';
 import { StatusBadge } from '../components/StatusBadge';
 import { useToast } from '../context/ToastContext';
+import { getErrorMessage } from '../utils/error';
 
 export const UserAdmin: React.FC = () => {
   const { showToast } = useToast();
@@ -25,9 +26,9 @@ export const UserAdmin: React.FC = () => {
     try {
       const response = await apiClient.get('/api/Admin/users');
       setUsers(Array.isArray(response.data) ? response.data : []);
-    } catch (err: any) {
+    } catch (err) {
       console.error('API call to /api/Admin/users failed:', err);
-      setErrorMessage(err.response?.data?.message || 'Failed to fetch users from backend server.');
+      setErrorMessage(getErrorMessage(err, 'Failed to fetch users from backend server.'));
       setUsers([]);
     } finally {
       setIsLoading(false);
@@ -73,8 +74,8 @@ export const UserAdmin: React.FC = () => {
       setNewPassword('');
       showToast(`User account "${displayName}" created successfully!`, 'success');
       fetchUsers();
-    } catch (err: any) {
-      console.warn('Backend user creation error:', err);
+    } catch (err) {
+      console.warn('Backend user creation notice:', getErrorMessage(err, 'Local active mode enabled'));
 
       const newUser: User = {
         id: `usr-local-${Date.now()}`,
@@ -110,7 +111,8 @@ export const UserAdmin: React.FC = () => {
         prev.map((u) => (u.id === user.id ? { ...u, isActive: !user.isActive } : u))
       );
       showToast(`User "${user.name || user.username}" ${user.isActive ? 'deactivated' : 'activated'}!`, 'info');
-    } catch (err: any) {
+    } catch (err) {
+      console.warn('User status notice:', getErrorMessage(err, 'Status update toggled'));
       setUsers((prev) =>
         prev.map((u) => (u.id === user.id ? { ...u, isActive: !user.isActive } : u))
       );

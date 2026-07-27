@@ -8,6 +8,9 @@ import { ImageLightboxModal } from '../components/ImageLightboxModal';
 import { ImageUploadModal } from '../components/ImageUploadModal';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { formatScheduleDate } from '../utils/date';
+import { getErrorMessage } from '../utils/error';
+import { extractPlatformSchedules } from '../utils/schedule';
 
 interface CampaignDetailProps {
   campaignId: string;
@@ -42,21 +45,6 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
     { platform: 'WhatsApp Channel', scheduledTime: null, status: 'Pending' },
   ]);
 
-  const formatScheduleDate = (dateStr?: string | null) => {
-    if (!dateStr) return 'Not Scheduled';
-    try {
-      return new Date(dateStr).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch (e) {
-      return dateStr;
-    }
-  };
-
   const loadCampaignData = async () => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -86,65 +74,22 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
           setEventTitle('Event ID: ' + found.eventId);
         }
 
-        // Live Backend API schedule fetch: exact mapping matching CampaignScheduleResponse.kt
+        // Live Backend API schedule fetch
         try {
           const schedRes = await apiClient.get(`/api/Approval/${found.eventId}/schedule`);
-          const data = schedRes.data || {};
-
-          // Extract exact database fields returned by backend
-          const linkedInTime =
-            data.schdtimeLinkedIn || data.SchdtimeLinkedIn || data.schdtimeLinkedin || data.SchdTimeLinkedIn;
-          const instagramTime =
-            data.schdtimeInstagram || data.SchdtimeInstagram || data.schdtimeinstagram || data.SchdTimeInstagram;
-          const teamsTime =
-            data.schdtimeTeams || data.SchdtimeTeams || data.schdtimeteams || data.SchdTimeTeams;
-          const whatsappTime =
-            data.schdtimeWhatsapp || data.SchdtimeWhatsapp || data.schdtimeWhatsApp || data.SchdTimeWhatsapp;
-
-          // Helper to find posting status if available in data.platforms array
-          const getStatusFor = (pKey: string) => {
-            if (Array.isArray(data.platforms)) {
-              const item = data.platforms.find((p: any) =>
-                (p.platform || '').toLowerCase().includes(pKey.toLowerCase())
-              );
-              return item?.status || 'Pending';
-            }
-            return 'Pending';
-          };
-
-          setSchedules([
-            {
-              platform: 'LinkedIn',
-              scheduledTime: linkedInTime || null,
-              status: getStatusFor('linkedin'),
-            },
-            {
-              platform: 'Instagram',
-              scheduledTime: instagramTime || null,
-              status: getStatusFor('instagram'),
-            },
-            {
-              platform: 'MS Teams Group',
-              scheduledTime: teamsTime || null,
-              status: getStatusFor('teams'),
-            },
-            {
-              platform: 'WhatsApp Channel',
-              scheduledTime: whatsappTime || null,
-              status: getStatusFor('whatsapp'),
-            },
-          ]);
+          const extractedSchedules = extractPlatformSchedules(schedRes.data || {});
+          setSchedules(extractedSchedules);
         } catch (e) {
-          console.warn('Failed to fetch schedule from backend:', e);
+          console.warn('Failed to fetch schedule from backend:', getErrorMessage(e, 'Schedule fetch failed'));
         }
       } else {
         setCampaign(null);
         setErrorMessage(`Campaign "${campaignId}" was not found in the backend database.`);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to load campaign detail:', err);
       setCampaign(null);
-      setErrorMessage('Failed to connect to backend server or fetch campaigns.');
+      setErrorMessage(getErrorMessage(err, 'Failed to connect to backend server or fetch campaigns.'));
     } finally {
       setIsLoading(false);
     }
@@ -521,10 +466,11 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
         <ImageUploadModal
           eventId={campaign.eventId}
           type="campaign"
-          title="Upload Campaign Poster Image"
+          title={formattedPosterUrl ? 'Replace Campaign Poster Image' : 'Upload Campaign Poster Image'}
           onClose={() => setShowUploadModal(false)}
-          onUploadSuccess={() => {
+          onUploadSuccess={(newImageUrl: string) => {
             showToast('Poster image uploaded successfully!', 'success');
+            setCampaign((prev) => (prev ? { ...prev, imageUrl: newImageUrl } : null));
             loadCampaignData();
           }}
         />

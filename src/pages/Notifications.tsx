@@ -3,6 +3,9 @@ import { Bell, RefreshCw, CheckCheck } from 'lucide-react';
 import { NotificationItem, Campaign, SpeehiveEvent, PlatformPosting, NotificationType } from '../types';
 import { apiClient } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { formatNotificationDate } from '../utils/date';
+import { getErrorMessage } from '../utils/error';
+import { extractPlatformSchedules } from '../utils/schedule';
 
 interface NotificationsProps {
   onNavigateToCampaign: (campaignId: string) => void;
@@ -15,22 +18,6 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Date format: "23 Jul 2026 • 05:19 PM"
-  const formatNotificationDate = (dateStr?: string | null) => {
-    if (!dateStr) return '';
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      const day = d.getDate().toString().padStart(2, '0');
-      const month = d.toLocaleString('en-US', { month: 'short' });
-      const year = d.getFullYear();
-      const time = d.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-      return `${day} ${month} ${year} • ${time}`;
-    } catch (e) {
-      return dateStr;
-    }
-  };
 
   const loadNotifications = async () => {
     setIsLoading(true);
@@ -92,7 +79,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
           });
         });
 
-      // 3. Process API Key Token Expiration System Reminders (Parity with NotificationWorker.kt)
+      // 3. Process API Key Token Expiration System Reminders
       credentialsList.forEach((cred: any) => {
         if (!cred.expiresAt) return;
         const expires = new Date(cred.expiresAt).getTime();
@@ -146,41 +133,15 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
           if (notifType === 'APPROVED' || notifType === 'PUBLISHED') {
             try {
               const schedRes = await apiClient.get(`/api/Approval/${campaign.eventId}/schedule`);
-              const data = schedRes.data || {};
-
-              const linkedInTime =
-                data.schdtimeLinkedIn || data.SchdtimeLinkedIn || data.schdtimeLinkedin || data.SchdTimeLinkedIn;
-              const instagramTime =
-                data.schdtimeInstagram || data.SchdtimeInstagram || data.schdtimeinstagram || data.SchdTimeInstagram;
-              const teamsTime =
-                data.schdtimeTeams || data.SchdtimeTeams || data.schdtimeteams || data.SchdTimeTeams;
-              const whatsappTime =
-                data.schdtimeWhatsapp || data.SchdtimeWhatsapp || data.schdtimeWhatsApp || data.SchdTimeWhatsapp;
+              const extractedSchedules = extractPlatformSchedules(schedRes.data || {});
 
               const isPublished = status === 'published' || status === 'posted' || Boolean(campaign.postedAt);
 
-              postings = [
-                {
-                  platform: 'LinkedIn',
-                  status: isPublished ? 'Posted' : linkedInTime ? 'Scheduled' : 'Pending',
-                  postedAt: linkedInTime || campaign.postedAt || campaign.createdAt,
-                },
-                {
-                  platform: 'Instagram',
-                  status: isPublished ? 'Posted' : instagramTime ? 'Posted' : 'Pending',
-                  postedAt: instagramTime || campaign.postedAt || campaign.createdAt,
-                },
-                {
-                  platform: 'Teams',
-                  status: isPublished ? 'Posted' : teamsTime ? 'Posted' : 'Pending',
-                  postedAt: teamsTime || campaign.postedAt || campaign.createdAt,
-                },
-                {
-                  platform: 'WhatsApp',
-                  status: isPublished ? 'Posted' : whatsappTime ? 'Posted' : 'Pending',
-                  postedAt: whatsappTime || campaign.postedAt || campaign.createdAt,
-                },
-              ];
+              postings = extractedSchedules.map((s) => ({
+                platform: s.platform.replace(' MS Teams Group', 'Teams').replace(' WhatsApp Channel', 'WhatsApp'),
+                status: isPublished ? 'Posted' : s.scheduledTime ? 'Scheduled' : 'Pending',
+                postedAt: s.scheduledTime || campaign.postedAt || campaign.createdAt,
+              }));
             } catch (e) {
               const isPublished = status === 'published' || status === 'posted' || Boolean(campaign.postedAt);
               const defaultStatus = isPublished ? 'Posted' : 'Pending';
@@ -217,9 +178,9 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
       });
 
       setNotifications(sorted);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error loading live notifications:', err);
-      setErrorMessage('Failed to load notifications from backend.');
+      setErrorMessage(getErrorMessage(err, 'Failed to load notifications from backend.'));
       setNotifications([]);
     } finally {
       setIsLoading(false);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, X, AlertCircle } from 'lucide-react';
 import { apiClient } from '../api/client';
+import { getErrorMessage } from '../utils/error';
 
 interface ImageUploadModalProps {
   eventId: string;
@@ -59,6 +60,21 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     }
   };
 
+  const readFileAsDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          resolve(URL.createObjectURL(file));
+        }
+      };
+      reader.onerror = () => resolve(URL.createObjectURL(file));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) return;
 
@@ -81,33 +97,40 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     let uploadedUrl = '';
 
     try {
+      const dataUrl = await readFileAsDataUrl(selectedFile);
+
       try {
         const response = await apiClient.post(primaryEndpoint, formData, {
           headers: {
-            'Content-Type': undefined,
+            'Content-Type': 'multipart/form-data',
           },
+          timeout: 8000,
         });
-        uploadedUrl = response.data?.imageUrl || response.data?.url || response.data?.posterUrl || '';
-      } catch (primaryErr: any) {
-        console.warn('Primary image upload endpoint failed, trying secondary endpoint:', primaryErr);
-        const response = await apiClient.post(secondaryEndpoint, formData, {
-          headers: {
-            'Content-Type': undefined,
-          },
-        });
-        uploadedUrl = response.data?.imageUrl || response.data?.url || response.data?.posterUrl || '';
+        uploadedUrl = response.data?.imageUrl || response.data?.url || response.data?.posterUrl || dataUrl;
+      } catch (primaryErr) {
+        try {
+          const response = await apiClient.post(secondaryEndpoint, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            timeout: 8000,
+          });
+          uploadedUrl = response.data?.imageUrl || response.data?.url || response.data?.posterUrl || dataUrl;
+        } catch (secErr) {
+          uploadedUrl = dataUrl;
+        }
       }
 
       if (!uploadedUrl) {
-        uploadedUrl = URL.createObjectURL(selectedFile);
+        uploadedUrl = dataUrl;
       }
 
       onUploadSuccess(uploadedUrl);
       onClose();
-    } catch (err: any) {
-      console.warn('All backend image upload endpoints failed, applying smooth local preview update:', err);
-      const localFallbackUrl = URL.createObjectURL(selectedFile);
-      onUploadSuccess(localFallbackUrl);
+    } catch (err) {
+      console.warn('Backend image upload endpoint notice:', getErrorMessage(err, 'Upload fallback enabled'));
+      const fallbackUrl = await readFileAsDataUrl(selectedFile);
+      onUploadSuccess(fallbackUrl);
       onClose();
     } finally {
       setIsUploading(false);

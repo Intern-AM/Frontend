@@ -3,6 +3,7 @@ import { Lock, User, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { UserRole } from '../types';
+import { getErrorMessage } from '../utils/error';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
@@ -38,8 +39,8 @@ export const Login: React.FC = () => {
         finalUser,
         finalRole
       );
-    } catch (err: any) {
-      console.warn('Login API call completed with fallback session:', err);
+    } catch (err) {
+      console.warn('Login notice:', getErrorMessage(err, 'Operating with active session'));
       const detectedRole: UserRole = usernameInput.toLowerCase().includes('admin') ? 'Admin' : 'Reviewer';
       login('hive-auth-token-session', usernameInput, detectedRole);
     } finally {

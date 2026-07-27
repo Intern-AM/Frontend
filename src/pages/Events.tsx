@@ -6,10 +6,38 @@ import { StatusBadge } from '../components/StatusBadge';
 import { ImageLightboxModal } from '../components/ImageLightboxModal';
 import { ImageUploadModal } from '../components/ImageUploadModal';
 import { useToast } from '../context/ToastContext';
+import { formatEventDate, formatScheduleDate } from '../utils/date';
+import { getErrorMessage } from '../utils/error';
 
 interface EventsProps {
   onNavigateToCampaign: (eventId: string) => void;
 }
+
+const LOCAL_POSTERS_KEY = 'hive_local_event_posters';
+
+const getLocalEventPosters = (): Record<string, string> => {
+  try {
+    const raw = localStorage.getItem(LOCAL_POSTERS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+};
+
+const saveLocalEventPoster = (eventId: string, eventTitle: string | undefined, imageUrl: string) => {
+  try {
+    const current = getLocalEventPosters();
+    if (eventId) current[eventId] = imageUrl;
+    if (eventTitle) {
+      current[eventTitle] = imageUrl;
+      current[eventTitle.toLowerCase()] = imageUrl;
+      current[eventTitle.trim()] = imageUrl;
+    }
+    localStorage.setItem(LOCAL_POSTERS_KEY, JSON.stringify(current));
+  } catch (e) {
+    console.warn('Failed to persist local poster:', e);
+  }
+};
 
 export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
   const { showToast } = useToast();
@@ -26,10 +54,26 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
     setErrorMessage(null);
     try {
       const response = await apiClient.get('/api/Events');
-      setEvents(Array.isArray(response.data) ? response.data : []);
-    } catch (err: any) {
+      const rawEvents: SpeehiveEvent[] = Array.isArray(response.data) ? response.data : [];
+      const localPosters = getLocalEventPosters();
+
+      const mergedEvents = rawEvents.map((evt) => {
+        const posterFromStorage =
+          localPosters[evt.id] ||
+          (evt.title ? localPosters[evt.title] : null) ||
+          (evt.title ? localPosters[evt.title.toLowerCase()] : null) ||
+          (evt.title ? localPosters[evt.title.trim()] : null);
+
+        return {
+          ...evt,
+          imageUrl: evt.imageUrl || posterFromStorage || null,
+        };
+      });
+
+      setEvents(mergedEvents);
+    } catch (err) {
       console.error('API call to /api/Events failed:', err);
-      setErrorMessage(err.response?.data?.message || 'Failed to fetch live events from server.');
+      setErrorMessage(getErrorMessage(err, 'Failed to fetch live events from server.'));
       setEvents([]);
     } finally {
       setIsLoading(false);
@@ -46,27 +90,12 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
       await apiClient.put(`/api/Events/${eventId}/cancel`);
       showToast('Event cancelled successfully.', 'error');
       fetchEvents();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Cancel event failed:', err);
       showToast('Event cancellation request recorded.', 'info');
       fetchEvents();
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-  const formatEventDate = (dateStr?: string) => {
-    if (!dateStr) return '';
-    try {
-      return new Date(dateStr).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch (e) {
-      return dateStr;
     }
   };
 
@@ -148,7 +177,7 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
                 {/* Description */}
                 <p className="text-sm text-slate-700 leading-relaxed">{event.description}</p>
 
-                {/* Poster Graphic (AsyncImage parity with ZoomableImageDialog) */}
+                {/* Poster Image Preview (when uploaded) */}
                 {formattedPosterUrl ? (
                   <div className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 max-h-80 flex items-center justify-center">
                     <img
@@ -169,8 +198,8 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
                 {/* Event Actions Bar */}
                 <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    {/* STRICT CONDITION: ONLY show Upload/Replace Poster if event.status is "Pending" */}
-                    {isPending && (
+                    {/* Upload / Replace Poster button */}
+                    {(isPending || Boolean(formattedPosterUrl)) && (
                       <button
                         onClick={() => setUploadModalEventId(event.id)}
                         className="deep-3d-press btn-secondary text-xs font-bold"
@@ -180,7 +209,7 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
                       </button>
                     )}
 
-                    {/* STRICT CONDITION: ONLY show "Open Campaign" button if event.status is "Generated" */}
+                    {/* Open Campaign button */}
                     {isGenerated && (
                       <button
                         onClick={() => onNavigateToCampaign(event.id)}
@@ -191,7 +220,7 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
                     )}
                   </div>
 
-                  {/* STRICT CONDITION: ONLY show Reject Event button if event.status is "Pending" */}
+                  {/* ONLY show Reject Event button if event.status is "Pending" */}
                   {isPending && (
                     <button
                       onClick={() => handleCancelEvent(event.id)}
@@ -216,15 +245,28 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
         />
       )}
 
-      {/* Upload Image Modal */}
+      {/* Upload / Replace Image Modal */}
       {uploadModalEventId && (
         <ImageUploadModal
           eventId={uploadModalEventId}
           type="event"
-          title="Upload Event Poster Image"
+          title={
+            events.find((e) => e.id === uploadModalEventId)?.imageUrl
+              ? 'Replace Event Poster Image'
+              : 'Upload Event Poster Image'
+          }
           onClose={() => setUploadModalEventId(null)}
-          onUploadSuccess={() => {
+          onUploadSuccess={(newImageUrl: string) => {
+            if (uploadModalEventId) {
+              const targetEvent = events.find((e) => e.id === uploadModalEventId);
+              saveLocalEventPoster(uploadModalEventId, targetEvent?.title, newImageUrl);
+            }
             showToast('Event poster uploaded successfully!', 'success');
+            setEvents((prevEvents) =>
+              prevEvents.map((evt) =>
+                evt.id === uploadModalEventId ? { ...evt, imageUrl: newImageUrl } : evt
+              )
+            );
             fetchEvents();
           }}
         />

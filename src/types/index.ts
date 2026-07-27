@@ -1,11 +1,26 @@
+/**
+ * Role assigned to users within the Hive AI system.
+ */
 export type UserRole = 'Admin' | 'Reviewer';
 
+/**
+ * Status of campaigns throughout the approval and publishing lifecycle.
+ */
 export type CampaignStatus = 'Active' | 'Generated' | 'Approved' | 'Rejected' | 'Published' | string;
 
+/**
+ * Status of per-platform social media postings.
+ */
 export type PostingStatus = 'Pending' | 'Posted' | 'Failed' | 'Scheduled' | string;
 
+/**
+ * Categories of system notifications.
+ */
 export type NotificationType = 'REVIEW_REQUIRED' | 'APPROVED' | 'REJECTED' | 'PUBLISHED' | 'EVENT_CANCELLED';
 
+/**
+ * User account model.
+ */
 export interface User {
   id: string;
   name?: string;
@@ -16,6 +31,9 @@ export interface User {
   createdAt?: string;
 }
 
+/**
+ * Marketing campaign model created for an event.
+ */
 export interface Campaign {
   campaignId: number;
   eventId: string;
@@ -31,6 +49,9 @@ export interface Campaign {
   postedAt?: string | null;
 }
 
+/**
+ * Event model synced with the calendar.
+ */
 export interface SpeehiveEvent {
   id: string;
   title: string;
@@ -44,6 +65,9 @@ export interface SpeehiveEvent {
   imageUrl?: string | null;
 }
 
+/**
+ * Per-platform social media posting record.
+ */
 export interface PlatformPosting {
   platform: string;
   status: PostingStatus;
@@ -53,17 +77,26 @@ export interface PlatformPosting {
   failureReason?: string;
 }
 
+/**
+ * Schedule item for an individual social platform.
+ */
 export interface PlatformScheduleItem {
   platform: string;
   scheduledTime?: string | null;
   status?: PostingStatus;
 }
 
+/**
+ * Response contract for campaign schedule retrieval.
+ */
 export interface CampaignScheduleResponse {
   eventId: string;
   schedules: PlatformScheduleItem[];
 }
 
+/**
+ * Compliance audit log item.
+ */
 export interface AuditLog {
   id: string;
   userId: string;
@@ -74,6 +107,9 @@ export interface AuditLog {
   timestamp?: string;
 }
 
+/**
+ * Admin configuration model for social media platform credentials & API tokens.
+ */
 export interface SocialMediaCredential {
   id?: string;
   provider: string;
@@ -87,6 +123,9 @@ export interface SocialMediaCredential {
   isValid?: boolean;
 }
 
+/**
+ * System notification item presented in Notification Center.
+ */
 export interface NotificationItem {
   id: string;
   title: string;
@@ -98,3 +137,4 @@ export interface NotificationItem {
   campaignId?: string;
   platformPostings?: PlatformPosting[];
 }
+

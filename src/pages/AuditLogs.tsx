@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Search, RefreshCw, Clock, User } from 'lucide-react';
 import { AuditLog } from '../types';
 import { apiClient } from '../api/client';
+import { getErrorMessage } from '../utils/error';
 
 export const AuditLogs: React.FC = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -15,9 +16,9 @@ export const AuditLogs: React.FC = () => {
     try {
       const response = await apiClient.get('/api/Admin/auditlogs');
       setLogs(Array.isArray(response.data) ? response.data : []);
-    } catch (err: any) {
+    } catch (err) {
       console.error('API call to /api/Admin/auditlogs failed:', err);
-      setErrorMessage(err.response?.data?.message || 'Failed to fetch audit logs from backend server.');
+      setErrorMessage(getErrorMessage(err, 'Failed to fetch audit logs from backend server.'));
       setLogs([]);
     } finally {
       setIsLoading(false);

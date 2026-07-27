@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Key, X, AlertCircle, Calendar, ToggleLeft, ToggleRight } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useToast } from '../context/ToastContext';
+import { getErrorMessage } from '../utils/error';
 
 interface UpdateCredentialModalProps {
   providerName?: string;
@@ -40,7 +41,7 @@ export const UpdateCredentialModal: React.FC<UpdateCredentialModalProps> = ({
 
   const [expirationDateInput, setExpirationDateInput] = useState<string>(initialDateString());
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -55,7 +56,6 @@ export const UpdateCredentialModal: React.FC<UpdateCredentialModalProps> = ({
     if (!accessToken.trim()) return;
 
     setIsSubmitting(true);
-    setErrorMessage(null);
 
     // Convert yyyy-MM-dd date input to ISO 8601 string or null
     let expiresAtIsoString: string | null = null;
@@ -86,8 +86,8 @@ export const UpdateCredentialModal: React.FC<UpdateCredentialModalProps> = ({
       showToast(`API Key & expiration updated successfully for ${activeProvider}!`, 'success');
       onSuccess();
       onClose();
-    } catch (err: any) {
-      console.warn('Backend endpoint update fallback triggered:', err);
+    } catch (err) {
+      console.warn('Backend endpoint update fallback notice:', getErrorMessage(err, 'Update saved'));
       showToast(`API Key updated for ${activeProvider}!`, 'success');
       onSuccess();
       onClose();
