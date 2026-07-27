@@ -21,28 +21,28 @@ val LilexFamily = FontFamily(
 
 val PulseTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = LilexFamily,
+        fontFamily = BitcountFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 36.sp,
         letterSpacing = 0.sp
     ),
     headlineLarge = TextStyle(
-        fontFamily = LilexFamily,
+        fontFamily = BitcountFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         lineHeight = 40.sp,
         letterSpacing = 0.sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = LilexFamily,
+        fontFamily = BitcountFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.sp
     ),
     headlineSmall = TextStyle(
-        fontFamily = LilexFamily,
+        fontFamily = BitcountFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         lineHeight = 28.sp,
