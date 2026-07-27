@@ -13,32 +13,6 @@ interface EventsProps {
   onNavigateToCampaign: (eventId: string) => void;
 }
 
-const LOCAL_POSTERS_KEY = 'hive_local_event_posters';
-
-const getLocalEventPosters = (): Record<string, string> => {
-  try {
-    const raw = localStorage.getItem(LOCAL_POSTERS_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch (e) {
-    return {};
-  }
-};
-
-const saveLocalEventPoster = (eventId: string, eventTitle: string | undefined, imageUrl: string) => {
-  try {
-    const current = getLocalEventPosters();
-    if (eventId) current[eventId] = imageUrl;
-    if (eventTitle) {
-      current[eventTitle] = imageUrl;
-      current[eventTitle.toLowerCase()] = imageUrl;
-      current[eventTitle.trim()] = imageUrl;
-    }
-    localStorage.setItem(LOCAL_POSTERS_KEY, JSON.stringify(current));
-  } catch (e) {
-    console.warn('Failed to persist local poster:', e);
-  }
-};
-
 export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
   const { showToast } = useToast();
   const [events, setEvents] = useState<SpeehiveEvent[]>([]);
@@ -55,22 +29,7 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
     try {
       const response = await apiClient.get('/api/Events');
       const rawEvents: SpeehiveEvent[] = Array.isArray(response.data) ? response.data : [];
-      const localPosters = getLocalEventPosters();
-
-      const mergedEvents = rawEvents.map((evt) => {
-        const posterFromStorage =
-          localPosters[evt.id] ||
-          (evt.title ? localPosters[evt.title] : null) ||
-          (evt.title ? localPosters[evt.title.toLowerCase()] : null) ||
-          (evt.title ? localPosters[evt.title.trim()] : null);
-
-        return {
-          ...evt,
-          imageUrl: evt.imageUrl || posterFromStorage || null,
-        };
-      });
-
-      setEvents(mergedEvents);
+      setEvents(rawEvents);
     } catch (err) {
       console.error('API call to /api/Events failed:', err);
       setErrorMessage(getErrorMessage(err, 'Failed to fetch live events from server.'));
@@ -257,10 +216,6 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
           }
           onClose={() => setUploadModalEventId(null)}
           onUploadSuccess={(newImageUrl: string) => {
-            if (uploadModalEventId) {
-              const targetEvent = events.find((e) => e.id === uploadModalEventId);
-              saveLocalEventPoster(uploadModalEventId, targetEvent?.title, newImageUrl);
-            }
             showToast('Event poster uploaded successfully!', 'success');
             setEvents((prevEvents) =>
               prevEvents.map((evt) =>
