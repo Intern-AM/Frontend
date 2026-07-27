@@ -38,7 +38,6 @@ import com.speehive.speehiveaihub.utils.istZone
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import com.speehive.speehiveaihub.utils.formatEventDate
 import com.speehive.speehiveaihub.utils.isEventUpcoming
-import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,12 +48,12 @@ fun DashboardScreen(
     onNavigateToCampaigns: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToCampaignDetail: (String) -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    isAdmin: Boolean = false,
+    onNavigateToAdmin: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
-    var showMenu by remember {
-    mutableStateOf(false)
-}
+    var showMenu by remember { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -67,16 +66,44 @@ fun DashboardScreen(
 
     Scaffold(
         containerColor = AppBackground,
+        topBar = {
+            if (isAdmin) {
+                TopAppBar(
+                    title = {
+                        Column {
+                            Text(
+                                text = "REVIEWER",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                text = "Dashboard",
+                                style = MaterialTheme.typography.displayLarge
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = AppBackground
+                    ),
+                    actions = {
+                        TextButton(onClick = {
+                            Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                            onLogout()
+                        }) {
+                            Text(
+                                "Logout",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                )
+            }
+        },
         bottomBar = {
             BottomNavBar(
                 selected = BottomNavItem.HOME,
-
                 onHomeClick = {},
-
                 onEventsClick = onNavigateToEvents,
-
                 onCampaignsClick = onNavigateToCampaigns,
-
                 onNotificationsClick = onNavigateToNotifications
             )
         }
@@ -84,12 +111,13 @@ fun DashboardScreen(
         PullToRefreshBox(
             isRefreshing = viewModel.isLoading,
             onRefresh = { viewModel.refresh() },
-            state = rememberPullToRefreshState()
-        ) {
-        LazyColumn(
+            state = rememberPullToRefreshState(),
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxSize(),
+                .fillMaxSize()
+        ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = 20.dp,
                 end = 20.dp,
@@ -98,6 +126,20 @@ fun DashboardScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (isAdmin) {
+                item {
+                    ViewModeSwitcher(
+                        currentView = DashboardView.REVIEWER,
+                        onViewSelected = { targetView ->
+                            when (targetView) {
+                                DashboardView.ADMIN -> onNavigateToAdmin?.invoke()
+                                DashboardView.REVIEWER -> { /* Already on Reviewer */ }
+                                else -> {}
+                            }
+                        }
+                    )
+                }
+            }
             // Dashboard Header (Chart Area Placeholder)
             item {
 
@@ -167,7 +209,7 @@ fun DashboardScreen(
                                 Surface(
                                     modifier = Modifier
                                         .size(40.dp)
-                                        .clickable {
+                                        .clickable(enabled = !isAdmin) {
                                             showMenu = true
                                         },
                                     shape = RoundedCornerShape(20.dp),
@@ -189,16 +231,17 @@ fun DashboardScreen(
                                         )
                                     }
                                 }
-                                DropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = {
-                                        showMenu = false
-                                    },
-                                    containerColor = CardSurface,
-                                    tonalElevation = 0.dp,
-                                    shadowElevation = 0.dp,
-                                    shape = RoundedCornerShape(12.dp),
-                                ){
+                                if (!isAdmin) {
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = {
+                                            showMenu = false
+                                        },
+                                        containerColor = CardSurface,
+                                        tonalElevation = 0.dp,
+                                        shadowElevation = 0.dp,
+                                        shape = RoundedCornerShape(12.dp),
+                                    ){
                                         DropdownMenuItem(
                                             text = {
                                                 Text(
@@ -258,6 +301,7 @@ fun DashboardScreen(
                         }
                     }
                 }
+            }
 
             // Campaign Queue Section
             item {
@@ -502,20 +546,18 @@ fun StatCard(
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, CardBorder)
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 14.dp, horizontal = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall,
-                color = color,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                modifier = Modifier.fillMaxWidth()
+                color = color
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -523,10 +565,7 @@ fun StatCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelMedium,
-                color = TextSecondary,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                modifier = Modifier.fillMaxWidth()
+                color = TextSecondary
             )
         }
     }
