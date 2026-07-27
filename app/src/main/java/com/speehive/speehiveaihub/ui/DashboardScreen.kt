@@ -38,6 +38,7 @@ import com.speehive.speehiveaihub.utils.istZone
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import com.speehive.speehiveaihub.utils.formatEventDate
 import com.speehive.speehiveaihub.utils.isEventUpcoming
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -501,18 +502,20 @@ fun StatCard(
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, CardBorder)
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(vertical = 14.dp, horizontal = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall,
-                color = color
+                color = color,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -520,7 +523,10 @@ fun StatCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelMedium,
-                color = TextSecondary
+                color = TextSecondary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
