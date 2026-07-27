@@ -160,7 +160,9 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
     try {
       await apiClient.put(`/api/Campaigns/${campaign.eventId}`, {
         campaignPost: editCampaignPost,
+        CampaignPost: editCampaignPost,
         hashtags: editHashtags,
+        Hashtags: editHashtags,
       });
       setCampaign((prev) => (prev ? { ...prev, campaignPost: editCampaignPost, hashtags: editHashtags } : null));
       setIsEditingPost(false);
@@ -179,7 +181,9 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
     try {
       await apiClient.post('/api/Approval/approve', {
         eventId: campaign.eventId,
+        EventId: campaign.eventId,
         comments: 'Approved by Reviewer',
+        Comments: 'Approved by Reviewer',
       });
       setCampaign((prev) => (prev ? { ...prev, status: 'Approved' } : null));
       showToast('Campaign approved successfully!', 'success');
@@ -198,7 +202,9 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
     try {
       await apiClient.post('/api/Approval/reject', {
         eventId: campaign.eventId,
+        EventId: campaign.eventId,
         comments: rejectionComments,
+        Comments: rejectionComments,
       });
       setCampaign((prev) => (prev ? { ...prev, status: 'Rejected' } : null));
       setShowRejectModal(false);
@@ -233,6 +239,8 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
     try {
       await apiClient.put(`/api/Approval/${campaign.eventId}/schedule/${platformKey}`, {
         scheduledTime: isoValue,
+        ScheduledTime: isoValue,
+        schdTime: isoValue,
       });
       showToast(`Publishing schedule updated for ${platformName}!`, 'success');
     } catch (err: any) {

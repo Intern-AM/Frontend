@@ -73,8 +73,11 @@ export const UpdateCredentialModal: React.FC<UpdateCredentialModalProps> = ({
     // Match UpdateSocialMediaCredentialRequest.kt: { accessToken, expiresAt, isActive }
     const payload = {
       accessToken: accessToken.trim(),
+      AccessToken: accessToken.trim(),
       expiresAt: expiresAtIsoString,
+      ExpiresAt: expiresAtIsoString,
       isActive: isActive,
+      IsActive: isActive,
     };
 
     try {

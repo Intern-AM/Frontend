@@ -63,7 +63,12 @@ export const Campaigns: React.FC<CampaignsProps> = ({ onSelectCampaign }) => {
   const handleQuickApprove = async (e: React.MouseEvent, eventId: string) => {
     e.stopPropagation();
     try {
-      await apiClient.post('/api/Approval/approve', { eventId, comments: 'Approved' });
+      await apiClient.post('/api/Approval/approve', {
+        eventId,
+        EventId: eventId,
+        comments: 'Approved',
+        Comments: 'Approved',
+      });
       showToast('Campaign approved successfully!', 'success');
       fetchCampaignsAndEvents();
     } catch (err: any) {
