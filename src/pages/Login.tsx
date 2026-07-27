@@ -24,8 +24,8 @@ export const Login: React.FC = () => {
 
     try {
       const response = await apiClient.post('/api/Auth/login', {
-        username: usernameInput,
-        email: usernameInput,
+        username: usernameInput.trim(),
+        email: usernameInput.trim(),
         password: passwordInput,
       });
 
@@ -68,7 +68,7 @@ export const Login: React.FC = () => {
           <p className="text-xs text-slate-500 mb-6">Sign in to your workspace to continue.</p>
 
           {errorMessage && (
-            <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+            <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2" role="alert">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -76,12 +76,13 @@ export const Login: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label htmlFor="login-username-field" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Username / Email
               </label>
               <div className="relative flex items-center">
                 <User className="w-5 h-5 absolute left-4 text-slate-400 pointer-events-none z-10" />
                 <input
+                  id="login-username-field"
                   type="text"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
@@ -93,12 +94,13 @@ export const Login: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label htmlFor="login-password-field" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <div className="relative flex items-center">
                 <Lock className="w-5 h-5 absolute left-4 text-slate-400 pointer-events-none z-10" />
                 <input
+                  id="login-password-field"
                   type={showPassword ? 'text' : 'password'}
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
@@ -110,6 +112,7 @@ export const Login: React.FC = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 text-slate-400 hover:text-slate-600 z-10"
+                  aria-label={showPassword ? "Hide password text" : "Show password text"}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>

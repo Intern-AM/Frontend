@@ -30,6 +30,15 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  // Clean up object URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -40,6 +49,9 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       if (file.size > 10 * 1024 * 1024) {
         setErrorMessage('File size exceeds the 10MB maximum limit.');
         return;
+      }
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
       }
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
@@ -69,7 +81,6 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     let uploadedUrl = '';
 
     try {
-      // 1. Try primary endpoint (do NOT set explicit Content-Type so browser includes boundary string)
       try {
         const response = await apiClient.post(primaryEndpoint, formData, {
           headers: {
@@ -104,30 +115,31 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
       <div
         className="deep-3d-card p-6 max-w-md w-full bg-white space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <h3 className="font-extrabold text-lg text-slate-900 font-heading">{title}</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500" title="Close (Esc)">
+          <h3 id="upload-modal-title" className="font-extrabold text-lg text-slate-900 font-heading">{title}</h3>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-500" title="Close (Esc)" aria-label="Close modal">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {errorMessage && (
-          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2" role="alert">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         <div className="space-y-3">
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+          <label htmlFor="poster-file-input" className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
             Select PNG / JPEG Image (Max 10MB)
           </label>
           <input
+            id="poster-file-input"
             type="file"
             accept="image/png, image/jpeg"
             onChange={handleFileChange}
