@@ -340,11 +340,6 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
                     </span>
                   </div>
                 )}
-                {campaign.cta && (
-                  <p className="text-xs font-bold text-slate-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
-                    Call To Action: {campaign.cta}
-                  </p>
-                )}
               </div>
             ) : (
               <div className="space-y-3">
