@@ -52,6 +52,18 @@ class EventViewModel(private val repository: EventRepository) : ViewModel() {
         }
     }
 
+    fun uploadEventImage(eventId: String, uri: android.net.Uri) {
+        viewModelScope.launch {
+            isProcessing = true
+            errorMessage = null
+            repository.uploadDesignerImage(eventId, uri).fold(
+                onSuccess = { loadEventsSilently() },
+                onFailure = { errorMessage = it.message ?: "Failed to upload poster" }
+            )
+            isProcessing = false
+        }
+    }
+
     fun cancelEvent(id: String) {
         viewModelScope.launch {
             isProcessing = true

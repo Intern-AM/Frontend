@@ -1,5 +1,6 @@
 package com.speehive.speehiveaihub.viewmodel
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -26,6 +27,12 @@ class DashboardViewModel(
         private set
 
     var errorMessage by mutableStateOf<String?>(null)
+        private set
+
+    var uploadSuccess by mutableStateOf<String?>(null)
+        private set
+
+    var uploadingId by mutableStateOf<String?>(null)
         private set
 
     val pendingCount: Int
@@ -81,6 +88,54 @@ class DashboardViewModel(
                 },
                 onFailure = { if (errorMessage == null) errorMessage = it.message ?: "Failed to load events" }
             )
+        }
+    }
+
+    fun uploadEventImage(eventId: String, uri: Uri) {
+        viewModelScope.launch {
+            uploadingId = eventId
+            errorMessage = null
+            uploadSuccess = null
+            eventRepository.uploadDesignerImage(eventId, uri).fold(
+                onSuccess = {
+                    uploadSuccess = "Event poster uploaded"
+                    refreshSilently()
+                },
+                onFailure = { errorMessage = it.message ?: "Upload failed" }
+            )
+            uploadingId = null
+        }
+    }
+
+    fun uploadCampaignImage(eventId: String, uri: Uri) {
+        viewModelScope.launch {
+            uploadingId = eventId
+            errorMessage = null
+            uploadSuccess = null
+            campaignRepository.uploadCampaignImage(eventId, uri).fold(
+                onSuccess = {
+                    uploadSuccess = "Campaign poster uploaded"
+                    refreshSilently()
+                },
+                onFailure = { errorMessage = it.message ?: "Upload failed" }
+            )
+            uploadingId = null
+        }
+    }
+
+    fun editCampaign(eventId: String, campaignPost: String, hashtags: String) {
+        viewModelScope.launch {
+            uploadingId = eventId
+            errorMessage = null
+            uploadSuccess = null
+            campaignRepository.editCampaign(eventId, campaignPost, hashtags).fold(
+                onSuccess = {
+                    uploadSuccess = "Campaign updated successfully"
+                    refreshSilently()
+                },
+                onFailure = { errorMessage = it.message ?: "Update failed" }
+            )
+            uploadingId = null
         }
     }
 

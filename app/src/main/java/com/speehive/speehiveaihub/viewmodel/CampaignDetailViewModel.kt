@@ -139,23 +139,81 @@ class CampaignDetailViewModel(
             isUpdatingSchedule = true
             errorMessage = null
             campaign?.let { currentCampaign ->
-                campaignRepository.updateCampaignSchedule(currentCampaign.eventId, request).fold(
-                    onSuccess = {
-                        loadSchedule(currentCampaign.eventId)
-                        onSuccess()
-                    },
-                    onFailure = { error ->
-                        errorMessage = when (error) {
-                            is AuthError.Unauthorized -> "You don't have permission to modify schedules"
-                            is AuthError.TokenExpired -> "Session expired. Please log in again"
-                            else -> error.message ?: "Failed to update schedule"
+                val platformUpdates = mutableListOf<Pair<String, String?>>()
+                if (request.isLinkedInModified) platformUpdates.add("LinkedIn" to request.schdtimeLinkedIn)
+                if (request.isInstagramModified) platformUpdates.add("Instagram" to request.schdtimeInstagram)
+                if (request.isTeamsModified) platformUpdates.add("Teams" to request.schdtimeTeams)
+                if (request.isWhatsappModified) platformUpdates.add("WhatsApp" to request.schdtimeWhatsapp)
+
+                var hasFailure = false
+                var lastErrorMessage: String? = null
+
+                for ((platform, scheduledTime) in platformUpdates) {
+                    val result = campaignRepository.updatePlatformSchedule(currentCampaign.eventId, platform, scheduledTime)
+                    result.fold(
+                        onSuccess = {
+                            sessionManager.saveActionTimestamp(currentCampaign.eventId)
+                        },
+                        onFailure = { error ->
+                            hasFailure = true
+                            lastErrorMessage = when (error) {
+                                is AuthError.Unauthorized -> "You don't have permission to modify schedules"
+                                is AuthError.TokenExpired -> "Session expired. Please log in again"
+                                else -> error.message ?: "Failed to update schedule for $platform"
+                            }
                         }
-                    }
-                )
+                    )
+                    if (hasFailure) break
+                }
+
+                if (hasFailure) {
+                    errorMessage = lastErrorMessage
+                    loadSchedule(currentCampaign.eventId)
+                } else {
+                    loadSchedule(currentCampaign.eventId)
+                    loadCampaign(currentCampaign.campaignId.toString())
+                    onSuccess()
+                }
             } ?: run {
                 errorMessage = "Campaign not found"
             }
             isUpdatingSchedule = false
+        }
+    }
+
+    fun uploadCampaignImage(uri: android.net.Uri) {
+        viewModelScope.launch {
+            campaign?.let { currentCampaign ->
+                isProcessing = true
+                errorMessage = null
+                campaignRepository.uploadCampaignImage(currentCampaign.eventId, uri).fold(
+                    onSuccess = {
+                        loadCampaign(currentCampaign.campaignId.toString())
+                    },
+                    onFailure = { error ->
+                        errorMessage = error.message ?: "Failed to upload image"
+                    }
+                )
+                isProcessing = false
+            }
+        }
+    }
+
+    fun editCampaign(campaignPost: String, hashtags: String) {
+        viewModelScope.launch {
+            campaign?.let { currentCampaign ->
+                isProcessing = true
+                errorMessage = null
+                campaignRepository.editCampaign(currentCampaign.eventId, campaignPost, hashtags).fold(
+                    onSuccess = {
+                        loadCampaign(currentCampaign.campaignId.toString())
+                    },
+                    onFailure = { error ->
+                        errorMessage = error.message ?: "Failed to update campaign"
+                    }
+                )
+                isProcessing = false
+            }
         }
     }
 

@@ -199,7 +199,7 @@ fun NavGraph(navController: NavHostController) {
             RoleGuard(
                 sessionManager = sessionManager,
                 navController = navController,
-                isAllowed = { !it.equals("Designer", ignoreCase = true) }
+                isAllowed = { !it.equals("Designer", ignoreCase = true) && !it.equals("Admin", ignoreCase = true) }
             ) {
                 DashboardScreen(
                     viewModel = dashboardViewModel,
@@ -234,16 +234,6 @@ fun NavGraph(navController: NavHostController) {
                         navController.navigate(
                             Screen.CampaignDetail.createRoute(id)
                         )
-                    },
-                    isAdmin = sessionManager.getRole().equals("Admin", ignoreCase = true),
-                    onNavigateToAdmin = {
-                        navController.navigate(Screen.AdminDashboard.route) {
-                            popUpTo(Screen.AdminDashboard.route) { inclusive = false }
-                            launchSingleTop = true
-                        }
-                    },
-                    onNavigateToDesigner = {
-                        navController.navigate(Screen.DesignerDashboard.route)
                     }
                 )
             }
@@ -271,12 +261,6 @@ fun NavGraph(navController: NavHostController) {
                         navController.navigate(
                             Screen.AdminSettings.route
                         )
-                    },
-                    onNavigateToDesigner = {
-                        navController.navigate(Screen.DesignerDashboard.route)
-                    },
-                    onNavigateToReviewer = {
-                        navController.navigate(Screen.Dashboard.route)
                     }
                 )
             }
@@ -457,7 +441,7 @@ fun NavGraph(navController: NavHostController) {
             RoleGuard(
                 sessionManager = sessionManager,
                 navController = navController,
-                isAllowed = { it.equals("Designer", ignoreCase = true) || it.equals("Admin", ignoreCase = true) }
+                isAllowed = { it.equals("Designer", ignoreCase = true) }
             ) {
                 val viewModel: DesignerViewModel = viewModel {
                     DesignerViewModel(eventRepository, campaignRepository)
@@ -470,16 +454,6 @@ fun NavGraph(navController: NavHostController) {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(navController.graph.id) { inclusive = true }
                         }
-                    },
-                    isAdmin = sessionManager.getRole().equals("Admin", ignoreCase = true),
-                    onNavigateToAdmin = {
-                        navController.navigate(Screen.AdminDashboard.route) {
-                            popUpTo(Screen.AdminDashboard.route) { inclusive = false }
-                            launchSingleTop = true
-                        }
-                    },
-                    onNavigateToReviewer = {
-                        navController.navigate(Screen.Dashboard.route)
                     }
                 )
             }

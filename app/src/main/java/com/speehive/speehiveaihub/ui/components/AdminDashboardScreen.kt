@@ -46,9 +46,7 @@ fun AdminDashboardScreen(
     viewModel: AdminViewModel,
     onLogout: () -> Unit,
     onViewAuditLogs: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToDesigner: () -> Unit,
-    onNavigateToReviewer: () -> Unit
+    onNavigateToSettings: () -> Unit
 ){
     val context = LocalContext.current
 
@@ -198,19 +196,6 @@ fun AdminDashboardScreen(
                             )
                         }
                     }
-                }
-
-                item {
-                    ViewModeSwitcher(
-                        currentView = DashboardView.ADMIN,
-                        onViewSelected = { targetView ->
-                            when (targetView) {
-                                DashboardView.ADMIN -> { /* Already on Admin Dashboard */ }
-                                DashboardView.DESIGNER -> onNavigateToDesigner()
-                                DashboardView.REVIEWER -> onNavigateToReviewer()
-                            }
-                        }
-                    )
                 }
 
                 item {

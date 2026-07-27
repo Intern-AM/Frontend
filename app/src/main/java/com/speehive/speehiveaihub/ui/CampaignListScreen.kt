@@ -21,9 +21,18 @@ import com.speehive.speehiveaihub.models.Campaign
 import com.speehive.speehiveaihub.ui.components.BottomNavBar
 import com.speehive.speehiveaihub.ui.components.BottomNavItem
 import com.speehive.speehiveaihub.ui.components.FigmaStatusBadge
+import com.speehive.speehiveaihub.ui.components.ZoomableImageDialog
+import com.speehive.speehiveaihub.ui.theme.*
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import com.speehive.speehiveaihub.R
-import com.speehive.speehiveaihub.ui.theme.*
+import coil.compose.AsyncImage
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import com.speehive.speehiveaihub.viewmodel.DashboardViewModel
 
@@ -39,33 +48,30 @@ fun CampaignListScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshSilently()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshSilently()
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
+    val pullToRefreshState = rememberPullToRefreshState()
+
     Scaffold(
-        bottomBar = {
-            BottomNavBar(
-                selected = BottomNavItem.CAMPAIGNS,
-                onHomeClick = onNavigateHome,
-                onEventsClick = onNavigateEvents,
-                onCampaignsClick = {},
-                onNotificationsClick = onNavigateNotifications
-            )
-        },
         containerColor = AppBackground,
         topBar = {
             TopAppBar(
                 title = {
                     Column {
                         Text(
-                            stringResource(R.string.review_queue_header),
+                            text = "HIVE AI HUB",
                             style = MaterialTheme.typography.labelSmall
                         )
                         Text(
-                            stringResource(R.string.nav_campaigns),
+                            text = stringResource(R.string.nav_campaigns),
                             style = MaterialTheme.typography.displayLarge
                         )
                     }
@@ -74,25 +80,32 @@ fun CampaignListScreen(
                     containerColor = AppBackground
                 )
             )
+        },
+        bottomBar = {
+            BottomNavBar(
+                selected = BottomNavItem.CAMPAIGNS,
+                onHomeClick = onNavigateHome,
+                onEventsClick = onNavigateEvents,
+                onCampaignsClick = {},
+                onNotificationsClick = onNavigateNotifications
+            )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
+    ) { padding ->
 
-            PullToRefreshBox(
-                isRefreshing = viewModel.isLoading,
-                onRefresh = { viewModel.refresh() },
-                state = rememberPullToRefreshState()
-            ) {
+        PullToRefreshBox(
+            isRefreshing = viewModel.isLoading,
+            onRefresh = { viewModel.refresh() },
+            state = pullToRefreshState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 80.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
                 items(
                     items = viewModel.reviewQueue,
                     key = { it.campaignId }
@@ -114,10 +127,8 @@ fun CampaignListScreen(
                     )
                 }
             }
-            }
         }
     }
-
 }
 
 @Composable
@@ -130,27 +141,29 @@ fun CampaignListCard(
         modifier = Modifier
             .fillMaxWidth()
             .deep3DCard(elevation = 10.dp)
-            .clickable {
-                onClick()
-            },
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardSurface
         ),
-        border = BorderStroke(
-            1.dp,
-            CardBorder
-        )
+        border = BorderStroke(1.dp, CardBorder)
     ) {
-
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.weight(1f)
+                )
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge
-            )
+                FigmaStatusBadge(campaign.status)
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -161,20 +174,13 @@ fun CampaignListCard(
                 color = TextSecondary
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            FigmaStatusBadge(campaign.status)
-
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = formatCampaignDate(
-                    campaign.createdAt
-                ),
+                text = formatCampaignDate(campaign.createdAt),
                 style = MaterialTheme.typography.labelSmall,
                 color = TextSecondary
             )
         }
     }
-
 }

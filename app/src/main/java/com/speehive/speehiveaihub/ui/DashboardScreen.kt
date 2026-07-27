@@ -48,10 +48,7 @@ fun DashboardScreen(
     onNavigateToCampaigns: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToCampaignDetail: (String) -> Unit,
-    onLogout: () -> Unit,
-    isAdmin: Boolean = false,
-    onNavigateToAdmin: (() -> Unit)? = null,
-    onNavigateToDesigner: (() -> Unit)? = null
+    onLogout: () -> Unit
 ) {
     val context = LocalContext.current
     var showMenu by remember {
@@ -69,30 +66,6 @@ fun DashboardScreen(
 
     Scaffold(
         containerColor = AppBackground,
-        topBar = {
-            if (isAdmin) {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text("REVIEWER", style = MaterialTheme.typography.labelSmall)
-                            Text("Dashboard", style = MaterialTheme.typography.displayLarge)
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = AppBackground),
-                    actions = {
-                        TextButton(onClick = {
-                            Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
-                            onLogout()
-                        }) {
-                            Text(
-                                "Logout",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                )
-            }
-        },
         bottomBar = {
             BottomNavBar(
                 selected = BottomNavItem.HOME,
@@ -124,20 +97,6 @@ fun DashboardScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (isAdmin) {
-                item {
-                    ViewModeSwitcher(
-                        currentView = DashboardView.REVIEWER,
-                        onViewSelected = { targetView ->
-                            when (targetView) {
-                                DashboardView.ADMIN -> onNavigateToAdmin?.invoke()
-                                DashboardView.DESIGNER -> onNavigateToDesigner?.invoke()
-                                DashboardView.REVIEWER -> { /* Already on Reviewer */ }
-                            }
-                        }
-                    )
-                }
-            }
             // Dashboard Header (Chart Area Placeholder)
             item {
 
@@ -207,7 +166,7 @@ fun DashboardScreen(
                                 Surface(
                                     modifier = Modifier
                                         .size(40.dp)
-                                        .clickable(enabled = !isAdmin) {
+                                        .clickable {
                                             showMenu = true
                                         },
                                     shape = RoundedCornerShape(20.dp),
@@ -229,17 +188,16 @@ fun DashboardScreen(
                                         )
                                     }
                                 }
-                                if (!isAdmin) {
-                                    DropdownMenu(
-                                        expanded = showMenu,
-                                        onDismissRequest = {
-                                            showMenu = false
-                                        },
-                                        containerColor = CardSurface,
-                                        tonalElevation = 0.dp,
-                                        shadowElevation = 0.dp,
-                                        shape = RoundedCornerShape(12.dp),
-                                    ){
+                                DropdownMenu(
+                                    expanded = showMenu,
+                                    onDismissRequest = {
+                                        showMenu = false
+                                    },
+                                    containerColor = CardSurface,
+                                    tonalElevation = 0.dp,
+                                    shadowElevation = 0.dp,
+                                    shape = RoundedCornerShape(12.dp),
+                                ){
                                         DropdownMenuItem(
                                             text = {
                                                 Text(
@@ -299,7 +257,6 @@ fun DashboardScreen(
                         }
                     }
                 }
-            }
 
             // Campaign Queue Section
             item {

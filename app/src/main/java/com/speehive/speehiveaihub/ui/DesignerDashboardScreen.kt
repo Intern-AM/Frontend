@@ -47,10 +47,7 @@ import com.speehive.speehiveaihub.viewmodel.DesignerViewModel
 @Composable
 fun DesignerDashboardScreen(
     viewModel: DesignerViewModel,
-    onLogout: () -> Unit,
-    isAdmin: Boolean = false,
-    onNavigateToAdmin: (() -> Unit)? = null,
-    onNavigateToReviewer: (() -> Unit)? = null
+    onLogout: () -> Unit
 ) {
     val context = LocalContext.current
     var showCampaigns by remember { mutableStateOf(false) }
@@ -121,20 +118,6 @@ fun DesignerDashboardScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (isAdmin) {
-                    item {
-                        ViewModeSwitcher(
-                            currentView = DashboardView.DESIGNER,
-                            onViewSelected = { targetView ->
-                                when (targetView) {
-                                    DashboardView.ADMIN -> onNavigateToAdmin?.invoke()
-                                    DashboardView.DESIGNER -> { /* Already on Designer */ }
-                                    DashboardView.REVIEWER -> onNavigateToReviewer?.invoke()
-                                }
-                            }
-                        )
-                    }
-                }
             if (viewModel.isLoading) {
                 item {
                     Box(
