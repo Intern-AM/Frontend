@@ -1,46 +1,43 @@
-# 🐝 Hive AI - Android Mobile Application
+# 🐝 Speehive AI Hub - v2 Redesign Branch
 
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-blue?style=flat&logo=kotlin)
-![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3%20%2B%203D%20Glassmorphism-4285F4?style=flat&logo=android)
-![Min SDK](https://img.shields.io/badge/Min%20SDK-26%20(Android%208.0)-brightgreen)
-![Target SDK](https://img.shields.io/badge/Target%20SDK-37-green)
-![License](https://img.shields.io/badge/License-MIT-blue)
+![Jetpack%20Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3%20%2B%203D%20Glassmorphism-4285F4?style=flat&logo=android)
+![Min%20SDK](https://img.shields.io/badge/Min%20SDK-26%20(Android%208.0)-brightgreen)
+![Target%20SDK](https://img.shields.io/badge/Target%20SDK-37-green)
+![License](https://img.shields.io/badge/License-Proprietary-blue)
 
-**Hive AI** is a state-of-the-art Android application built with Jetpack Compose, Material 3, and Kotlin Coroutines. It serves as the mobile administration and management hub for the Speehive AI automation platform—enabling end-to-end campaign lifecycle management, multi-platform scheduling (LinkedIn, Instagram), creative media editing, real-time audit logging, and role-based administration.
+The **`feature/v2-redesign`** branch of **Speehive AI Hub** introduces a streamlined architecture that consolidates design and reviewer workflows into a unified **Reviewer** experience, alongside multi-platform social media scheduling, 3D glassmorphism aesthetics, AI prompt copying, and hybrid DNS resilience.
 
 ---
 
-## 🚀 Key Features & Role-Based Access Control (RBAC)
-
-Hive AI enforces strict role-based access control with intuitive, polished UI flows:
+## 🚀 Key Features & Role Consolidation
 
 ### 👑 Admin
-- **User Administration**: Create new user accounts, assign roles (`Admin`, `Reviewer`), and toggle user activation status (Active/Deactive).
-- **Audit Logs**: Monitor real-time system-wide audit logs with action filters for administrative compliance.
-- **Social Media Credentials**: Manage OAuth credentials, view token expiry banners, and update tokens for connected platforms (LinkedIn, Instagram, Google Calendar).
+- **User Administration**: Create new user accounts, assign roles (`Admin`, `Reviewer`), and toggle user activation status (`Active`/`Inactive`).
+- **System Audit Logs**: Monitor system-wide compliance logs with search and date filters.
+- **Social Media Credentials**: Add and update OAuth credentials for connected platforms (LinkedIn, Instagram, MS Teams, WhatsApp).
+- **View Mode Switcher**: Seamlessly switch dashboard view modes using the 3D `ViewModeSwitcher`.
 
-### 👁️ Reviewer (Includes Consolidated Designer Capabilities)
-- **Campaign Management & Review**: View active, generated, approved, rejected, and published marketing campaigns.
-- **Per-Platform Multi-Platform Scheduling**: Customize posting dates and times individually per platform (e.g. LinkedIn, Instagram) and track per-platform status (`Posted`, `Failed`, `Pending`) along with failure diagnostics.
-- **Creative Collateral & Poster Upload**: Upload campaign poster images and event images directly in-line, edit captions, hashtags, and CTAs before approval.
-- **Event Synchronization**: Track upcoming events, view status details, cancel events, and trigger AI campaign generation workflows.
-- **Interactive View Modes**: Toggle layout displays using the dynamic `ViewModeSwitcher`.
+### 👁️ Reviewer (Consolidated Designer Capabilities)
+- **Unified Review & Asset Workflow**: View active, generated, approved, rejected, and published marketing campaigns and events.
+- **Poster Upload & Replacement**: Upload or replace event/campaign poster images directly in-line with centered layout positioning.
+- **Per-Platform Social Scheduling**: Customize posting dates and times individually per platform (`LinkedIn`, `Instagram`, `MS Teams`, `WhatsApp`) with past-date validation.
+- **Copy AI Image Prompt**: One-tap action to copy AI generation image prompts directly to the clipboard from zoomable dialogs.
+- **Top App Bar Cleanups**: Top app bar is hidden on Reviewer dashboards to maximize screen real estate.
 
-### 🎨 3D Glassmorphism & UI Aesthetics
-- **Visual Elevation (`ThreeDEffects`)**: Custom 3D cards, depth shadows, light highlights, and glassmorphic container styling.
-- **Media Experience (`ZoomableImageDialog`)**: Full-screen zoomable media preview supporting pinch-to-zoom and pan.
+### 🎨 3D Glassmorphism & Visual Aesthetics
+- **3D Depth Styling (`ThreeDEffects`)**: Custom 3D cards, press effects, depth shadows, light highlights, and glassmorphic containers.
+- **Interactive Image Viewing (`ZoomableImageDialog`)**: Full-screen zoomable media preview supporting double-tap, pinch-to-zoom, and prompt clipboard copying.
 
-### 🔔 Background Notifications & WorkManager
-- **WorkManager Engine**: `NotificationWorker` polls campaign status and social media credential expiry in the background every 15 minutes.
-- **Dynamic Event Mapping**: Notifications display real Event Titles instead of raw IDs.
-- **Platform Breakdown**: Notifications include platform posting summaries (e.g., *"Posted to 2 of 2 platform(s)"*).
+### 🔔 Background Notifications & Workers
+- **WorkManager Engine**: `NotificationWorker` polls campaign status and social media credential expiry in the background.
 - **Deep Linking**: Direct navigation from local push notifications into the Notification Center.
 
 ---
 
 ## 🏗️ Architecture & Tech Stack
 
-The application follows the **MVVM (Model-View-ViewModel)** architectural pattern with clean repository abstractions:
+The application follows the **MVVM (Model-View-ViewModel)** architectural pattern:
 
 ```
                   ┌─────────────────────────────────────┐
@@ -64,14 +61,14 @@ The application follows the **MVVM (Model-View-ViewModel)** architectural patter
             ▼                                                 ▼
 ┌─────────────────────────────────────┐           ┌──────────────────────┐
 │         SpeehiveApiService          │           │    SessionManager    │
-│ (Retrofit 2 + Gson + OkHttp Logger) │           │ (SharedPreferences)  │
+│ (Retrofit 2 + Gson + Hybrid DNS)    │           │ (SharedPreferences)  │
 └─────────────────────────────────────┘           └──────────────────────┘
 ```
 
 * **UI Layer**: Jetpack Compose with Material 3, custom 3D glassmorphism (`ThreeDEffects.kt`), and `ViewModeSwitcher`.
-* **Networking**: Retrofit 2 + Gson + OkHttp `LoggingInterceptor` with custom `AuthInterceptor` (JWT injection) and `TokenValidationInterceptor` (auto-logout on 401 unauthenticated).
-* **Media Handling**: Coil Compose with fallback placeholders and dynamic server base URL image URL rewriters.
-* **Date & Time Handling**: Java 8 `java.time.OffsetDateTime` with IST (Asia/Kolkata) timezone utility formatting (`DateUtils`).
+* **Networking & Hybrid DNS**: Retrofit 2 + Gson + OkHttp with custom `AuthInterceptor` (JWT injection), `TokenValidationInterceptor` (auto-logout on 401), `HttpLoggingInterceptor`, and **Hybrid DNS** (System DNS with Cloudflare DNS-over-HTTPS `1.1.1.1` fallback).
+* **Media Handling**: Coil Compose with dynamic server base URL image URL rewriters and fallback placeholders.
+* **Timezone Standard**: Java 8 `java.time.OffsetDateTime` formatted to IST (Asia/Kolkata) timezone (`DateUtils`).
 
 ---
 
@@ -80,9 +77,9 @@ The application follows the **MVVM (Model-View-ViewModel)** architectural patter
 ```
 app/src/main/java/com/speehive/speehiveaihub/
 ├── data/               # Auth & Session Managers (Tokens, Roles, Timestamps)
-├── models/             # Data classes (Campaign, Event, User, AuditLog, PlatformPosting, etc.)
+├── models/             # Data models (Campaign, Event, User, AuditLog, PlatformPosting, etc.)
 ├── navigation/         # NavGraph, Screen routes, and RoleGuard authorization
-├── network/            # Retrofit client, API service, DTOs, mappers, interceptors
+├── network/            # Retrofit client, API service, DTOs, mappers, hybrid DNS
 ├── notification/       # WorkManager workers, schedulers, notification channels
 ├── repository/         # Repository contracts & API implementations
 ├── ui/                 # Jetpack Compose screens
@@ -98,28 +95,28 @@ app/src/main/java/com/speehive/speehiveaihub/
 
 ### Prerequisites
 * **Android Studio**: Ladybug (2024.2.1) or newer.
-* **JDK**: Java 17.
+* **JDK**: Java 17 (JBR recommended).
 * **Android SDK**: API 37 (Build-Tools 35.0.0+).
 * **Minimum Device**: Android 8.0 (API Level 26).
 
-### 1. Clone the Repository
+### 1. Clone the Repository & Checkout Feature Branch
 ```bash
 git clone https://github.com/Intern-AM/Frontend.git
 cd Frontend
+git checkout feature/v2-redesign
 ```
 
 ### 2. Configure Backend Server Base URL
 The backend API endpoint is configured in `RetrofitClient.kt`:
 ```kotlin
-private const val BASE_URL = "http://172.16.70.37:5019/"
+private const val BASE_URL = "https://debian.tailbd6bc8.ts.net/"
 ```
-Ensure your physical Android device or emulator is connected to the backend network.
 
 ### 3. Build & Run via Command Line
 
 * **Build Debug APK**:
   ```powershell
-  ./gradlew assembleDebug
+  cmd /c "set ""JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"" && gradlew assembleDebug"
   ```
 
 * **Run Unit Tests**:
