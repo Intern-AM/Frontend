@@ -87,12 +87,12 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     formData.append('Image', selectedFile);
 
     const primaryEndpoint = type === 'campaign'
-      ? `/api/Campaigns/${eventId}/image`
-      : `/api/Events/${eventId}/image`;
-
-    const secondaryEndpoint = type === 'campaign'
       ? `/api/designer/campaigns/${eventId}/image`
       : `/api/designer/events/${eventId}/image`;
+
+    const secondaryEndpoint = type === 'campaign'
+      ? `/api/Campaigns/${eventId}/image`
+      : `/api/Events/${eventId}/image`;
 
     let uploadedUrl = '';
 

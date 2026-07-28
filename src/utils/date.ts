@@ -69,3 +69,22 @@ export const getDaysUntilExpiration = (expiresAtStr?: string | null): number | n
     return null;
   }
 };
+
+/**
+ * Converts a UTC date string to local YYYY-MM-DDTHH:mm string for datetime-local picker input.
+ */
+export const getLocalDatetimeString = (dateStr?: string | null): string => {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (e) {
+    return '';
+  }
+};

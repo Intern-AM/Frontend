@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Clock, XCircle, AlertCircle, Shield, Eye, Send } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, AlertCircle, Shield, Eye, Send, Sparkles } from 'lucide-react';
 import { CampaignStatus, PostingStatus, UserRole } from '../types';
 
 interface StatusBadgeProps {
@@ -33,10 +33,18 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status = '', type = 'c
     );
   }
 
-  if (lowerStatus === 'pending' || lowerStatus === 'generated') {
+  if (lowerStatus === 'pending') {
     return (
       <span className="badge badge-pending">
         <Clock className="w-3.5 h-3.5" /> {status}
+      </span>
+    );
+  }
+
+  if (lowerStatus === 'generated') {
+    return (
+      <span className="badge badge-generated">
+        <Sparkles className="w-3.5 h-3.5" /> {status}
       </span>
     );
   }

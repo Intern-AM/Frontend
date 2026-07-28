@@ -5,6 +5,7 @@ import { apiClient } from '../api/client';
 import { StatusBadge } from '../components/StatusBadge';
 import { ApiConnectionBanner } from '../components/ApiConnectionBanner';
 import { UpdateCredentialModal } from '../components/UpdateCredentialModal';
+import { PullToRefresh } from '../components/PullToRefresh';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatEventDate, getDaysUntilExpiration } from '../utils/date';
@@ -86,10 +87,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   };
 
   // Active Pending Campaign Queue (Generated or Approved)
-  const campaignQueue = campaigns.filter((c) => {
-    const status = (c.status || '').toLowerCase();
-    return status === 'generated' || status === 'approved' || status === 'active';
-  });
+  const campaignQueue = campaigns
+    .filter((c) => {
+      const status = (c.status || '').toLowerCase();
+      const isPending = status === 'generated' || status === 'approved' || status === 'active';
+      if (!isPending) return false;
+
+      // Keep only if the associated event date has not passed yet (upcoming)
+      const assocEvent = events.find((e) => e.id === c.eventId);
+      const isExpired = assocEvent && assocEvent.endTime ? new Date(assocEvent.endTime).getTime() <= Date.now() : false;
+      return !isExpired;
+    })
+    .sort((a, b) => {
+      const eventA = events.find((e) => e.id === a.eventId);
+      const eventB = events.find((e) => e.id === b.eventId);
+      const timeA = eventA && eventA.startTime ? new Date(eventA.startTime).getTime() : 0;
+      const timeB = eventB && eventB.startTime ? new Date(eventB.startTime).getTime() : 0;
+      return timeA - timeB;
+    });
 
   // Count of Posted Campaigns/Events directly from database
   const postedEventsCount = campaigns.filter((c) => {
@@ -97,11 +112,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     return status === 'published' || status === 'posted' || Boolean(c.postedAt);
   }).length;
 
-  // Upcoming Active Events
-  const upcomingEvents = events.filter((e) => {
-    const status = (e.status || '').toLowerCase();
-    return status !== 'cancelled';
-  });
+  // Upcoming Active Events sorted chronologically (ascending)
+  const upcomingEvents = events
+    .filter((e) => {
+      const status = (e.status || '').toLowerCase();
+      if (status === 'cancelled' || status === 'rejected') return false;
+
+      // Exclude events that have already passed (upcoming check)
+      const isExpired = e.endTime ? new Date(e.endTime).getTime() <= Date.now() : false;
+      if (isExpired) return false;
+
+      // Exclude events that have already generated a campaign and been posted
+      const campaign = campaigns.find((c) => c.eventId === e.id);
+      if (campaign) {
+        const cStatus = (campaign.status || '').toLowerCase();
+        const isPosted = cStatus === 'posted' || cStatus === 'published' || Boolean(campaign.postedAt);
+        if (isPosted) return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      const timeA = a.startTime ? new Date(a.startTime).getTime() : 0;
+      const timeB = b.startTime ? new Date(b.startTime).getTime() : 0;
+      return timeA - timeB;
+    });
+
+  // Limit displayed queue and events to maximum 4
+  const displayedCampaignQueue = campaignQueue.slice(0, 4);
+  const displayedUpcomingEvents = upcomingEvents.slice(0, 4);
 
   // Credentials expiring within 7 days or expired (Admin Only)
   const expiringCredentials = role === 'Admin' ? credentials.filter((c) => {
@@ -111,7 +150,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   }) : [];
 
   return (
-    <div className="space-y-6 pb-12">
+    <PullToRefresh onRefresh={fetchDashboardData}>
+      <div className="space-y-6 pb-12">
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -211,8 +251,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {campaignQueue.map((c) => {
+            {displayedCampaignQueue.map((c) => {
               const eventName = getEventName(c.eventId);
+              const assocEvent = events.find((e) => e.id === c.eventId);
+              const eventDateDisplay = assocEvent && assocEvent.startTime ? formatEventDate(assocEvent.startTime) : (c.createdAt ? formatEventDate(c.createdAt) : 'Live Data');
               return (
                 <div
                   key={c.eventId || c.campaignId}
@@ -229,7 +271,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   </p>
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                    <span>{c.createdAt ? formatEventDate(c.createdAt) : 'Live Data'}</span>
+                    <span>{eventDateDisplay}</span>
                     <span className="font-bold text-blue-600 flex items-center gap-1">
                       Review &rarr;
                     </span>
@@ -262,7 +304,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {upcomingEvents.map((e) => (
+            {displayedUpcomingEvents.map((e) => (
               <div
                 key={e.id}
                 onClick={() => onNavigate('events')}
@@ -410,6 +452,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           }}
         />
       )}
-    </div>
+      </div>
+    </PullToRefresh>
   );
 };

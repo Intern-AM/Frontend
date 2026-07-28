@@ -30,7 +30,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'all' },
-    { id: 'campaigns', label: 'Campaigns', icon: Megaphone, role: 'all' },
     { id: 'events', label: 'Events', icon: Calendar, role: 'all' },
     { id: 'notifications', label: 'Notifications', icon: Bell, role: 'all', badge: unreadNotificationsCount },
     { id: 'audit-logs', label: 'Audit Logs', icon: ShieldCheck, role: 'Admin' },

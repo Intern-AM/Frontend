@@ -6,7 +6,6 @@ import { RoleGuard } from './components/RoleGuard';
 import { Navbar } from './components/Navbar';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
-import { Campaigns } from './pages/Campaigns';
 import { CampaignDetail } from './pages/CampaignDetail';
 import { Events } from './pages/Events';
 import { Notifications } from './pages/Notifications';
@@ -85,20 +84,16 @@ const MainAppContent: React.FC = () => {
               if (campaignId) {
                 handleNavigateToCampaignDetail(campaignId);
               } else {
-                handleTabChange(tab);
+                handleTabChange(tab === 'campaigns' ? 'events' : tab);
               }
             }}
           />
         )}
 
-        {activeTab === 'campaigns' && (
-          <Campaigns onSelectCampaign={handleNavigateToCampaignDetail} />
-        )}
-
         {activeTab === 'campaign-detail' && selectedCampaignId && (
           <CampaignDetail
             campaignId={selectedCampaignId}
-            onBack={() => handleTabChange('campaigns')}
+            onBack={() => handleTabChange('events')}
           />
         )}
 

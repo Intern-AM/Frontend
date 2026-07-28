@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { formatNotificationDate } from '../utils/date';
 import { getErrorMessage } from '../utils/error';
 import { extractPlatformSchedules } from '../utils/schedule';
+import { PullToRefresh } from '../components/PullToRefresh';
 
 interface NotificationsProps {
   onNavigateToCampaign: (campaignId: string) => void;
@@ -198,7 +199,8 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
   };
 
   return (
-    <div className="space-y-6 pb-16 max-w-4xl mx-auto">
+    <PullToRefresh onRefresh={loadNotifications}>
+      <div className="space-y-6 pb-16 max-w-4xl mx-auto">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -333,6 +335,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ onNavigateToCampai
           })}
         </div>
       )}
-    </div>
+      </div>
+    </PullToRefresh>
   );
 };
