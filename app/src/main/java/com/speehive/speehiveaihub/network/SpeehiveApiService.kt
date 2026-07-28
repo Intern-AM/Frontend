@@ -30,6 +30,11 @@ interface SpeehiveApiService {
     suspend fun cancelEvent(
         @Path("id") id: String
     ): retrofit2.Response<Unit>
+
+    @PUT("api/events/{id}/restore")
+    suspend fun restoreEvent(
+        @Path("id") id: String
+    ): retrofit2.Response<Unit>
     // Admin
 
     @GET("api/Admin/users")

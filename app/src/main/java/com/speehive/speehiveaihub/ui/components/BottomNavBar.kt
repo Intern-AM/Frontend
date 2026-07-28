@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 enum class BottomNavItem {
     HOME,
     EVENTS,
-    CAMPAIGNS,
     NOTIFICATIONS
 }
 
@@ -35,7 +34,6 @@ fun BottomNavBar(
     notificationCount: Int = 0,
     onHomeClick: () -> Unit,
     onEventsClick: () -> Unit,
-    onCampaignsClick: () -> Unit,
     onNotificationsClick: () -> Unit
 ) {
     val itemColors = NavigationBarItemDefaults.colors(
@@ -87,20 +85,6 @@ fun BottomNavBar(
                 },
                 label = {
                     Text(stringResource(R.string.nav_events))
-                },
-                colors = itemColors
-            )
-        }
-
-        if (BottomNavItem.CAMPAIGNS in visibleItems) {
-            NavigationBarItem(
-                selected = selected == BottomNavItem.CAMPAIGNS,
-                onClick = onCampaignsClick,
-                icon = {
-                    Icon(Icons.Default.Campaign, contentDescription = "Campaigns")
-                },
-                label = {
-                    Text(stringResource(R.string.nav_campaigns))
                 },
                 colors = itemColors
             )

@@ -10,5 +10,6 @@ fun statusColor(status: String): Color = when (status.lowercase()) {
 
     "generated", "posted" -> PulseBlue
     "scheduled" -> PulsePurple
+    "completed", "passed", "archived" -> TextMuted
     else -> TextMuted
 }

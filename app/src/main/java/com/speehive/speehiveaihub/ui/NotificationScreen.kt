@@ -31,8 +31,7 @@ import com.speehive.speehiveaihub.utils.formatNotificationDate
 fun NotificationScreen(
     viewModel: NotificationViewModel,
     onNavigateHome: () -> Unit,
-    onNavigateEvents: () -> Unit,
-    onNavigateCampaigns: () -> Unit
+    onNavigateEvents: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -50,8 +49,6 @@ fun NotificationScreen(
             onHomeClick = onNavigateHome,
 
             onEventsClick = onNavigateEvents,
-
-            onCampaignsClick = onNavigateCampaigns,
 
             onNotificationsClick = {}
         )

@@ -25,6 +25,8 @@ class CampaignDetailViewModel(
         private set
     var eventTitle by mutableStateOf("Loading...")
         private set
+    var eventEndTime by mutableStateOf<String?>(null)
+        private set
     var errorMessage by mutableStateOf<String?>(null)
         private set
     var isProcessing by mutableStateOf(false)
@@ -46,10 +48,15 @@ class CampaignDetailViewModel(
                     campaign = found
                     found?.let { currentCampaign ->
                         eventRepository.getEvents().fold(
-                            onSuccess = {
-                                eventTitle = it.find { it.id == currentCampaign.eventId }?.title ?: "Unknown Event"
+                            onSuccess = { events ->
+                                val event = events.find { it.id == currentCampaign.eventId }
+                                eventTitle = event?.title ?: "Unknown Event"
+                                eventEndTime = event?.endTime
                             },
-                            onFailure = { eventTitle = "Unknown Event" }
+                            onFailure = {
+                                eventTitle = "Unknown Event"
+                                eventEndTime = null
+                            }
                         )
                         loadSchedule(currentCampaign.eventId)
                     }

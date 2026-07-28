@@ -44,3 +44,13 @@ fun isEventUpcoming(endTime: String): Boolean {
         false
     }
 }
+
+fun isEventPassed(endTime: String?): Boolean {
+    if (endTime.isNullOrBlank()) return false
+    return try {
+        val date = OffsetDateTime.parse(endTime)
+        date.toInstant().isBefore(java.time.Instant.now())
+    } catch (e: Exception) {
+        false
+    }
+}

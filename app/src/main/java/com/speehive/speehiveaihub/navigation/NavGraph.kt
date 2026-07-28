@@ -193,9 +193,6 @@ fun NavGraph(navController: NavHostController) {
                     onNavigateToEvents = {
                         navController.navigate(Screen.EventList.route)
                     },
-                    onNavigateToCampaigns = {
-                        navController.navigate(Screen.CampaignList.route)
-                    },
                     onNavigateToNotifications = {
                         navController.navigate(Screen.Notifications.route)
                     },
@@ -271,7 +268,7 @@ fun NavGraph(navController: NavHostController) {
                 isAllowed = { !it.equals("Designer", ignoreCase = true) }
             ) {
                 val viewModel: EventViewModel = viewModel {
-                    EventViewModel(eventRepository)
+                    EventViewModel(eventRepository, campaignRepository)
                 }
 
                 EventListScreen(
@@ -283,50 +280,15 @@ fun NavGraph(navController: NavHostController) {
                         }
                     },
 
-                    onNavigateCampaigns = {
-                        navController.navigate(Screen.CampaignList.route) {
-                            launchSingleTop = true
-                        }
-                    },
-
-                    onNavigateNotifications = {
-                        navController.navigate(Screen.Notifications.route) {
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-        }
-        composable(Screen.CampaignList.route) {
-            RoleGuard(
-                sessionManager = sessionManager,
-                navController = navController,
-                isAllowed = { !it.equals("Designer", ignoreCase = true) }
-            ) {
-                CampaignListScreen(
-                    viewModel = dashboardViewModel,
-                    onNavigateHome = {
-                        navController.navigate(Screen.Dashboard.route) {
-                            launchSingleTop = true
-                            popUpTo(Screen.Dashboard.route)
-                        }
-                    },
-
-                    onNavigateEvents = {
-                        navController.navigate(Screen.EventList.route) {
-                            launchSingleTop = true
-                        }
-                    },
-
                     onNavigateNotifications = {
                         navController.navigate(Screen.Notifications.route) {
                             launchSingleTop = true
                         }
                     },
 
-                    onCampaignClick = { id ->
+                    onCampaignClick = { campaignId ->
                         navController.navigate(
-                            Screen.CampaignDetail.createRoute(id)
+                            Screen.CampaignDetail.createRoute(campaignId)
                         )
                     }
                 )
@@ -409,13 +371,6 @@ fun NavGraph(navController: NavHostController) {
                         navController.navigate(Screen.EventList.route) {
                             launchSingleTop = true
                             popUpTo(Screen.EventList.route)
-                        }
-                    },
-
-                    onNavigateCampaigns = {
-                        navController.navigate(Screen.CampaignList.route) {
-                            launchSingleTop = true
-                            popUpTo(Screen.CampaignList.route)
                         }
                     }
                 )

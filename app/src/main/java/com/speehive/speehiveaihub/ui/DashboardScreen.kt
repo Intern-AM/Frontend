@@ -38,6 +38,7 @@ import com.speehive.speehiveaihub.utils.istZone
 import com.speehive.speehiveaihub.utils.formatCampaignDate
 import com.speehive.speehiveaihub.utils.formatEventDate
 import com.speehive.speehiveaihub.utils.isEventUpcoming
+import com.speehive.speehiveaihub.utils.isEventPassed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +46,6 @@ fun DashboardScreen(
     viewModel: DashboardViewModel,
     userName: String,
     onNavigateToEvents: () -> Unit,
-    onNavigateToCampaigns: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToCampaignDetail: (String) -> Unit,
     onLogout: () -> Unit,
@@ -103,7 +103,6 @@ fun DashboardScreen(
                 selected = BottomNavItem.HOME,
                 onHomeClick = {},
                 onEventsClick = onNavigateToEvents,
-                onCampaignsClick = onNavigateToCampaigns,
                 onNotificationsClick = onNavigateToNotifications
             )
         }
@@ -116,6 +115,18 @@ fun DashboardScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
+            val sortedCampaigns = remember(viewModel.campaigns, viewModel.events) {
+                viewModel.campaigns
+                    .filter {
+                        it.status.equals("Generated", ignoreCase = true) ||
+                        it.status.equals("Approved", ignoreCase = true)
+                    }
+                    .sortedBy { campaign ->
+                        val event = viewModel.events.find { it.id == campaign.eventId }
+                        event?.startTime ?: campaign.createdAt
+                    }
+            }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -304,27 +315,24 @@ fun DashboardScreen(
 
             // Campaign Queue Section
             item {
-                SectionHeader("Campaign Queue", onNavigateToCampaigns)
+                SectionHeader("Campaign Queue", onNavigateToEvents)
             }
 
             items(
-                items = viewModel.campaigns
-                    .filter {
-                        it.status.equals("Generated", ignoreCase = true) ||
-                        it.status.equals("Approved", ignoreCase = true)
-                    }
-                    .take(4),
+                items = sortedCampaigns.take(4),
                 key = { it.campaignId }
             ) { campaign ->
 
-                val eventTitle = viewModel.events
-                    .find { it.id == campaign.eventId }
-                    ?.title
-                    ?: "Unknown Event"
+                val event = viewModel.events.find { it.id == campaign.eventId }
+                val eventTitle = event?.title ?: "Unknown Event"
+                val eventStartTime = event?.startTime ?: campaign.createdAt
+                val isPassed = event?.endTime?.let { isEventPassed(it) } ?: false
 
                 DashboardCampaignCard(
                     campaign = campaign,
                     title = eventTitle,
+                    eventStartTime = eventStartTime,
+                    isPassed = isPassed,
                     onClick = onNavigateToCampaignDetail
                 )
             }
@@ -376,8 +384,11 @@ fun SectionHeader(title: String, onSeeAll: () -> Unit) {
 fun DashboardCampaignCard(
     campaign: Campaign,
     title: String,
+    eventStartTime: String,
+    isPassed: Boolean,
     onClick: (String) -> Unit
 ) {
+    val displayStatus = if (isPassed && !campaign.status.equals("Posted", ignoreCase = true)) "ARCHIVED" else campaign.status
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -424,12 +435,12 @@ fun DashboardCampaignCard(
             ) {
 
                 FigmaStatusBadge(
-                    campaign.status
+                    displayStatus
                 )
 
                 Text(
-                    text = formatCampaignDate(
-                        campaign.createdAt
+                    text = formatEventDate(
+                        eventStartTime
                     ),
                     style = MaterialTheme.typography.labelSmall,
                     color = TextMuted

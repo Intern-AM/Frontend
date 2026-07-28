@@ -28,6 +28,10 @@ class ApiEventRepository(
         api.cancelEvent(id).toResult()
     }
 
+    override suspend fun restoreEvent(id: String): Result<Unit> = safeApiCall {
+        api.restoreEvent(id).toResult()
+    }
+
     override suspend fun uploadDesignerImage(
         eventId: String,
         imageUri: Uri

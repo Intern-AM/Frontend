@@ -12,8 +12,6 @@ sealed class Screen(val route: String) {
 
     object EventList : Screen("events")
 
-    object CampaignList : Screen("campaigns")
-
     object AuditLogs : Screen("audit_logs")
 
     object CampaignDetail : Screen("campaign_detail/{campaignId}") {

@@ -22,9 +22,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.speehive.speehiveaihub.ui.components.FigmaStatusBadge
 import com.speehive.speehiveaihub.ui.components.ZoomableImageDialog
+import com.speehive.speehiveaihub.ui.components.ConfirmationDialog
 import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.viewmodel.CampaignDetailViewModel
 import com.speehive.speehiveaihub.utils.formatCampaignDate
+import com.speehive.speehiveaihub.utils.isEventPassed
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import java.time.Instant
@@ -66,6 +68,8 @@ fun CampaignDetailScreen(
     val isProcessing = viewModel.isProcessing
     val errorMessage = viewModel.errorMessage
     var showEditScheduleDialog by remember { mutableStateOf(false) }
+    var showApproveConfirmation by remember { mutableStateOf(false) }
+    var showRejectConfirmation by remember { mutableStateOf(false) }
 
     if (errorMessage != null) {
         AlertDialog(
@@ -141,93 +145,79 @@ fun CampaignDetailScreen(
         },
 
         bottomBar = {
+            if (campaign != null) {
+                val scheduleState = viewModel.scheduleState
+                val postedPlatforms = scheduleState?.platforms
+                    ?.filter { it.status.equals("Posted", ignoreCase = true) }
+                    ?.toSet() ?: emptySet()
+                
+                val isPosted = campaign.status.equals("Posted", ignoreCase = true) || postedPlatforms.isNotEmpty()
+                val isPassed = viewModel.eventEndTime?.let { isEventPassed(it) } ?: false
 
-            if (
-                campaign != null &&
-                campaign.status.equals(
-                    "Generated",
-                    ignoreCase = true
-                )
-            ) {
+                val showApprove = !isPassed && (campaign.status.equals("Generated", ignoreCase = true) || campaign.status.equals("Rejected", ignoreCase = true))
+                val showReject = !isPassed && (campaign.status.equals("Generated", ignoreCase = true) || (campaign.status.equals("Approved", ignoreCase = true) && !isPosted))
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-
-                    OutlinedButton(
-                        onClick = {
-
-                            viewModel.rejectCampaign(
-                                comments = "Rejected by reviewer"
+                if (showApprove || showReject) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        if (showReject) {
+                            OutlinedButton(
+                                onClick = { showRejectConfirmation = true },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp),
+                                enabled = !isProcessing,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = PulseRed,
+                                    disabledContentColor = PulseRed.copy(alpha = 0.5f)
+                                )
                             ) {
-                                Toast.makeText(context, "Campaign rejected successfully", Toast.LENGTH_SHORT).show()
-                                onBack()
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = null
+                                )
+                                Spacer(
+                                    modifier = Modifier.width(8.dp)
+                                )
+                                Text(
+                                    text = "Reject",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
                             }
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(56.dp),
-                        enabled = !isProcessing,
-                        shape = RoundedCornerShape(20.dp),
+                        }
 
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = PulseRed,
-                            disabledContentColor = PulseRed.copy(alpha = 0.5f)
-                        )
-                    ) {
-
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = null
-                        )
-
-                        Spacer(
-                            modifier = Modifier.width(8.dp)
-                        )
-
-                        Text(
-                            text = "Reject",
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-
-                    Button(
-                        onClick = {
-
-                            viewModel.approveCampaign {
-                                Toast.makeText(context, "Campaign approved successfully", Toast.LENGTH_SHORT).show()
+                        if (showApprove) {
+                            Button(
+                                onClick = { showApproveConfirmation = true },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp),
+                                enabled = !isProcessing,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = PulseGreen,
+                                    contentColor = AppBackground,
+                                    disabledContainerColor = PulseGreen.copy(alpha = 0.5f)
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.CheckCircle,
+                                    contentDescription = null
+                                )
+                                Spacer(
+                                    modifier = Modifier.width(8.dp)
+                                )
+                                Text(
+                                    text = "Approve",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
                             }
-                        },
-
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(56.dp),
-                        enabled = !isProcessing,
-                        shape = RoundedCornerShape(20.dp),
-
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PulseGreen,
-                            contentColor = AppBackground,
-                            disabledContainerColor = PulseGreen.copy(alpha = 0.5f)
-                        )
-                    ) {
-
-                        Icon(
-                            Icons.Default.CheckCircle,
-                            contentDescription = null
-                        )
-
-                        Spacer(
-                            modifier = Modifier.width(8.dp)
-                        )
-
-                        Text(
-                            text = "Approve",
-                            style = MaterialTheme.typography.titleSmall
-                        )
+                        }
                     }
                 }
             }
@@ -303,8 +293,10 @@ fun CampaignDetailScreen(
                                     modifier = Modifier.height(12.dp)
                                 )
 
+                                val isPassed = viewModel.eventEndTime?.let { isEventPassed(it) } ?: false
+                                val displayStatus = if (isPassed && !campaign.status.equals("Posted", ignoreCase = true)) "ARCHIVED" else campaign.status
                                 FigmaStatusBadge(
-                                    campaign.status
+                                    displayStatus
                                 )
 
                                 Spacer(
@@ -822,6 +814,39 @@ fun CampaignDetailScreen(
         ZoomableImageDialog(imageUrl = campaign?.imageUrl) {
             showFullScreenImage = false
         }
+    }
+
+    if (showApproveConfirmation) {
+        ConfirmationDialog(
+            title = "Approve Campaign",
+            message = "Are you sure you want to approve this campaign? It will be prepared for publishing.",
+            confirmLabel = "Approve",
+            confirmButtonColor = PulseGreen,
+            onConfirm = {
+                viewModel.approveCampaign {
+                    Toast.makeText(context, "Campaign approved successfully", Toast.LENGTH_SHORT).show()
+                }
+                showApproveConfirmation = false
+            },
+            onDismiss = { showApproveConfirmation = false }
+        )
+    }
+
+    if (showRejectConfirmation) {
+        ConfirmationDialog(
+            title = "Reject Campaign",
+            message = "Are you sure you want to reject this campaign? It will be returned for review.",
+            confirmLabel = "Reject",
+            confirmButtonColor = PulseRed,
+            onConfirm = {
+                viewModel.rejectCampaign(comments = "Rejected by reviewer") {
+                    Toast.makeText(context, "Campaign rejected successfully", Toast.LENGTH_SHORT).show()
+                    onBack()
+                }
+                showRejectConfirmation = false
+            },
+            onDismiss = { showRejectConfirmation = false }
+        )
     }
 }
 

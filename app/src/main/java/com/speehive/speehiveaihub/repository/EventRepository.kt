@@ -9,5 +9,7 @@ interface EventRepository {
 
     suspend fun cancelEvent(id: String): Result<Unit>
 
+    suspend fun restoreEvent(id: String): Result<Unit>
+
     suspend fun uploadDesignerImage(eventId: String, imageUri: Uri): Result<String>
 }
