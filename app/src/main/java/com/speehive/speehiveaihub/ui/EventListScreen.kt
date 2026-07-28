@@ -3,6 +3,7 @@ package com.speehive.speehiveaihub.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
@@ -40,6 +41,7 @@ import com.speehive.speehiveaihub.ui.components.BottomNavBar
 import com.speehive.speehiveaihub.ui.components.BottomNavItem
 import com.speehive.speehiveaihub.ui.components.FigmaStatusBadge
 import com.speehive.speehiveaihub.ui.components.ZoomableImageDialog
+import com.speehive.speehiveaihub.ui.components.SlidingStatusFilter
 import com.speehive.speehiveaihub.ui.components.statusColor
 import com.speehive.speehiveaihub.ui.theme.*
 import com.speehive.speehiveaihub.utils.formatCampaignDate
@@ -77,26 +79,22 @@ fun EventListScreen(
     }
 
     var selectedMonth by remember { mutableStateOf(0) } // 0 = All Months
-    var selectedYear by remember { mutableStateOf("All Years") }
+    var selectedYear by remember { mutableStateOf(java.time.LocalDate.now().year.toString()) }
     var selectedStatus by remember { mutableStateOf("All") } // "All", "Pending", "Generated", "Rejected", "Completed"
     var monthDropdownExpanded by remember { mutableStateOf(false) }
     var yearDropdownExpanded by remember { mutableStateOf(false) }
     var eventToReject by remember { mutableStateOf<Event?>(null) }
+    var eventToRestore by remember { mutableStateOf<Event?>(null) }
 
     val months = listOf(
         "All Months", "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     )
 
-    val availableYears = remember(viewModel.events) {
-        val years = viewModel.events.mapNotNull { event ->
-            try {
-                OffsetDateTime.parse(event.startTime).year.toString()
-            } catch (e: Exception) {
-                null
-            }
-        }.distinct().sorted()
-        listOf("All Years") + years
+    val availableYears = remember {
+        val currentYear = java.time.LocalDate.now().year
+        val previousYear = currentYear - 1
+        listOf(currentYear.toString(), previousYear.toString())
     }
 
     val listItems = remember(viewModel.events, viewModel.campaigns, selectedMonth, selectedYear, selectedStatus) {
@@ -104,10 +102,10 @@ fun EventListScreen(
             try {
                 val date = OffsetDateTime.parse(event.startTime).atZoneSameInstant(istZone)
                 val matchesMonth = if (selectedMonth == 0) true else date.monthValue == selectedMonth
-                val matchesYear = if (selectedYear == "All Years") true else date.year.toString() == selectedYear
+                val matchesYear = date.year.toString() == selectedYear
                 matchesMonth && matchesYear
             } catch (e: Exception) {
-                selectedMonth == 0 && selectedYear == "All Years"
+                false
             }
         }
 
@@ -308,36 +306,10 @@ fun EventListScreen(
                             }
                         }
 
-                        // Status Filter Selection Buttons
-                        val statusOptions = listOf("All", "Pending", "Generated", "Rejected", "Completed")
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            statusOptions.forEach { status ->
-                                val isSelected = selectedStatus == status
-                                OutlinedButton(
-                                    onClick = { selectedStatus = status },
-                                    shape = RoundedCornerShape(10.dp),
-                                    border = BorderStroke(
-                                        width = 1.dp,
-                                        color = if (isSelected) PulseBlue else CardBorder
-                                    ),
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        containerColor = if (isSelected) PulseBlue.copy(alpha = 0.1f) else Color.Transparent,
-                                        contentColor = if (isSelected) PulseBlue else TextSecondary
-                                    ),
-                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        text = status,
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                }
-                            }
-                        }
+                        SlidingStatusFilter(
+                            selectedStatus = selectedStatus,
+                            onStatusSelected = { selectedStatus = it }
+                        )
                     }
                 }
 
@@ -404,7 +376,8 @@ fun EventListScreen(
                                         event = item.event,
                                         onReject = { eventToReject = item.event },
                                         onUploadImage = { uri -> viewModel.uploadEventImage(item.event.id, uri) },
-                                        onRestore = if (canRestore) { { viewModel.restoreEvent(item.event.id) } } else null,
+                                        onRestore = if (canRestore) { { eventToRestore = item.event } } else null,
+                                        selectedStatus = selectedStatus,
                                         isProcessing = viewModel.isProcessing
                                     )
                                 }
@@ -415,6 +388,7 @@ fun EventListScreen(
                                         title = item.eventTitle,
                                         eventStartTime = item.eventStartTime,
                                         isPassed = isPassed,
+                                        selectedStatus = selectedStatus,
                                         onClick = { onCampaignClick(item.campaign.campaignId.toString()) }
                                     )
                                 }
@@ -439,6 +413,20 @@ fun EventListScreen(
             onDismiss = { eventToReject = null }
         )
     }
+
+    if (eventToRestore != null) {
+        ConfirmationDialog(
+            title = "Restore Event",
+            message = "Are you sure you want to restore \"${eventToRestore?.title}\"? This will make the event pending again.",
+            confirmLabel = "Restore",
+            confirmButtonColor = PulseGreen,
+            onConfirm = {
+                eventToRestore?.let { viewModel.restoreEvent(it.id) }
+                eventToRestore = null
+            },
+            onDismiss = { eventToRestore = null }
+        )
+    }
 }
 
 @Composable
@@ -447,19 +435,24 @@ fun CampaignListCard(
     title: String,
     eventStartTime: String,
     isPassed: Boolean,
+    selectedStatus: String = "All",
     onClick: () -> Unit
 ) {
     val displayStatus = if (isPassed && !campaign.status.equals("Posted", ignoreCase = true)) "ARCHIVED" else campaign.status
+    val shadowColor = if (selectedStatus == "All") {
+        statusColor(displayStatus)
+    } else {
+        Color(0x380F172A)
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .deep3DCard(elevation = 10.dp)
+            .deep3DCard(elevation = 10.dp, spotColor = shadowColor)
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardSurface
-        ),
-        border = BorderStroke(1.dp, CardBorder)
+        )
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -504,6 +497,7 @@ fun FullEventCard(
     onReject: () -> Unit,
     onUploadImage: ((android.net.Uri) -> Unit)? = null,
     onRestore: (() -> Unit)? = null,
+    selectedStatus: String = "All",
     isProcessing: Boolean = false
 ) {
     val displayStatus = event.status
@@ -516,15 +510,20 @@ fun FullEventCard(
         uri?.let { onUploadImage?.invoke(it) }
     }
 
+    val shadowColor = if (selectedStatus == "All") {
+        eventStatusColor
+    } else {
+        Color(0x380F172A)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .deep3DCard(elevation = 10.dp),
+            .deep3DCard(elevation = 10.dp, spotColor = shadowColor),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardSurface
-        ),
-        border = BorderStroke(1.dp, CardBorder)
+        )
     ) {
         Column(
             modifier = Modifier.padding(20.dp)

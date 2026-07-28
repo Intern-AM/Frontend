@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -224,21 +225,17 @@ fun CampaignDetailScreen(
         }
     ) { padding ->
 
-        Box(
+        PullToRefreshBox(
+            isRefreshing = isLoading,
+            onRefresh = { viewModel.loadCampaign(campaignId) },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-
             when {
-
-                isLoading -> {
-
+                isLoading && campaign == null -> {
                     CircularProgressIndicator(
-                        modifier =
-                            Modifier.align(
-                                Alignment.Center
-                            )
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
 
