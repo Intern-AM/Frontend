@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
 
     private const val BASE_URL =
-        "https://debian.tailbd6bc8.ts.net/"
+        "https://debian.tail72ffe0.ts.net/"
 
     private val cloudflareDns: Dns by lazy {
         val bootstrapClient = OkHttpClient.Builder().build()
@@ -114,4 +114,4 @@ object RetrofitClient {
             .build()
             .create(SpeehiveApiService::class.java)
     }
-}
+}
