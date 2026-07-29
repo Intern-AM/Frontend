@@ -65,6 +65,8 @@ sealed class EventListItem {
 @Composable
 fun EventListScreen(
     viewModel: EventViewModel,
+    initialStatus: String,
+    onStatusChange: (String) -> Unit,
     onNavigateHome: () -> Unit,
     onNavigateNotifications: () -> Unit,
     onCampaignClick: (String) -> Unit
@@ -80,7 +82,7 @@ fun EventListScreen(
 
     var selectedMonth by remember { mutableStateOf(0) } // 0 = All Months
     var selectedYear by remember { mutableStateOf(java.time.LocalDate.now().year.toString()) }
-    var selectedStatus by remember { mutableStateOf("All") } // "All", "Pending", "Generated", "Rejected", "Completed"
+    var selectedStatus by remember(initialStatus) { mutableStateOf(initialStatus) } // "All", "Pending", "Generated", "Rejected", "Completed"
     var monthDropdownExpanded by remember { mutableStateOf(false) }
     var yearDropdownExpanded by remember { mutableStateOf(false) }
     var eventToReject by remember { mutableStateOf<Event?>(null) }
@@ -308,7 +310,10 @@ fun EventListScreen(
 
                         SlidingStatusFilter(
                             selectedStatus = selectedStatus,
-                            onStatusSelected = { selectedStatus = it }
+                            onStatusSelected = {
+                                selectedStatus = it
+                                onStatusChange(it)
+                            }
                         )
                     }
                 }

@@ -95,6 +95,10 @@ fun NavGraph(navController: NavHostController) {
         AdminViewModel(adminRepository, auditRepository, credentialRepository)
     }
 
+    val eventViewModel: EventViewModel = viewModel {
+        EventViewModel(eventRepository, campaignRepository)
+    }
+
 
     var currentUserName by remember {
         mutableStateOf(
@@ -191,7 +195,7 @@ fun NavGraph(navController: NavHostController) {
                     viewModel = viewModel,
                     userName = currentUserName,
                     onNavigateToEvents = {
-                        navController.navigate(Screen.EventList.route)
+                        navController.navigate(Screen.EventList.createRoute("All"))
                     },
                     onNavigateToNotifications = {
                         navController.navigate(Screen.Notifications.route)
@@ -261,18 +265,31 @@ fun NavGraph(navController: NavHostController) {
                 )
             }
         }
-        composable(Screen.EventList.route) {
+        composable(
+            route = Screen.EventList.route,
+            arguments = listOf(
+                navArgument("status") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
             RoleGuard(
                 sessionManager = sessionManager,
                 navController = navController,
                 isAllowed = { !it.equals("Designer", ignoreCase = true) }
             ) {
-                val viewModel: EventViewModel = viewModel {
-                    EventViewModel(eventRepository, campaignRepository)
-                }
+                val status = backStackEntry.arguments?.getString("status") ?: "All"
 
                 EventListScreen(
-                    viewModel = viewModel,
+                    viewModel = eventViewModel,
+                    initialStatus = status,
+                    onStatusChange = { newStatus ->
+                        navController.navigate(Screen.EventList.createRoute(newStatus)) {
+                            popUpTo(Screen.EventList.route) {
+                                inclusive = true
+                            }
+                        }
+                    },
                     onNavigateHome = {
                         navController.navigate(Screen.Dashboard.route) {
                             launchSingleTop = true
@@ -368,7 +385,7 @@ fun NavGraph(navController: NavHostController) {
                     },
 
                     onNavigateEvents = {
-                        navController.navigate(Screen.EventList.route) {
+                        navController.navigate(Screen.EventList.createRoute("All")) {
                             launchSingleTop = true
                             popUpTo(Screen.EventList.route)
                         }

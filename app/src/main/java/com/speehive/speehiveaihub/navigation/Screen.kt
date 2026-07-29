@@ -10,7 +10,12 @@ sealed class Screen(val route: String) {
 
     object AdminDashboard : Screen("admin_dashboard")
 
-    object EventList : Screen("events")
+    object EventList : Screen("events/{status}") {
+
+        fun createRoute(
+            status: String
+        ) = "events/$status"
+    }
 
     object AuditLogs : Screen("audit_logs")
 
