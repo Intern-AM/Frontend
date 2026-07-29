@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { UserRole } from '../types';
@@ -40,9 +41,18 @@ export const Login: React.FC = () => {
         finalRole
       );
     } catch (err) {
-      console.warn('Login notice:', getErrorMessage(err, 'Operating with active session'));
-      const detectedRole: UserRole = usernameInput.toLowerCase().includes('admin') ? 'Admin' : 'Reviewer';
-      login('hive-auth-token-session', usernameInput, detectedRole);
+      console.warn('Login attempt failed:', err);
+      if (axios.isAxiosError(err)) {
+        if (!err.response) {
+          setErrorMessage('Backend server is currently offline or inactive. Please try again later.');
+        } else if (err.response.status === 401 || err.response.status === 400) {
+          setErrorMessage('Invalid username or password.');
+        } else {
+          setErrorMessage(`Login failed: Server error (${err.response.status}).`);
+        }
+      } else {
+        setErrorMessage('An unexpected error occurred during login.');
+      }
     } finally {
       setIsLoading(false);
     }
