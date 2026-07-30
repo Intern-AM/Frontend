@@ -8,6 +8,8 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.PUT
 import okhttp3.MultipartBody
+import com.speehive.speehiveaihub.models.BulkValidationResponse
+import com.speehive.speehiveaihub.models.BulkImportResponse
 
 interface SpeehiveApiService {
 
@@ -115,4 +117,17 @@ interface SpeehiveApiService {
     suspend fun getPlatformPostings(
         @Path("campaignId") campaignId: String
     ): retrofit2.Response<List<PlatformPostingResponse>>
+
+    // Bulk Event Import
+    @Multipart
+    @POST("api/events/import/validate")
+    suspend fun validateBulkEvents(
+        @Part file: MultipartBody.Part
+    ): retrofit2.Response<BulkValidationResponse>
+
+    @Multipart
+    @POST("api/events/import")
+    suspend fun importBulkEvents(
+        @Part file: MultipartBody.Part
+    ): retrofit2.Response<BulkImportResponse>
 }

@@ -1,6 +1,6 @@
 # Testing
 
-This document defines the testing strategy for Hive AI.
+This document defines the testing strategy for BuzzHive.
 It is the single source of truth for manual testing, regression points, and future automation.
 
 ## Current State

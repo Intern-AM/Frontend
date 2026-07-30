@@ -77,7 +77,7 @@ fun NavGraph(navController: NavHostController) {
     }
 
     val adminRepository = remember {
-        ApiAdminRepository(sessionManager, authManager)
+        ApiAdminRepository(sessionManager, authManager, context)
     }
     val auditRepository = remember {
         ApiAuditRepository(sessionManager, authManager)

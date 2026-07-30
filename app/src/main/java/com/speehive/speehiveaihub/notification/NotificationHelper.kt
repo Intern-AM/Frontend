@@ -13,7 +13,7 @@ import com.speehive.speehiveaihub.MainActivity
 object NotificationHelper {
 
     private const val CHANNEL_ID = "hive_ai_notifications"
-    private const val CHANNEL_NAME = "Hive AI Notifications"
+    private const val CHANNEL_NAME = "BuzzHive Notifications"
 
     fun createChannel(context: Context) {
         val channel = NotificationChannel(

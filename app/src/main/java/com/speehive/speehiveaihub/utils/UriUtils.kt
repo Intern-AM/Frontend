@@ -45,3 +45,57 @@ inline fun <R> Uri.toMultipartBodyPart(
         tempFile.delete()
     }
 }
+
+inline fun <R> Uri.toBulkImportFilePart(
+    context: Context,
+    partName: String = "file",
+    block: (MultipartBody.Part) -> Result<R>
+): Result<R> {
+    val tempFile = File(context.cacheDir, "import_${System.currentTimeMillis()}.xlsx")
+    return try {
+        val mimeType = context.contentResolver.getType(this) ?: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        val inputStream = context.contentResolver.openInputStream(this)
+            ?: return Result.failure(Exception("Cannot open file"))
+
+        inputStream.use { input ->
+            tempFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        val requestBody = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
+        val part = MultipartBody.Part.createFormData(partName, tempFile.name, requestBody)
+
+        block(part)
+    } catch (e: Exception) {
+        Result.failure(e)
+    } finally {
+        tempFile.delete()
+    }
+}
+
+fun Uri.getFileName(context: Context): String {
+    var result: String? = null
+    if (scheme == "content") {
+        val cursor = context.contentResolver.query(this, null, null, null, null)
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (index != -1) {
+                    result = cursor.getString(index)
+                }
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+    if (result == null) {
+        result = path
+        val cut = result?.lastIndexOf('/') ?: -1
+        if (cut != -1) {
+            result = result?.substring(cut + 1)
+        }
+    }
+    return result ?: "unknown_file.xlsx"
+}
+

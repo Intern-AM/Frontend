@@ -1,6 +1,6 @@
 # Workflow
 
-This document defines the engineering workflow for Hive AI.
+This document defines the engineering workflow for BuzzHive.
 It is the single source of truth for how work should be planned, implemented, reviewed, and verified.
 
 ## The Workflow

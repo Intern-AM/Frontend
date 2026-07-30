@@ -1,6 +1,6 @@
 # Playbook
 
-This document explains how to extend the Hive AI codebase.
+This document explains how to extend the BuzzHive codebase.
 It is the single source of truth for adding screens, ViewModels, repositories, endpoints, navigation, and composables.
 
 ## Adding a Screen

@@ -14,6 +14,10 @@ import com.speehive.speehiveaihub.repository.SocialMediaCredentialRepository
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import java.time.Duration
+import android.net.Uri
+import com.speehive.speehiveaihub.models.BulkValidationResponse
+import com.speehive.speehiveaihub.models.BulkImportResponse
+
 
 class AdminViewModel(
     private val repository: AdminRepository,
@@ -23,6 +27,28 @@ class AdminViewModel(
 
     var users by mutableStateOf<List<AdminUser>>(emptyList())
         private set
+
+    var selectedFileUri by mutableStateOf<Uri?>(null)
+        private set
+
+    var selectedFileName by mutableStateOf<String?>(null)
+        private set
+
+    var isValidatingFile by mutableStateOf(false)
+        private set
+
+    var isImportingFile by mutableStateOf(false)
+        private set
+
+    var validationResult by mutableStateOf<BulkValidationResponse?>(null)
+        private set
+
+    var importResult by mutableStateOf<BulkImportResponse?>(null)
+        private set
+
+    var importErrorMessage by mutableStateOf<String?>(null)
+        private set
+
 
     var isLoading by mutableStateOf(false)
         private set
@@ -353,4 +379,69 @@ class AdminViewModel(
         get() = users.count {
             it.role.equals("Admin", ignoreCase = true)
         }
+
+    fun selectFile(uri: Uri, name: String) {
+        selectedFileUri = uri
+        selectedFileName = name
+        validationResult = null
+        importResult = null
+        importErrorMessage = null
+    }
+
+    fun clearSelectedFile() {
+        selectedFileUri = null
+        selectedFileName = null
+        validationResult = null
+        importResult = null
+        importErrorMessage = null
+    }
+
+    fun validateFile() {
+        val uri = selectedFileUri ?: return
+        viewModelScope.launch {
+            isValidatingFile = true
+            importErrorMessage = null
+            validationResult = null
+            importResult = null
+
+            repository.validateBulkEvents(uri).fold(
+                onSuccess = {
+                    validationResult = it
+                },
+                onFailure = {
+                    importErrorMessage = it.message ?: "Failed to validate file"
+                }
+            )
+            isValidatingFile = false
+        }
+    }
+
+    fun importFile() {
+        val uri = selectedFileUri ?: return
+        viewModelScope.launch {
+            isImportingFile = true
+            importErrorMessage = null
+            importResult = null
+
+            repository.importBulkEvents(uri).fold(
+                onSuccess = {
+                    importResult = it
+                    if (it.success == true) {
+                        selectedFileUri = null
+                        selectedFileName = null
+                        validationResult = null
+                    }
+                },
+                onFailure = {
+                    importErrorMessage = it.message ?: "Failed to import events"
+                }
+            )
+            isImportingFile = false
+        }
+    }
+
+    fun clearImportStatus() {
+        importResult = null
+        importErrorMessage = null
+    }
 }

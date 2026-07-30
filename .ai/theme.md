@@ -1,6 +1,6 @@
 # Theme
 
-This document defines the design system for Hive AI.
+This document defines the design system for BuzzHive.
 It is the single source of truth for colors, typography, shapes, and spacing.
 
 ## The PureBlack Trap

@@ -1,6 +1,6 @@
 # Engineering Manifesto
 
-This document explains WHY Hive AI is developed the way it is.
+This document explains WHY BuzzHive is developed the way it is.
 Every engineering rule in this workspace traces back to one of these principles.
 
 ## Core Principles

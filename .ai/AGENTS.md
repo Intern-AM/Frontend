@@ -1,11 +1,11 @@
 # AGENTS.md — Engineering Constitution
 
-This is the central entry point for all AI-assisted development on Hive AI.
+This is the central entry point for all AI-assisted development on BuzzHive.
 Read this file on every session before making any changes.
 
 ## Project Identity
 
-- **App Name:** Hive AI
+- **App Name:** BuzzHive
 - **Purpose:** Intelligent social media automation for event-driven campaigns
 - **Architecture:** Single-activity Jetpack Compose, MVVM, manual constructor injection
 - **Roles:** Admin, Designer, Reviewer

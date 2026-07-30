@@ -68,7 +68,7 @@ fun LoginScreen(
 
                 Image(
                     painter = painterResource(id = R.drawable.ic_logo),
-                    contentDescription = "Hive AI Logo",
+                    contentDescription = "BuzzHive Logo",
                     modifier = Modifier.size(48.dp),
                     contentScale = ContentScale.Fit
                 )

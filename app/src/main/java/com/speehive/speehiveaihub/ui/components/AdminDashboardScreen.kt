@@ -40,6 +40,7 @@ import com.speehive.speehiveaihub.R
 import com.speehive.speehiveaihub.ui.theme.deep3DCard
 import com.speehive.speehiveaihub.utils.formatAuditDate
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(
@@ -55,6 +56,8 @@ fun AdminDashboardScreen(
         mutableStateOf(false)
     }
     var isRefreshing by remember { mutableStateOf(false) }
+
+
 
     LaunchedEffect(viewModel.isLoading) {
         if (isRefreshing && !viewModel.isLoading) {
@@ -307,6 +310,7 @@ fun AdminDashboardScreen(
                     }
                 }
 
+
                 item {
 
                     Spacer(
@@ -325,7 +329,7 @@ fun AdminDashboardScreen(
                     )
                 }
                 items(
-                    items = viewModel.users.filter { !it.role.equals("Admin", ignoreCase = true) },
+                    items = viewModel.users,
                     key = { it.id }
                 ) { user ->
 
@@ -502,3 +506,4 @@ private fun UserCard(
         }
     }
 }
+

@@ -1,6 +1,6 @@
 # API Contract
 
-This document defines the API interface between Hive AI and its backend.
+This document defines the API interface between BuzzHive and its backend.
 It is the single source of truth for endpoints, DTOs, error handling, and upload constraints.
 
 ## Base URL

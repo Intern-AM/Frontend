@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the system architecture of Hive AI.
+This document describes the system architecture of BuzzHive.
 It is the single source of truth for architectural patterns and data flow.
 
 ## Data Flow

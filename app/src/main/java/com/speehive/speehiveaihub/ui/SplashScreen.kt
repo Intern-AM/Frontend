@@ -31,7 +31,7 @@ fun SplashScreen(
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_logo),
-            contentDescription = "Hive AI Logo",
+            contentDescription = "BuzzHive Logo",
             modifier = Modifier.size(192.dp),
             contentScale = ContentScale.Fit
         )
