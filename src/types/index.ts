@@ -1,5 +1,5 @@
 /**
- * Role assigned to users within the Hive AI system.
+ * Role assigned to users within the BuzzHive system.
  */
 export type UserRole = 'Admin' | 'Reviewer';
 
@@ -137,4 +137,6 @@ export interface NotificationItem {
   campaignId?: string;
   platformPostings?: PlatformPosting[];
 }
+
+export * from './events';
 

@@ -32,13 +32,17 @@ export const Login: React.FC = () => {
       });
 
       const { token, role, username, name, email } = response.data || {};
-      const finalUser = username || name || email || usernameInput;
-      const finalRole: UserRole = (role as UserRole) || (finalUser.toLowerCase().includes('admin') ? 'Admin' : 'Reviewer');
+      if (!token) {
+        setErrorMessage('Authentication failed: Invalid response from authentication server.');
+        return;
+      }
+      const finalUser = username || name || email || usernameInput.trim();
+      const validRole: UserRole = role === 'Admin' || role === 'Reviewer' ? role : 'Reviewer';
 
       login(
-        token || 'session-active-token',
+        token,
         finalUser,
-        finalRole
+        validRole
       );
     } catch (err) {
       console.warn('Login attempt failed:', err);
@@ -66,9 +70,9 @@ export const Login: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-20 h-20 mb-2">
-            <img src="/hive_logo.png" alt="Hive AI Logo" className="w-full h-full object-contain drop-shadow-md" />
+            <img src="/hive_logo.png" alt="BuzzHive Logo" className="w-full h-full object-contain drop-shadow-md" />
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Hive AI</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">BuzzHive</h1>
           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1 font-mono">
             INTELLIGENT SM AUTOMATION
           </p>

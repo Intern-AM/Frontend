@@ -34,7 +34,12 @@ apiClient.interceptors.response.use(
     } else if (error.response) {
       const status = error.response.status;
       if (status === 401) {
-        console.warn('Session token expired or unauthorized access.');
+        console.warn('Session token expired or unauthorized access. Logging out.');
+        localStorage.removeItem('hive_auth_token');
+        localStorage.removeItem('hive_auth_user');
+        localStorage.removeItem('hive_auth_role');
+        window.location.hash = '#dashboard';
+        window.location.reload();
       } else if (status === 403) {
         console.warn('Forbidden access: Insufficient role permissions for this operation.');
       } else if (status >= 500) {

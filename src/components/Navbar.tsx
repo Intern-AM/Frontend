@@ -43,11 +43,11 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand Logo with Uploaded Honeycomb Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => onTabChange('dashboard')}>
-          <img src="/hive_logo.png" alt="HIVE AI Logo" className="w-10 h-10 object-contain drop-shadow-sm hover:scale-105 transition-transform" />
+          <img src="/hive_logo.png" alt="BuzzHive Logo" className="w-10 h-10 object-contain drop-shadow-sm hover:scale-105 transition-transform" />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 font-heading">
-                Hive AI
+                BuzzHive
               </span>
             </div>
             <p className="text-[10px] font-bold text-slate-500 tracking-wider uppercase hidden sm:block font-mono">

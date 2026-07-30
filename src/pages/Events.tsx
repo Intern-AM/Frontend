@@ -32,7 +32,21 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Filters State
-  const [selectedStatus, setSelectedStatus] = useState<FilterStatus>('ALL');
+  const getInitialStatus = (): FilterStatus => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#events')) {
+      const queryPart = hash.split('?')[1] || '';
+      const params = new URLSearchParams(queryPart);
+      const status = params.get('status') as FilterStatus;
+      const validStatuses: FilterStatus[] = ['ALL', 'PENDING', 'GENERATED', 'REJECTED', 'COMPLETED'];
+      if (validStatuses.includes(status)) {
+        return status;
+      }
+    }
+    return 'ALL';
+  };
+
+  const [selectedStatus, setSelectedStatus] = useState<FilterStatus>(getInitialStatus);
   const currentYear = new Date().getFullYear();
   const previousYear = currentYear - 1;
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
@@ -106,6 +120,31 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
   useEffect(() => {
     fetchEventsAndCampaigns();
   }, []);
+
+  // Sync selectedStatus with URL hash whenever it changes
+  useEffect(() => {
+    if (window.location.hash.startsWith('#events')) {
+      window.location.hash = `#events?status=${selectedStatus}`;
+    }
+  }, [selectedStatus]);
+
+  // Sync state with URL hash if the user navigates using browser buttons
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#events')) {
+        const queryPart = hash.split('?')[1] || '';
+        const params = new URLSearchParams(queryPart);
+        const status = params.get('status') as FilterStatus;
+        const validStatuses: FilterStatus[] = ['ALL', 'PENDING', 'GENERATED', 'REJECTED', 'COMPLETED'];
+        if (validStatuses.includes(status) && status !== selectedStatus) {
+          setSelectedStatus(status);
+        }
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [selectedStatus]);
 
   const triggerConfirmation = (options: {
     title: string;
@@ -197,7 +236,7 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
 
     if (selectedStatus === 'PENDING') {
       const isCancelledOrRejectedEvent = eventStatusLower === 'cancelled' || eventStatusLower === 'rejected';
-      return !item.campaign && !isCancelledOrRejectedEvent;
+      return !item.campaign && !isCancelledOrRejectedEvent && !isExpired;
     }
 
     if (selectedStatus === 'GENERATED') {
@@ -390,6 +429,14 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
               if (hasCampaign && campaign) {
                 // Campaign Card Style
                 const formattedPosterUrl = getFormattedImageUrl(campaign.imageUrl);
+                const isEventPassed = event.endTime ? new Date(event.endTime).getTime() <= Date.now() : false;
+                const isPosted = campaign.status && (
+                  campaign.status.toLowerCase() === 'posted' || 
+                  campaign.status.toLowerCase() === 'published' || 
+                  campaign.status.toLowerCase() === 'completed'
+                );
+                const isArchived = isEventPassed && !isPosted;
+
                 return (
                   <div
                     key={`cmp-${campaign.campaignId || event.id}`}
@@ -406,7 +453,13 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
                               {event.title}
                             </h2>
                           </div>
-                          <StatusBadge status={campaign.status} type="campaign" />
+                          {isArchived ? (
+                            <span className="badge bg-slate-200 text-slate-600 border border-slate-300 font-bold font-mono">
+                              <Clock className="w-3.5 h-3.5" /> ARCHIVED
+                            </span>
+                          ) : (
+                            <StatusBadge status={campaign.status} type="campaign" />
+                          )}
                         </div>
 
                         {/* Metadata Sub-row */}
@@ -468,6 +521,7 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
               const formattedPosterUrl = getFormattedImageUrl(event.imageUrl);
               const isPending = event.status && event.status.toLowerCase() === 'pending';
               const isCancelled = event.status && event.status.toLowerCase() === 'cancelled';
+              const isExpired = event.endTime ? new Date(event.endTime).getTime() <= Date.now() : false;
 
               return (
                 <div key={`evt-${event.id}`} className={getCardBaseClass(item)}>
@@ -507,7 +561,7 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
                     {/* Actions Bar */}
                     <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
-                        {(isPending || Boolean(formattedPosterUrl)) && (
+                        {(isPending || Boolean(formattedPosterUrl)) && !isExpired && (
                           <button
                             onClick={() => setUploadModalEventId(event.id)}
                             className="deep-3d-press p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
@@ -577,6 +631,14 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
               const isPending = event.status && event.status.toLowerCase() === 'pending';
               const isCancelled = event.status && event.status.toLowerCase() === 'cancelled';
               const formattedEventDateStr = formatEventDate(event.startTime);
+              
+              const isEventPassed = event.endTime ? new Date(event.endTime).getTime() <= Date.now() : false;
+              const isPosted = campaign && campaign.status && (
+                campaign.status.toLowerCase() === 'posted' || 
+                campaign.status.toLowerCase() === 'published' || 
+                campaign.status.toLowerCase() === 'completed'
+              );
+              const isArchived = isEventPassed && !isPosted;
 
               return (
                 <div
@@ -598,7 +660,13 @@ export const Events: React.FC<EventsProps> = ({ onNavigateToCampaign }) => {
                       <div className="flex items-center gap-2.5 flex-wrap">
                         <h3 className="font-extrabold text-slate-900 text-sm leading-snug">{event.title}</h3>
                         {campaign ? (
-                          <StatusBadge status={campaign.status} type="campaign" />
+                          isArchived ? (
+                            <span className="badge bg-slate-200 text-slate-650 border border-slate-300 font-bold font-mono">
+                              <Clock className="w-3.5 h-3.5 text-slate-500" /> ARCHIVED
+                            </span>
+                          ) : (
+                            <StatusBadge status={campaign.status} type="campaign" />
+                          )
                         ) : (
                           <StatusBadge status={event.status} type="event" />
                         )}

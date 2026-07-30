@@ -1,5 +1,5 @@
 /**
- * Date formatting and expiration utility functions for Hive AI Web Application.
+ * Date formatting and expiration utility functions for BuzzHive Web Application.
  */
 
 /**

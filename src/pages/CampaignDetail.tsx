@@ -312,7 +312,7 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
             <div className="deep-3d-card p-6 bg-white/95 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-extrabold text-base text-slate-900 font-heading">Campaign Post & Copy</h3>
-                {!isEditingPost ? (
+                {!(isArchived || isPosted) && (!isEditingPost ? (
                   <button
                     onClick={() => setIsEditingPost(true)}
                     className="deep-3d-press px-3 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-bold border border-blue-200 flex items-center gap-1"
@@ -335,7 +335,7 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
                       <Save className="w-3.5 h-3.5" /> Save
                     </button>
                   </div>
-                )}
+                ))}
               </div>
 
               {!isEditingPost ? (
@@ -386,13 +386,15 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
                   <Eye className="w-5 h-5 text-blue-600" />
                   <span>Campaign Poster Graphic</span>
                 </h3>
-                <button
-                  onClick={() => setShowUploadModal(true)}
-                  className="deep-3d-press btn-secondary text-xs font-bold"
-                >
-                  <Upload className="w-4 h-4 text-blue-600" />
-                  {formattedPosterUrl ? 'Replace Poster' : 'Upload Poster'}
-                </button>
+                {!(isArchived || isPosted) && (
+                  <button
+                    onClick={() => setShowUploadModal(true)}
+                    className="deep-3d-press btn-secondary text-xs font-bold"
+                  >
+                    <Upload className="w-4 h-4 text-blue-600" />
+                    {formattedPosterUrl ? 'Replace Poster' : 'Upload Poster'}
+                  </button>
+                )}
               </div>
 
               {formattedPosterUrl ? (
@@ -414,9 +416,11 @@ export const CampaignDetail: React.FC<CampaignDetailProps> = ({ campaignId, onBa
                 <div className="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
                   <Upload className="w-10 h-10 mx-auto text-slate-400 mb-2" />
                   <p className="text-xs font-bold text-slate-700">No Poster Image Uploaded Yet</p>
-                  <button onClick={() => setShowUploadModal(true)} className="deep-3d-press btn-secondary text-xs mt-3">
-                    Upload Poster Graphic
-                  </button>
+                  {!(isArchived || isPosted) && (
+                    <button onClick={() => setShowUploadModal(true)} className="deep-3d-press btn-secondary text-xs mt-3">
+                      Upload Poster Graphic
+                    </button>
+                  )}
                 </div>
               )}
             </div>
