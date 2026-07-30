@@ -1,10 +1,9 @@
-# 🐝 BuzzHive — v2 Redesign Branch
+# BuzzHive — v2 Redesign Branch
 
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-blue?style=flat&logo=kotlin)
 ![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3%20%2B%203D%20Glassmorphism-4285F4?style=flat&logo=android)
 ![Min SDK](https://img.shields.io/badge/Min%20SDK-26%20(Android%208.0)-brightgreen)
 ![Target SDK](https://img.shields.io/badge/Target%20SDK-37-green)
-![License](https://img.shields.io/badge/License-Proprietary-blue)
 
 **BuzzHive (`feature/v2-redesign`)** is an Android mobile administration client built with Jetpack Compose, Material 3, and Kotlin Coroutines. It serves as a central hub for managing AI-driven marketing campaigns, social media event schedules, multi-platform post publishing, creative poster collateral, and system-wide audit logging.
 
@@ -12,7 +11,7 @@ This `feature/v2-redesign` branch features a streamlined **2-role architecture**
 
 ---
 
-## 🎯 What This Project Does
+## What This Project Does
 
 BuzzHive automates the end-to-end lifecycle of corporate social media marketing:
 1. **AI Campaign Orchestration**: Ingests event details, generates campaign copy, suggests hashtags, and attaches AI-generated poster prompt concepts.
@@ -23,7 +22,7 @@ BuzzHive automates the end-to-end lifecycle of corporate social media marketing:
 
 ---
 
-## 🛠️ Core Tech Stack
+## Core Tech Stack
 
 | Category | Technology | Usage / Details |
 | :--- | :--- | :--- |
@@ -39,7 +38,7 @@ BuzzHive automates the end-to-end lifecycle of corporate social media marketing:
 
 ---
 
-## 🏛️ Architecture & System Design
+## Architecture & System Design
 
 The application follows the **Model-View-ViewModel (MVVM)** architectural pattern:
 
@@ -70,11 +69,11 @@ The application follows the **Model-View-ViewModel (MVVM)** architectural patter
 └──────────────────────────────┘          └──────────────────────────────┘
 ```
 
-### 🔐 Consolidated 2-Role System (`v2-redesign`)
+### Consolidated 2-Role System (`v2-redesign`)
 
 In the `v2-redesign` branch, user roles are streamlined to eliminate workflow bottlenecks:
 
-#### 👑 Admin
+#### Admin
 * **User Management**: Create user accounts with `Admin` or `Reviewer` roles; activate or deactivate user profiles.
 * **Audit Logging**: View system audit logs with date filtering and search capabilities.
 * **View Mode Switcher**: Toggle between Admin and Reviewer views using the interactive `ViewModeSwitcher` slider.
@@ -83,7 +82,7 @@ In the `v2-redesign` branch, user roles are streamlined to eliminate workflow bo
   * **Bulk Event Import**: Ingest events in bulk by uploading Excel files (`.xlsx`), with layout validation checks and a visible errors dialog interface.
 * **Dashboard Overview**: View live stats on the admin dashboard, including counts of total users, active users, inactive users, designers, and admins.
 
-#### 👁️ Reviewer (Unified Reviewer + Designer)
+#### Reviewer (Unified Reviewer + Designer)
 * **Unified Feed**: Manage pending events and generated campaigns inline in a single stream (`EventListScreen`), removing the need for a separate campaigns screen.
 * **Advanced Filters**: Seamlessly filter events by Month (Jan-Dec), Year, and Status ("All", "Pending", "Generated", "Rejected", "Completed") using a custom `SlidingStatusFilter` with dynamic routing integration.
 * **Action Confirmations**: Guarded state transitions via a reusable `ConfirmationDialog` for lifecycle operations (Approve, Reject, Restore Event).
@@ -95,7 +94,7 @@ In the `v2-redesign` branch, user roles are streamlined to eliminate workflow bo
 
 ---
 
-## ⚙️ Configuration & Environment Settings
+## Configuration & Environment Settings
 
 ### Codebase Configuration (`RetrofitClient.kt`)
 
@@ -119,7 +118,7 @@ In the `v2-redesign` branch, user roles are streamlined to eliminate workflow bo
 
 ---
 
-## 🚀 Step-by-Step Local Setup & Installation Guide
+## Step-by-Step Local Setup & Installation Guide
 
 ### Prerequisites
 * **Android Studio**: Ladybug (2024.2.1) or newer.
@@ -167,7 +166,7 @@ export JAVA_HOME=/Applications/Android\ Studio.app/Contents/jbr/Contents/Home
 
 ---
 
-## 💡 Usage Examples & Workflows
+## Usage Examples & Workflows
 
 ### 1. Bulk Event Import
 1. Log in as an **Admin**.
@@ -205,7 +204,7 @@ export JAVA_HOME=/Applications/Android\ Studio.app/Contents/jbr/Contents/Home
 
 ---
 
-## 📂 Repository Directory Structure
+## Repository Directory Structure
 
 ```
 app/src/main/java/com/speehive/speehiveaihub/
@@ -221,9 +220,3 @@ app/src/main/java/com/speehive/speehiveaihub/
 ├── utils/              # Timezone (IST), Date formatting, and Uri/File helpers
 └── viewmodel/          # ViewModels managing StateFlow UI state (DashboardViewModel, AdminViewModel, CampaignDetailViewModel, EventViewModel)
 ```
-
----
-
-## 📄 License
-
-This project is proprietary software belonging to **BuzzHive Technologies**. All rights reserved.
