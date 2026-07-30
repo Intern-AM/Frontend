@@ -2,8 +2,9 @@ import axios from 'axios';
 
 export const SERVER_ORIGIN = import.meta.env.VITE_API_BASE_URL || 'https://debian.tail72ffe0.ts.net/';
 
-// In Vite dev mode or Vercel edge proxy, route via relative base URL if configured, otherwise use SERVER_ORIGIN
-export const BASE_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_BASE_URL || SERVER_ORIGIN);
+// Route via relative base URL in both Dev (Vite proxy) and Prod (Vercel rewrites) to bypass CORS issues,
+// unless VITE_API_BASE_URL is explicitly set.
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
