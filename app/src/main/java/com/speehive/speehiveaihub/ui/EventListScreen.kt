@@ -609,7 +609,8 @@ fun FullEventCard(
                     )
                 }
 
-                if (onUploadImage != null && event.status.equals("Pending", ignoreCase = true)) {
+                val isPassed = event.endTime?.let { isEventPassed(it) } ?: false
+                if (onUploadImage != null && event.status.equals("Pending", ignoreCase = true) && !isPassed) {
                     OutlinedButton(
                         onClick = { imagePickerLauncher.launch(arrayOf("image/*")) },
                         shape = RoundedCornerShape(10.dp),
@@ -633,7 +634,8 @@ fun FullEventCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (event.status.equals("Pending", true)) {
+            val isPassed = event.endTime?.let { isEventPassed(it) } ?: false
+            if (event.status.equals("Pending", true) && !isPassed) {
                 Button(
                     onClick = onReject,
                     colors = ButtonDefaults.buttonColors(

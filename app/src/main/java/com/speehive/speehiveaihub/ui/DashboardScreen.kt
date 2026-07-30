@@ -281,32 +281,40 @@ fun DashboardScreen(
                         Spacer(modifier = Modifier.height(32.dp))
 
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(androidx.compose.foundation.layout.IntrinsicSize.Min),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
 
                             StatCard(
-                                modifier = Modifier.weight(1f),
-                                title = "Pending",
-                                value = viewModel.pendingCount.toString(),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                title = "Active Events",
+                                value = viewModel.activeEventsCount.toString(),
+                                color = PulseBlue,
+                                backgroundColor = PulseBlueLight
+                            )
+
+                            StatCard(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                title = "Pending Approval",
+                                value = viewModel.pendingApprovalCount.toString(),
                                 color = PulseAmber,
                                 backgroundColor = PulseAmberLight
                             )
 
                             StatCard(
-                                modifier = Modifier.weight(1f),
-                                title = "Approved",
-                                value = viewModel.approvedCount.toString(),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                title = "Posted Events",
+                                value = viewModel.postedEventsCount.toString(),
                                 color = PulseGreen,
                                 backgroundColor = PulseGreenLight
-                            )
-
-                            StatCard(
-                                modifier = Modifier.weight(1f),
-                                title = "Active",
-                                value = viewModel.activeCount.toString(),
-                                color = PulseBlue,
-                                backgroundColor = PulseBlueLight
                             )
                         }
                     }
@@ -574,8 +582,11 @@ fun StatCard(
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = TextSecondary
+                style = MaterialTheme.typography.labelSmall,
+                color = TextSecondary,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 4.dp),
+                maxLines = 2
             )
         }
     }

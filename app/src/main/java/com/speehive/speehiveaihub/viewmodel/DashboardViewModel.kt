@@ -11,6 +11,7 @@ import com.speehive.speehiveaihub.models.Event
 import com.speehive.speehiveaihub.repository.CampaignRepository
 import com.speehive.speehiveaihub.repository.EventRepository
 import kotlinx.coroutines.launch
+import com.speehive.speehiveaihub.utils.isEventPassed
 
 class DashboardViewModel(
     private val campaignRepository: CampaignRepository,
@@ -35,28 +36,23 @@ class DashboardViewModel(
     var uploadingId by mutableStateOf<String?>(null)
         private set
 
-    val pendingCount: Int
-        get() = campaigns.count {
-            it.status.equals(
-                "Generated",
-                ignoreCase = true
-            )
+    val activeEventsCount: Int
+        get() = events.size
+
+    val pendingApprovalCount: Int
+        get() = campaigns.count { campaign ->
+            val status = campaign.status.lowercase()
+            val isPending = status == "generated" || status == "approved" || status == "active"
+            if (!isPending) return@count false
+            val event = events.find { it.id == campaign.eventId }
+            val isPassed = event?.endTime?.let { isEventPassed(it) } ?: false
+            !isPassed
         }
 
-    val approvedCount: Int
-        get() = campaigns.count {
-            it.status.equals(
-                "Approved",
-                ignoreCase = true
-            )
-        }
-
-    val activeCount: Int
-        get() = campaigns.count {
-            it.status.equals(
-                "Posted",
-                ignoreCase = true
-            )
+    val postedEventsCount: Int
+        get() = campaigns.count { campaign ->
+            val status = campaign.status.lowercase()
+            status == "posted" || status == "published" || !campaign.postedAt.isNullOrBlank()
         }
     val reviewQueue: List<Campaign>
         get() = campaigns.filter {

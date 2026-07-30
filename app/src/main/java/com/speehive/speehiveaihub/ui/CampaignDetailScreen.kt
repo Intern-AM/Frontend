@@ -640,7 +640,8 @@ fun CampaignDetailScreen(
                                     }
                                 }
 
-                                if (!campaign.status.equals("Posted", ignoreCase = true)) {
+                                val isPassed = viewModel.eventEndTime?.let { isEventPassed(it) } ?: false
+                                if (!campaign.status.equals("Posted", ignoreCase = true) && !isPassed) {
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
@@ -691,7 +692,9 @@ fun CampaignDetailScreen(
                                         style = MaterialTheme.typography.titleMedium
                                     )
 
-                                    if (!isEditingPost) {
+                                    val isPassed = viewModel.eventEndTime?.let { isEventPassed(it) } ?: false
+                                    val isPosted = campaign.status.equals("Posted", ignoreCase = true)
+                                    if (!isEditingPost && !isPassed && !isPosted) {
                                         IconButton(onClick = { isEditingPost = true }) {
                                             Icon(
                                                 imageVector = Icons.Default.Edit,
